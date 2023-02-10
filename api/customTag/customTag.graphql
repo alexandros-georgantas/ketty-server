@@ -1,0 +1,30 @@
+type CustomTag {
+  id: ID!
+  label: String!
+  tagType: String!
+}
+
+# input CustomTagUpdateInput {
+#   id: ID!
+#   label: String
+#   tagType: String
+#   deleted: Boolean
+# }
+
+input CustomTagAddInput {
+  label: String
+  tagType: String
+}
+
+extend type Query {
+  getCustomTags: [CustomTag]!
+}
+
+extend type Mutation {
+  addCustomTag(input: CustomTagAddInput!): CustomTag!
+  # updateCustomTag(input: CustomTagUpdateInput!): CustomTag!
+}
+
+extend type Subscription {
+  customTagsUpdated: [CustomTag!]!
+}
