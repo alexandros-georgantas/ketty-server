@@ -3,9 +3,6 @@ const get = require('lodash/get')
 const assign = require('lodash/assign')
 
 const config = require('config')
-const { ketidaDataModel } = require('../data-model')
-
-const { models } = ketidaDataModel
 
 const {
   Book,
@@ -13,7 +10,7 @@ const {
   BookComponentTranslation,
   Division,
   BookComponentState,
-} = models
+} = require('../models').models
 
 const createBookComponents = async () => {
   try {

@@ -8,7 +8,7 @@ const {
   heartbeat,
   initializeHeartbeat,
   initializeFailSafeUnlocking,
-} = require('./utils/wsConnectionHandlers')
+} = require('./services/websocket.service')
 
 const { unlockBookComponent } = require('./services/bookComponentLock.service')
 

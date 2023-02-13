@@ -1,6 +1,6 @@
-const model = require('./customTag')
+const model = require("./customTag.model");
 
 module.exports = {
   model,
-  modelName: 'CustomTag',
-}
+  modelName: "CustomTag",
+};

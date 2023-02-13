@@ -1,6 +1,6 @@
-const model = require('./serviceCallbackToken')
+const model = require("./serviceCallbackToken.model");
 
 module.exports = {
   model,
-  modelName: 'ServiceCallbackToken',
-}
+  modelName: "ServiceCallbackToken",
+};

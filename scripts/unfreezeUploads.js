@@ -1,20 +1,17 @@
 const { logger } = require('@coko/server')
 const map = require('lodash/map')
-const { ketidaDataModel } = require('../data-model')
 
-const { models } = ketidaDataModel
-
-const { BookComponentState } = models
+const BookComponentState = require('../models/bookComponentState/bookComponentState.model')
 
 const unfreezeUploading = async () => {
   try {
     const hanged = await BookComponentState.query().where('uploading', true)
     logger.info(`Found ${hanged.length} with hanging uploading`)
     await Promise.all(
-      map(hanged, async bookcomponentState => {
-        logger.info(`Unfreezing ${bookcomponentState.id}`)
+      map(hanged, async bookComponentState => {
+        logger.info(`Unfreezing ${bookComponentState.id}`)
         return BookComponentState.query().patchAndFetchById(
-          bookcomponentState.id,
+          bookComponentState.id,
           {
             uploading: false,
           },

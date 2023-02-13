@@ -10,11 +10,12 @@
   "license": "MIT",
   "author": "Yannis Barlas, Alexandros Georgantas",
   "scripts": {
-     "cz": "git-cz",
+    "cz": "git-cz",
     "prepare": "husky install",
+    "lint": "eslint '**/*.js'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-   "config": {
+  "config": {
     "commitizen": {
       "path": "cz-customizable"
     }

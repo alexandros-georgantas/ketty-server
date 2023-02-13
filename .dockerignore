@@ -1,0 +1,49 @@
+# docker
+Dockerfile*
+docker-compose*
+
+# git
+.git
+.gitignore
+
+# npm & yarn
+node_modules
+npm-debug.log
+package-lock.json
+yarn-error.log
+
+# misc
+.devcontainer
+.DS_Store
+.vscode
+app.pid
+
+# environment files
+.env*
+*.env
+
+# app
+_build/
+config/local*
+data/
+coverage/
+cypress/
+logs/
+stories/
+tmp/
+uploads/
+templates
+
+# Include README.md and LICENSE.md, exlcude the rest
+*.md
+!README.md
+!LICENSE.md
+
+# development config files
+.eslintrc.js
+.commitlintrc.js
+.cz-config.js
+.gitlab-ci.yml
+.linstagedrc.js
+.prettierrc.js
+.stylelintrc.js

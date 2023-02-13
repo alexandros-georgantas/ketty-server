@@ -6,7 +6,7 @@ const { UPDATE_APPLICATION_PARAMETERS } = require("./constants");
 const {
   getApplicationParameters,
   updateApplicationParameters,
-} = require("../../../models/applicationParameter/applicationParameter.controller");
+} = require("../../../controllers/applicationParameter.controller");
 
 const getApplicationParametersHandler = async (_, args, ctx) => {
   try {

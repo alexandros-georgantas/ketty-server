@@ -1,10 +1,6 @@
 const { logger } = require('@coko/server')
 
-const {
-  ketidaDataModel: {
-    models: { Team },
-  },
-} = require('../../data-model')
+const Team = require('../../models/team/ketidaTeam.model')
 
 const makeTeam = async type => {
   const names = {

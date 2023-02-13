@@ -2,7 +2,7 @@ const { pubsubManager, useTransaction, logger } = require('@coko/server')
 const config = require('config')
 
 const { Book, BookComponent, Lock, BookComponentState } =
-  require('../data-model/src').models
+  require('../models').models
 
 const unlockBookComponent = async (bookComponentId, userId, tabId) => {
   try {

@@ -4,10 +4,6 @@ const keys = require('lodash/keys')
 const map = require('lodash/map')
 const config = require('config')
 
-const { ketidaDataModel } = require('../data-model')
-
-const { models } = ketidaDataModel
-
 const {
   User,
   Book,
@@ -15,7 +11,7 @@ const {
   BookTranslation,
   BookCollection,
   BookCollectionTranslation,
-} = models
+} = require('../models').models
 
 const createBooksWithUsersAndTeams = async () => {
   try {

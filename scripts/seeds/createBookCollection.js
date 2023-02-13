@@ -1,10 +1,6 @@
 const { logger, useTransaction } = require('@coko/server')
-
-const {
-  ketidaDataModel: {
-    models: { BookCollection, BookCollectionTranslation },
-  },
-} = require('../../data-model')
+const BookCollection = require('../../models/bookCollection/bookCollection.model')
+const BookCollectionTranslation = require('../../models/bookCollectionTranslation/bookCollectionTranslation.model')
 
 const createBookCollection = async trx => {
   logger.info('>>> creating a new books collection')

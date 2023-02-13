@@ -4,7 +4,7 @@ RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y ranger vim python netcat
 
-WORKDIR /home/node/letida-server
+WORKDIR /home/node/ketida-server
 
 COPY package.json .
 COPY yarn.lock .

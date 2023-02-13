@@ -1,6 +1,6 @@
-const model = require('./division')
+const model = require("./division.model");
 
 module.exports = {
   model,
-  modelName: 'Division',
-}
+  modelName: "Division",
+};

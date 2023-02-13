@@ -1,6 +1,6 @@
-const model = require('../ketidaTeamMember')
+const model = require("./ketidaTeamMember.model");
 
 module.exports = {
   model,
-  modelName: 'TeamMember',
-}
+  modelName: "TeamMember",
+};

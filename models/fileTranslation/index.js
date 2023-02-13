@@ -1,6 +1,6 @@
-const model = require('./fileTranslation')
+const model = require("./fileTranslation.model");
 
 module.exports = {
   model,
-  modelName: 'FileTranslation',
-}
+  modelName: "FileTranslation",
+};

@@ -2,7 +2,7 @@
 const { dbCleaner } = require('./helpers')
 
 const { Book, BookCollection, Division, ApplicationParameter } =
-  require('../src').models
+  require('..').models
 
 const divisionConfig = [
   {

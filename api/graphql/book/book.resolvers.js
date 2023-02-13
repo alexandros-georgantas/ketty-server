@@ -1,6 +1,6 @@
-const { withFilter } = require("graphql-subscriptions");
-const { pubsubManager, logger } = require("@coko/server");
-const map = require("lodash/map");
+const { withFilter } = require('graphql-subscriptions')
+const { pubsubManager, logger } = require('@coko/server')
+const map = require('lodash/map')
 
 const {
   BOOK_CREATED,
@@ -10,13 +10,12 @@ const {
   BOOK_ARCHIVED,
   BOOK_METADATA_UPDATED,
   BOOK_RUNNING_HEADERS_UPDATED,
-} = require("./constants");
+} = require('./constants')
 
-const { BookTranslation } = require("../../data-model/src").models;
+const { BookTranslation } = require('../../../models').models
 
 const {
   getBook,
-  getBooks,
   archiveBook,
   createBook,
   renameBook,
@@ -30,169 +29,175 @@ const {
   updateLevelContentStructure,
   updateShowWelcome,
   finalizeBookStructure,
-} = require("../../../models/book/book.controller");
+} = require('../../../controllers/book.controller')
+
+const {
+  getPagedPreviewerLink,
+} = require('../../../controllers/microServices.controller')
+
+const { getEntityTeam } = require('../../../controllers/team.controller')
 
 const getBookHandler = async (_, { id }, ctx, info) => {
   try {
-    logger.info("book resolver: executing getBook use case");
-    return getBook(id);
+    logger.info('book resolver: executing getBook use case')
+    return getBook(id)
   } catch (e) {
-    throw new Error(e);
+    throw new Error(e)
   }
-};
+}
 
 const createBookHandler = async (_, { input }, ctx) => {
   try {
-    logger.info("book resolver: executing createBook use case");
+    logger.info('book resolver: executing createBook use case')
 
-    const { collectionId, title } = input;
-    const pubsub = await pubsubManager.getPubsub();
+    const { collectionId, title } = input
+    const pubsub = await pubsubManager.getPubsub()
 
-    logger.info("book resolver: checking permissions for book creation");
-    await ctx.helpers.can(ctx.user, "create", "Book");
+    logger.info('book resolver: checking permissions for book creation')
+    await ctx.helpers.can(ctx.user, 'create', 'Book')
 
-    const newBook = await createBook(collectionId, title);
+    const newBook = await createBook(collectionId, title)
 
-    logger.info("book resolver: broadcasting new book to clients");
+    logger.info('book resolver: broadcasting new book to clients')
 
-    pubsub.publish(BOOK_CREATED, { bookCreated: newBook.id });
+    pubsub.publish(BOOK_CREATED, { bookCreated: newBook.id })
 
-    return newBook;
+    return newBook
   } catch (e) {
-    throw new Error(e);
+    throw new Error(e)
   }
-};
+}
 
 const renameBookHandler = async (_, { id, title }, ctx) => {
   try {
-    logger.info("book resolver: executing renameBook use case");
+    logger.info('book resolver: executing renameBook use case')
 
-    const pubsub = await pubsubManager.getPubsub();
-    const book = await useCaseGetBook(id);
+    const pubsub = await pubsubManager.getPubsub()
+    const book = await getBook(id)
 
-    logger.info("book resolver: checking permissions for book renaming");
-    await ctx.helpers.can(ctx.user, "update", book);
+    logger.info('book resolver: checking permissions for book renaming')
+    await ctx.helpers.can(ctx.user, 'update', book)
 
-    const renamedBook = await renameBook(id, title);
+    const renamedBook = await renameBook(id, title)
 
-    logger.info("book resolver: broadcasting renamed book to clients");
+    logger.info('book resolver: broadcasting renamed book to clients')
 
     pubsub.publish(BOOK_UPDATED, {
       bookUpdated: renamedBook,
-    });
+    })
 
     pubsub.publish(BOOK_RENAMED, {
       bookRenamed: renamedBook.id,
-    });
+    })
 
-    return renamedBook;
+    return renamedBook
   } catch (e) {
-    throw new Error(e);
+    throw new Error(e)
   }
-};
+}
 
 const deleteBookHandler = async (_, args, ctx) => {
   try {
-    logger.info("book resolver: executing deleteBook use case");
-    const pubsub = await pubsubManager.getPubsub();
-    const book = await useCaseGetBook(args.id);
+    logger.info('book resolver: executing deleteBook use case')
+    const pubsub = await pubsubManager.getPubsub()
+    const book = await getBook(args.id)
 
-    logger.info("book resolver: checking permissions for book deletion");
-    await ctx.helpers.can(ctx.user, "update", book);
+    logger.info('book resolver: checking permissions for book deletion')
+    await ctx.helpers.can(ctx.user, 'update', book)
 
-    const deletedBook = await deleteBook(args.id);
+    const deletedBook = await deleteBook(args.id)
 
-    logger.info("book resolver: broadcasting deleted book to clients");
+    logger.info('book resolver: broadcasting deleted book to clients')
 
     pubsub.publish(BOOK_DELETED, {
       bookDeleted: deletedBook.id,
-    });
+    })
 
-    return deletedBook;
+    return deletedBook
   } catch (e) {
-    logger.error(e);
-    throw new Error(e);
+    logger.error(e)
+    throw new Error(e)
   }
-};
+}
 
 const archiveBookHandler = async (_, { id, archive }, ctx) => {
   try {
-    logger.info("book resolver: executing archiveBook use case");
-    const pubsub = await pubsubManager.getPubsub();
+    logger.info('book resolver: executing archiveBook use case')
+    const pubsub = await pubsubManager.getPubsub()
 
-    const archivedBook = await archiveBook(id, archive);
+    const archivedBook = await archiveBook(id, archive)
 
-    logger.info("book resolver: broadcasting archived book to clients");
+    logger.info('book resolver: broadcasting archived book to clients')
 
     pubsub.publish(BOOK_ARCHIVED, {
       bookArchived: archivedBook.id,
-    });
-    return archivedBook;
+    })
+    return archivedBook
   } catch (e) {
-    throw new Error(e);
+    throw new Error(e)
   }
-};
+}
 
 const updateMetadataHandler = async (_, { input }, ctx) => {
   try {
-    logger.info("book resolver: executing updateMetadata use case");
-    const pubsub = await pubsubManager.getPubsub();
+    logger.info('book resolver: executing updateMetadata use case')
+    const pubsub = await pubsubManager.getPubsub()
 
-    const updatedBook = await updateMetadata(input);
+    const updatedBook = await updateMetadata(input)
 
-    logger.info("book resolver: broadcasting updated book to clients");
+    logger.info('book resolver: broadcasting updated book to clients')
 
     pubsub.publish(BOOK_METADATA_UPDATED, {
       bookMetadataUpdated: updatedBook.id,
-    });
-    return updatedBook;
+    })
+    return updatedBook
   } catch (e) {
-    throw new Error(e);
+    throw new Error(e)
   }
-};
+}
 
 const exportBookHandler = async (_, { input }, ctx) => {
   const { bookId, mode, previewer, templateId, fileExtension, icmlNotes } =
-    input;
+    input
 
   try {
-    logger.info("book resolver: executing exportBook use case");
+    logger.info('book resolver: executing exportBook use case')
     return exportBook(
       bookId,
       mode,
       templateId,
       previewer,
       fileExtension,
-      icmlNotes
-    );
+      icmlNotes,
+    )
   } catch (e) {
-    throw new Error(e);
+    throw new Error(e)
   }
-};
+}
 
 const updateRunningHeadersHandler = async (_, { input, bookId }, ctx) => {
   try {
-    logger.info("book resolver: executing updateRunningHeaders use case");
-    const pubsub = await pubsubManager.getPubsub();
-    const updatedBook = await updateRunningHeaders(input, bookId);
+    logger.info('book resolver: executing updateRunningHeaders use case')
+    const pubsub = await pubsubManager.getPubsub()
+    const updatedBook = await updateRunningHeaders(input, bookId)
 
-    logger.info("book resolver: broadcasting updated book to clients");
+    logger.info('book resolver: broadcasting updated book to clients')
 
     pubsub.publish(BOOK_RUNNING_HEADERS_UPDATED, {
       bookRunningHeadersUpdated: updatedBook.id,
-    });
+    })
 
-    return updatedBook;
+    return updatedBook
   } catch (e) {
-    throw new Error(e);
+    throw new Error(e)
   }
-};
+}
 
 const changeLevelLabelHandler = async (_, { bookId, levelId, label }, ctx) => {
   try {
-    logger.info("book resolver: executing changeLevelLabel use case");
+    logger.info('book resolver: executing changeLevelLabel use case')
     // const pubsub = await pubsubManager.getPubsub()
-    const updatedLevel = await changeLevelLabel(bookId, levelId, label);
+    const updatedLevel = await changeLevelLabel(bookId, levelId, label)
 
     // logger.info('book resolver: broadcasting updated book to clients')
 
@@ -200,27 +205,27 @@ const changeLevelLabelHandler = async (_, { bookId, levelId, label }, ctx) => {
     //   bookRunningHeadersUpdated: updatedBook,
     // })
 
-    return updatedLevel;
+    return updatedLevel
   } catch (e) {
-    throw new Error(e);
+    throw new Error(e)
   }
-};
+}
 
 const changeNumberOfLevelsHandler = async (
   _,
   { bookId, levelsNumber },
-  ctx
+  ctx,
 ) => {
   try {
     logger.info(
-      "book resolver: executing changeBookStructureLevelNumber use case"
-    );
+      'book resolver: executing changeBookStructureLevelNumber use case',
+    )
 
     // const pubsub = await pubsubManager.getPubsub()
     const updatedBookStructure = await changeNumberOfLevels(
       bookId,
-      levelsNumber
-    );
+      levelsNumber,
+    )
 
     // logger.info('book resolver: broadcasting updated book to clients')
 
@@ -228,17 +233,17 @@ const changeNumberOfLevelsHandler = async (
     //   bookRunningHeadersUpdated: updatedBook,
     // })
 
-    return updatedBookStructure;
+    return updatedBookStructure
   } catch (e) {
-    throw new Error(e);
+    throw new Error(e)
   }
-};
+}
 
 const updateBookOutlineHandler = async (_, { bookId, outline }, ctx) => {
   try {
-    logger.info("book resolver: executing updateBookOutline use case");
+    logger.info('book resolver: executing updateBookOutline use case')
     // const pubsub = await pubsubManager.getPubsub()
-    const updatedOutline = await updateBookOutline(bookId, outline);
+    const updatedOutline = await updateBookOutline(bookId, outline)
 
     // logger.info('book resolver: broadcasting updated book to clients')
 
@@ -246,76 +251,74 @@ const updateBookOutlineHandler = async (_, { bookId, outline }, ctx) => {
     //   bookRunningHeadersUpdated: updatedBook,
     // })
 
-    return updatedOutline;
+    return updatedOutline
   } catch (e) {
-    throw new Error(e);
+    throw new Error(e)
   }
-};
+}
 
 const getPagedPreviewerLinkHandler = async (_, { hash }, ctx) => {
   try {
-    logger.info("book resolver: executing getPreviewerLink use case");
-    return getPreviewerLink(hash);
+    logger.info('book resolver: executing getPreviewerLink use case')
+    return getPagedPreviewerLink(hash)
   } catch (e) {
-    throw new Error(e);
+    throw new Error(e)
   }
-};
+}
 
 const updateLevelContentStructureHandler = async (
   _,
   { bookId, levels },
-  cx
+  cx,
 ) => {
   try {
-    logger.info(
-      "book resolver: executing updateLevelContentStructure use case"
-    );
+    logger.info('book resolver: executing updateLevelContentStructure use case')
 
     const updatedLevelsStructure = await updateLevelContentStructure(
       bookId,
-      levels
-    );
+      levels,
+    )
 
-    return updatedLevelsStructure;
+    return updatedLevelsStructure
   } catch (e) {
-    throw new Error(e);
+    throw new Error(e)
   }
-};
+}
 
 const finalizeBookStructureHandler = async (_, { bookId }, cx) => {
   try {
-    logger.info("book resolver: executing finalizeBookStructure use case");
-    const pubsub = await pubsubManager.getPubsub();
-    const updatedBook = await finalizeBookStructure(bookId);
+    logger.info('book resolver: executing finalizeBookStructure use case')
+    const pubsub = await pubsubManager.getPubsub()
+    const updatedBook = await finalizeBookStructure(bookId)
     // should add a specific event for the case of finalized
     pubsub.publish(BOOK_ARCHIVED, {
       bookArchived: updatedBook.id,
-    });
-    return updatedBook.id;
+    })
+    return updatedBook.id
   } catch (e) {
-    throw new Error(e);
+    throw new Error(e)
   }
-};
+}
 
 const updateShowWelcomeHandler = async (_, { bookId }, cx) => {
   try {
-    logger.info("book resolver: executing updateShowWelcome use case");
-    const pubsub = await pubsubManager.getPubsub();
-    const updatedBook = await updateShowWelcome(bookId);
+    logger.info('book resolver: executing updateShowWelcome use case')
+    const pubsub = await pubsubManager.getPubsub()
+    const updatedBook = await updateShowWelcome(bookId)
     // should add a specific event for the case of finalized
     pubsub.publish(BOOK_ARCHIVED, {
       bookArchived: updatedBook.id,
-    });
-    return updatedBook;
+    })
+    return updatedBook
   } catch (e) {
-    throw new Error(e);
+    throw new Error(e)
   }
-};
+}
 
 module.exports = {
   Query: {
-    getBook,
-    getPagedPreviewerLink,
+    getBook: getBookHandler,
+    getPagedPreviewerLink: getPagedPreviewerLinkHandler,
   },
   Mutation: {
     archiveBook: archiveBookHandler,
@@ -335,124 +338,119 @@ module.exports = {
   Book: {
     async title(book, _, ctx) {
       const bookTranslation = await BookTranslation.query()
-        .where("bookId", book.id)
-        .andWhere("languageIso", "en");
+        .where('bookId', book.id)
+        .andWhere('languageIso', 'en')
 
-      return bookTranslation[0].title;
+      return bookTranslation[0].title
     },
     divisions(book, _, ctx) {
-      return book.divisions;
+      return book.divisions
     },
     archived(book, _, ctx) {
-      return book.archived;
+      return book.archived
     },
     async authors(book, args, ctx, info) {
-      const authorsTeam = await useCaseGetEntityTeam(
-        book.id,
-        "book",
-        "author",
-        true
-      );
+      const authorsTeam = await getEntityTeam(book.id, 'book', 'author', true)
 
-      let authors = [];
+      let authors = []
 
       if (authorsTeam && authorsTeam.members.length > 0) {
-        authors = authorsTeam.members;
+        authors = authorsTeam.members
       }
 
-      return authors;
+      return authors
     },
     async isPublished(book, args, ctx, info) {
-      let isPublished = false;
+      let isPublished = false
 
       if (book.publicationDate) {
-        const date = book.publicationDate;
-        const inTimestamp = new Date(date).getTime();
-        const nowDate = new Date();
-        const nowTimestamp = nowDate.getTime();
+        const date = book.publicationDate
+        const inTimestamp = new Date(date).getTime()
+        const nowDate = new Date()
+        const nowTimestamp = nowDate.getTime()
 
         if (inTimestamp <= nowTimestamp) {
-          isPublished = true;
+          isPublished = true
         } else {
-          isPublished = false;
+          isPublished = false
         }
       }
 
-      return isPublished;
+      return isPublished
     },
     async productionEditors(book, _, ctx) {
-      const productionEditorsTeam = await useCaseGetEntityTeam(
+      const productionEditorsTeam = await getEntityTeam(
         book.id,
-        "book",
-        "productionEditor",
-        true
-      );
+        'book',
+        'productionEditor',
+        true,
+      )
 
-      let productionEditors = [];
+      let productionEditors = []
 
       if (productionEditorsTeam && productionEditorsTeam.members.length > 0) {
-        productionEditors = map(productionEditorsTeam.members, (teamMember) => {
-          const { givenName, surname } = teamMember;
-          return `${givenName} ${surname}`;
-        });
+        productionEditors = map(productionEditorsTeam.members, teamMember => {
+          const { givenName, surname } = teamMember
+          return `${givenName} ${surname}`
+        })
       }
 
-      return productionEditors;
+      return productionEditors
     },
   },
   Subscription: {
     bookCreated: {
       subscribe: async () => {
-        const pubsub = await pubsubManager.getPubsub();
-        return pubsub.asyncIterator(BOOK_CREATED);
+        const pubsub = await pubsubManager.getPubsub()
+        return pubsub.asyncIterator(BOOK_CREATED)
       },
     },
     bookUpdated: {
       subscribe: async (...args) => {
-        const pubsub = await pubsubManager.getPubsub();
+        const pubsub = await pubsubManager.getPubsub()
 
         return withFilter(
           () => {
-            return pubsub.asyncIterator(BOOK_UPDATED);
+            return pubsub.asyncIterator(BOOK_UPDATED)
           },
           (payload, variables) => {
-            const { id: bookId } = variables;
-            const { bookUpdated } = payload;
-            const { id } = bookUpdated;
-            return bookId === id;
-          }
-        )(...args);
+            const { id: bookId } = variables
+            const { bookUpdated } = payload
+            const { id } = bookUpdated
+            return bookId === id
+          },
+        )(...args)
       },
     },
     bookArchived: {
       subscribe: async () => {
-        const pubsub = await pubsubManager.getPubsub();
-        return pubsub.asyncIterator(BOOK_ARCHIVED);
+        const pubsub = await pubsubManager.getPubsub()
+        return pubsub.asyncIterator(BOOK_ARCHIVED)
       },
     },
     bookDeleted: {
       subscribe: async () => {
-        const pubsub = await pubsubManager.getPubsub();
-        return pubsub.asyncIterator(BOOK_DELETED);
+        const pubsub = await pubsubManager.getPubsub()
+        return pubsub.asyncIterator(BOOK_DELETED)
       },
     },
     bookRenamed: {
       subscribe: async () => {
-        const pubsub = await pubsubManager.getPubsub();
-        return pubsub.asyncIterator(BOOK_RENAMED);
+        const pubsub = await pubsubManager.getPubsub()
+        return pubsub.asyncIterator(BOOK_RENAMED)
       },
     },
     bookMetadataUpdated: {
       subscribe: async () => {
-        const pubsub = await pubsubManager.getPubsub();
-        return pubsub.asyncIterator(BOOK_METADATA_UPDATED);
+        const pubsub = await pubsubManager.getPubsub()
+        return pubsub.asyncIterator(BOOK_METADATA_UPDATED)
       },
     },
     bookRunningHeadersUpdated: {
       subscribe: async () => {
-        const pubsub = await pubsubManager.getPubsub();
-        return pubsub.asyncIterator(BOOK_RUNNING_HEADERS_UPDATED);
+        const pubsub = await pubsubManager.getPubsub()
+        return pubsub.asyncIterator(BOOK_RUNNING_HEADERS_UPDATED)
       },
     },
   },
-};
+}

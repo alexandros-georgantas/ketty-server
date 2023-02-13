@@ -13,7 +13,7 @@ module.exports = {
     {
       displayName: 'models',
       testEnvironment: 'node',
-      testRegex: './data-model/__tests__/.+test.js$',
+      testRegex: './data-models/__tests__/.+test.js$',
     },
   ],
 }

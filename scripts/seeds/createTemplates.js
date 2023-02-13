@@ -7,7 +7,7 @@ const get = require('lodash/get')
 const path = require('path')
 const fs = require('fs-extra')
 const config = require('config')
-const { createTemplate, getTemplates } = require('../utils/utils')
+const { createTemplate, getTemplates } = require('../utilities/templates')
 
 const createTemplates = async () => {
   try {

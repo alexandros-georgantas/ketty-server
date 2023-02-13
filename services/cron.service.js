@@ -11,7 +11,7 @@ const {
   BookComponentState,
   BookComponentTranslation,
   Book,
-} = require('../data-model/src').models
+} = require('../models').models
 
 const tempDirectoryCleanUp =
   JSON.parse(config.get('tempDirectoryCleanUp')) || false

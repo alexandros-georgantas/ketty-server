@@ -1,8 +1,5 @@
 const { logger, useTransaction } = require('@coko/server')
-const { ketidaDataModel } = require('../../data-model')
-
-const { models } = ketidaDataModel
-const { User } = models
+const User = require('../../models/user/user.model')
 
 const createAdmin = async userData => {
   try {
