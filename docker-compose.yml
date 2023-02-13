@@ -1,0 +1,346 @@
+version: '2'
+
+services:
+  server:
+    restart: always
+    build:
+      context: ./
+      dockerfile: Dockerfile-development
+    depends_on:
+      - db
+      - s3
+      - xsweet
+      - epubchecker
+      - pagedjs
+      - icml
+    entrypoint:
+      [
+        'sh',
+        'scripts/wait-for-it',
+        'db:5432',
+        '-t',
+        '60',
+        '--',
+        'sh',
+        'scripts/wait-for-it',
+        'http://s3:9001',
+        '-t',
+        '60',
+        '--',
+        'sh',
+        'scripts/wait-for-it',
+        'http://epubchecker:3001/healthcheck',
+        '-t',
+        '60',
+        '--',
+        'sh',
+        'scripts/wait-for-it',
+        'http://icml:3002/healthcheck',
+        '-t',
+        '60',
+        '--',
+        'sh',
+        'scripts/wait-for-it',
+        'http://pagedjs:3003/healthcheck',
+        '-t',
+        '60',
+        '--',
+        'sh',
+        'scripts/wait-for-it',
+        'http://xsweet:3004/healthcheck',
+        '-t',
+        '60',
+        '--',
+        'sh',
+        'scripts/setupDevServer.sh'
+      ]
+    command:
+      [
+        'node_modules/.bin/nodemon',
+        'startServer.js',
+        '--',
+        'config',
+        '--',
+        'api',
+        '--',
+        'services',
+        '--',
+        'utils',
+        '--',
+        'models',
+        '--',
+        'scripts',
+        '--',
+        'startServer.js',
+        '--',
+        'app.js',
+        '--ext',
+        'js,graphql'
+      ]
+    ports:
+      - ${SERVER_PORT:-3000}:${SERVER_PORT:-3000}
+      - ${WS_SERVER_PORT:-3333}:${WS_SERVER_PORT:-3333}
+    environment:
+      - NODE_ENV=development
+      - SERVER_IDENTIFIER=${SERVER_IDENTIFIER:-0a3cf3f0-98b6-11ed-87cd-0800200c9a66}
+      - KETIDA_FLAVOUR=${KETIDA_FLAVOUR:-VANILLA}
+      - PUBSWEET_SECRET=${PUBSWEET_SECRET:-dev_secret}
+      - PUBLIC_SERVER_URL=${PUBLIC_SERVER_URL:-http://server:3000}
+      - PUBLIC_CLIENT_URL=${PUBLIC_CLIENT_URL:-http://0.0.0.0:4000}
+      - SERVER_SERVE_CLIENT=false
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-ketida_dev}
+      - POSTGRES_USER=${POSTGRES_USER:-dev_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-dev_user_password}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-password}
+      - ADMIN_GIVEN_NAME=${ADMIN_GIVEN_NAME:-Admin}
+      - ADMIN_SURNAME=${ADMIN_SURNAME:-Adminius}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
+      - SERVER_PORT=${SERVER_PORT:-3000}
+      - SERVER_HOST=${SERVER_HOST:-localhost}
+      - SERVER_PROTOCOL=${SERVER_PROTOCOL:-http}
+      - WS_SERVER_PORT=${WS_SERVER_PORT:-3333}
+      - WS_HEARTBEAT_INTERVAL=${WS_HEARTBEAT_INTERVAL:-10000}
+      - FAIL_SAFE_UNLOCKING_INTERVAL=${FAIL_SAFE_UNLOCKING_INTERVAL:-12000}
+      - CLIENT_PROTOCOL=${CLIENT_PROTOCOL:-http}
+      - CLIENT_HOST=${CLIENT_HOST:-0.0.0.0}
+      - CLIENT_PORT=${CLIENT_PORT:-4000}
+      - MAILER_USER=${MAILER_USER}
+      - MAILER_PASSWORD=${MAILER_PASSWORD}
+      - MAILER_SENDER=${MAILER_SENDER:-dev@example.com}
+      - MAILER_HOSTNAME=${MAILER_HOSTNAME}
+      - PASSWORD_RESET_PATH=${PASSWORD_RESET_PATH:-password-reset}
+      - S3_PROTOCOL=${S3_PROTOCOL:-http}
+      - S3_HOST=${S3_HOST:-s3}
+      - S3_PORT=${S3_PORT:-9000}
+      - S3_ACCESS_KEY_ID_ADMIN=${S3_ACCESS_KEY_ID_ADMIN:-admin}
+      - S3_SECRET_ACCESS_KEY_ADMIN=${S3_SECRET_ACCESS_KEY_ADMIN:-superSecretAdminPassword}
+      - S3_ACCESS_KEY_ID_USER=${S3_ACCESS_KEY_ID_USER:-ketida}
+      - S3_SECRET_ACCESS_KEY_USER=${S3_SECRET_ACCESS_KEY_USER:-superSecretUserPassword}
+      - S3_BUCKET=${S3_BUCKET:-uploads}
+      - SERVICE_EPUB_CHECKER_CLIENT_ID=59a3392b-0c4f-4318-bbe2-f86eff6d3de4
+      - SERVICE_EPUB_CHECKER_SECRET=asldkjLKJLaslkdf897kjhKUJH
+      - SERVICE_EPUB_CHECKER_PROTOCOL=${SERVICE_EPUB_CHECKER_PROTOCOL:-http}
+      - SERVICE_EPUB_CHECKER_HOST=${SERVICE_EPUB_CHECKER_HOST:-epubchecker}
+      - SERVICE_EPUB_CHECKER_PORT=${SERVICE_EPUB_CHECKER_PORT:-3001}
+      - SERVICE_ICML_CLIENT_ID=59a3392b-0c4f-4318-bbe2-f86eff6d3de4
+      - SERVICE_ICML_SECRET=asldkjLKJLaslkdf897kjhKUJH
+      - SERVICE_ICML_PROTOCOL=${SERVICE_ICML_PROTOCOL:-http}
+      - SERVICE_ICML_HOST=${SERVICE_ICML_HOST:-icml}
+      - SERVICE_ICML_PORT=${SERVICE_ICML_PORT:-3002}
+      - SERVICE_PAGEDJS_CLIENT_ID=59a3392b-0c4f-4318-bbe2-f86eff6d3de4
+      - SERVICE_PAGEDJS_SECRET=asldkjLKJLaslkdf897kjhKUJH
+      - SERVICE_PAGEDJS_PROTOCOL=${SERVICE_PAGEDJS_PROTOCOL:-http}
+      - SERVICE_PAGEDJS_HOST=${SERVICE_PAGEDJS_HOST:-pagedjs}
+      - SERVICE_PAGEDJS_PORT=${SERVICE_PAGEDJS_PORT:-3003}
+      - SERVICE_XSWEET_CLIENT_ID=59a3392b-0c4f-4318-bbe2-f86eff6d3de4
+      - SERVICE_XSWEET_SECRET=asldkjLKJLaslkdf897kjhKUJH
+      - SERVICE_XSWEET_PROTOCOL=${SERVICE_XSWEET_PROTOCOL:-http}
+      - SERVICE_XSWEET_HOST=${SERVICE_XSWEET_HOST:-xsweet}
+      - SERVICE_XSWEET_PORT=${SERVICE_XSWEET_PORT:-3004}
+      - FEATURE_BOOK_STRUCTURE=${FEATURE_BOOK_STRUCTURE:-false}
+      - FEATURE_UPLOAD_DOCX_FILES=${FEATURE_UPLOAD_DOCX_FILES:-true}
+      - TEMP_DIRECTORY_CRON_JOB_SCHEDULE=${TEMP_DIRECTORY_CRON_JOB_TIMING:-0 * * * *}
+      - TEMP_DIRECTORY_CRON_JOB_OFFSET=${TEMP_DIRECTORY_CRON_JOB_OFFSET:-1800000}
+      - TEMP_DIRECTORY_CLEAN_UP=${TEMP_DIRECTORY_CLEAN_UP:-true}
+
+    volumes:
+      - ./config:/home/node/ketida-server/config
+      - ./api:/home/node/ketida-server/api
+      - ./services:/home/node/ketida-server/services
+      - ./utils:/home/node/ketida-server/utils
+      - ./models:/home/node/ketida-server/models
+      - ./scripts:/home/node/ketida-server/scripts
+      - ./common:/home/node/ketida-server/common
+      - ./app.js:/home/node/ketida-server/app.js
+      - ./startServer.js:/home/node/ketida-server/startServer.js
+      - ./startWebSocketServer.js:/home/node/ketida-server/startWebSocketServer.js
+      
+  epubchecker:
+    depends_on:
+      - db-epubchecker
+    image: cokoapps/epubchecker:1.1.2
+    ports:
+      - ${SERVICE_EPUB_CHECKER_PORT:-3001}:${SERVICE_EPUB_CHECKER_PORT:-3001}
+    environment:
+      - PUBSWEET_SECRET=epubchecker_dev_secret
+      - POSTGRES_USER=epubchecker_user_dev
+      - POSTGRES_PASSWORD=epubchecker_user_password
+      - POSTGRES_HOST=db-epubchecker
+      - POSTGRES_DB=epubchecker_dev
+      - POSTGRES_PORT=5432
+      - SERVER_PORT=${SERVICE_EPUB_CHECKER_PORT:-3001}
+    entrypoint:
+      [
+        'sh',
+        'scripts/wait-for-it',
+        'db-epubchecker:5432',
+        '--',
+        'sh',
+        'scripts/setupDevServer.sh'
+      ]
+    command: [ 'node', 'server/startServer.js' ]
+  icml:
+    depends_on:
+      - db-icml
+    image: cokoapps/icml:1.2.1
+    ports:
+      - ${SERVICE_ICML_PORT:-3002}:${SERVICE_ICML_PORT:-3002}
+    environment:
+      - PUBSWEET_SECRET=icml_dev_secret
+      - POSTGRES_USER=icml_user_dev
+      - POSTGRES_PASSWORD=icml_user_password
+      - POSTGRES_HOST=db-icml
+      - POSTGRES_DB=icml_dev
+      - POSTGRES_PORT=5432
+      - SERVER_PORT=${SERVICE_ICML_PORT:-3002}
+      - NODE_ENV=development
+    entrypoint:
+      [
+        'sh',
+        'scripts/wait-for-it',
+        'db-icml:5432',
+        '--',
+        'sh',
+        'scripts/setupDevServer.sh'
+      ]
+    command: [ 'node', 'server/startServer.js' ]
+
+  pagedjs:
+    depends_on:
+      - db-pagedjs
+    image: cokoapps/pagedjs:1.4.7
+    ports:
+      - ${SERVICE_PAGEDJS_PORT:-3003}:${SERVICE_PAGEDJS_PORT:-3003}
+    environment:
+      - PUBSWEET_SECRET=pagedjs_dev_secret
+      - POSTGRES_USER=pagedjs_user_dev
+      - POSTGRES_PASSWORD=pagedjs_user_password
+      - POSTGRES_HOST=db-pagedjs
+      - POSTGRES_DB=pagedjs_dev
+      - POSTGRES_PORT=5432
+      - SERVER_PORT=${SERVICE_PAGEDJS_PORT:-3003}
+      - NODE_ENV=development
+      - PUBLIC_URL=${PAGEDJS_PUBLIC_URL:-http://localhost:3003}
+    security_opt:
+      - seccomp:unconfined
+    entrypoint:
+      [
+        'dumb-init',
+        '--',
+        'sh',
+        'scripts/wait-for-it',
+        'db-pagedjs:5432',
+        '--',
+        'sh',
+        'scripts/setupDevServer.sh'
+      ]
+    command: [ 'node', 'server/startServer.js' ]
+
+  xsweet:
+    depends_on:
+      - db-xsweet
+    image: cokoapps/xsweet:2.1.2
+    ports:
+      - ${SERVICE_XSWEET_PORT:-3004}:${SERVICE_XSWEET_PORT:-3004}
+    environment:
+      - PUBSWEET_SECRET=xsweet_dev_secret
+      - POSTGRES_USER=xsweet_user_dev
+      - POSTGRES_PASSWORD=xsweet_user_password
+      - POSTGRES_HOST=db-xsweet
+      - POSTGRES_DB=xsweet_dev
+      - POSTGRES_PORT=5432
+      - SERVER_PORT=${SERVICE_XSWEET_PORT:-3004}
+      - NODE_ENV=development
+    entrypoint:
+      [
+        'sh',
+        'scripts/wait-for-it',
+        'db-xsweet:5432',
+        '--',
+        'sh',
+        'scripts/setupDevServer.sh'
+      ]
+    command: [ 'node', 'server/startServer.js' ]
+
+  db:
+    image: postgres:14.4-alpine
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-ketida_dev}
+      - POSTGRES_USER=${POSTGRES_USER:-dev_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-dev_user_password}
+    volumes:
+      - ./scripts/init-pgboss.sql:/docker-entrypoint-initdb.d/init-pgboss.sql
+
+  db-epubchecker:
+    image: postgres:14.4-alpine
+    environment:
+      - POSTGRES_USER=epubchecker_user_dev
+      - POSTGRES_DB=epubchecker_dev
+      - POSTGRES_PASSWORD=epubchecker_user_password
+    volumes:
+      - ./scripts/init-pgboss.sql:/docker-entrypoint-initdb.d/init-pgboss.sql
+
+  db-icml:
+    image: postgres:14.4-alpine
+    environment:
+      - POSTGRES_USER=icml_user_dev
+      - POSTGRES_DB=icml_dev
+      - POSTGRES_PASSWORD=icml_user_password
+    volumes:
+      - ./scripts/init-pgboss.sql:/docker-entrypoint-initdb.d/init-pgboss.sql
+
+  db-pagedjs:
+    image: postgres:14.4-alpine
+    environment:
+      - POSTGRES_USER=pagedjs_user_dev
+      - POSTGRES_DB=pagedjs_dev
+      - POSTGRES_PASSWORD=pagedjs_user_password
+    volumes:
+      - ./scripts/init-pgboss.sql:/docker-entrypoint-initdb.d/init-pgboss.sql
+
+  db-xsweet:
+    image: postgres:14.4-alpine
+    environment:
+      - POSTGRES_USER=xsweet_user_dev
+      - POSTGRES_DB=xsweet_dev
+      - POSTGRES_PASSWORD=xsweet_user_password
+    volumes:
+      - ./scripts/init-pgboss.sql:/docker-entrypoint-initdb.d/init-pgboss.sql
+
+  s3:
+    image: minio/minio:RELEASE.2022-05-26T05-48-41Z
+    ports:
+      - ${S3_PORT:-9000}:9000
+      - ${MINIO_CONSOLE_PORT:-9001}:9001
+    volumes:
+      - minio_storage:/data
+    environment:
+      - MINIO_ROOT_USER=${S3_ACCESS_KEY_ID_ADMIN:-admin}
+      - MINIO_ROOT_PASSWORD=${S3_SECRET_ACCESS_KEY_ADMIN:-superSecretAdminPassword}
+    command: server --console-address ":9001" /data
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'curl',
+          '-f',
+          'http://localhost:9000/minio/health/live'
+        ]
+      interval: 30s
+      timeout: 20s
+      retries: 10
+
+  createbucket:
+    image: minio/mc:RELEASE.2022-05-09T04-08-26Z
+    depends_on:
+      s3:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c " /usr/bin/mc config host add ketida ${S3_PROTOCOL:-http}://${S3_HOST:-s3}:${S3_PORT:-9000} ${S3_ACCESS_KEY_ID_ADMIN:-admin} ${S3_SECRET_ACCESS_KEY_ADMIN:-superSecretAdminPassword}; /usr/bin/mc admin user add ketida/ ${S3_ACCESS_KEY_ID_USER:-ketida} ${S3_SECRET_ACCESS_KEY_USER:-superSecretUserPassword}; /usr/bin/mc admin user enable ketida/ ${S3_ACCESS_KEY_ID_USER:-ketida}; /usr/bin/mc mb ketida/${S3_BUCKET:-uploads}; /usr/bin/mc admin policy set ketida/ readwrite user=${S3_ACCESS_KEY_ID_USER:-ketida}; exit 0; "
+volumes:
+  minio_storage:

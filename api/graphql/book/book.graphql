@@ -1,0 +1,151 @@
+type Book {
+  id: ID!
+  authors: [User]
+  archived: Boolean!
+  bookStructure: BookStructure
+  collectionId: ID!
+  copyrightStatement: String
+  copyrightYear: Int
+  copyrightHolder: String
+  divisions: [Division]!
+  edition: Int
+  isPublished: Boolean
+  isbn: String
+  issn: String
+  issnL: String
+  license: String
+  productionEditors: [String]!
+  publicationDate: Date
+  title: String!
+}
+
+input CreateBookInput {
+  collectionId: ID!
+  title: String!
+}
+
+input ExportBookInput {
+  bookId: ID!
+  mode: String!
+  templateId: ID
+  previewer: String
+  fileExtension: String
+  icmlNotes: String
+}
+
+type ContentStructure {
+  id: ID!
+  type: String!
+  displayName: String!
+}
+
+input ContentStructureInput {
+  id: ID
+  type: String!
+  displayName: String!
+}
+
+type Level {
+  id: ID!
+  type: String!
+  displayName: String!
+  contentStructure: [ContentStructure!]!
+}
+
+input LevelInput {
+  id: ID
+  type: String!
+  displayName: String!
+  contentStructure: [ContentStructureInput]
+}
+
+type Outline {
+  id: ID!
+  title: String
+  parentId: ID!
+  type: String!
+  children: [Outline!]!
+}
+
+input OutlineInput {
+  id: ID!
+  title: String
+  parentId: ID!
+  type: String!
+  children: [OutlineInput]
+}
+
+type BookStructure {
+  id: ID!
+  # numberOfLevels: Int!
+  levels: [Level!]!
+  outline: [Outline!]!
+  finalized: Boolean!
+  showWelcome: Boolean!
+}
+
+input BookStructureInput {
+  id: ID!
+  numberOfLevels: Int
+  levels: [LevelInput]
+  outline: [OutlineInput]
+}
+
+type PagedPreviewerLink {
+  link: String!
+}
+
+extend type Query {
+  getBook(id: ID!): Book!
+  getPagedPreviewerLink(hash: String!): PagedPreviewerLink!
+}
+
+input MetadataInput {
+  id: ID!
+  publicationDate: Date
+  edition: Int
+  copyrightStatement: String
+  copyrightYear: Int
+  copyrightHolder: String
+  isbn: String
+  issn: String
+  issnL: String
+  license: String
+}
+
+input RunningHeadersInput {
+  id: ID!
+  runningHeadersRight: String
+  runningHeadersLeft: String
+}
+
+type ExportResult {
+  path: String!
+  validationResult: String
+}
+extend type Mutation {
+  archiveBook(id: ID!, archive: Boolean!): Book!
+  createBook(input: CreateBookInput!): Book!
+  renameBook(id: ID!, title: String!): Book!
+  deleteBook(id: ID!): Book!
+  updateMetadata(input: MetadataInput!): Book!
+  changeLevelLabel(bookId: ID!, levelId: ID!, label: String!): Level!
+  changeNumberOfLevels(bookId: ID!, levelsNumber: Int!): [Level!]!
+  updateLevelContentStructure(bookId: ID!, levels: [LevelInput!]!): [Level!]!
+  updateBookOutline(bookId: ID!, outline: [OutlineInput!]!): BookStructure!
+  updateBookStructure(input: BookStructureInput!): BookStructure!
+  updateRunningHeaders(input: [RunningHeadersInput!]!, bookId: ID!): Book!
+  updateShowWelcome(bookId: ID!): Book!
+  finalizeBookStructure(bookId: ID!): ID!
+  exportBook(input: ExportBookInput!): ExportResult!
+}
+
+extend type Subscription {
+  bookArchived: ID!
+  bookCreated: ID!
+  bookDeleted: ID!
+  bookRenamed: ID!
+  bookMetadataUpdated: ID!
+  bookRunningHeadersUpdated: ID!
+  bookUpdated(id: ID!): Book!
+}

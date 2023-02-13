@@ -1,0 +1,18 @@
+FROM node:16.19.0-bullseye
+
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && apt-get install -y ranger vim python netcat
+
+WORKDIR /home/node/ketida-server
+
+COPY package.json .
+COPY yarn.lock .
+
+RUN chown -R node:node .
+USER node
+
+
+RUN yarn install
+# RUN yarn cache clean
+COPY --chown=node:node . .

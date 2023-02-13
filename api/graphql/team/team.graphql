@@ -1,0 +1,37 @@
+type KetidaTeamMember {
+  id: ID
+  user: User
+}
+
+type KetidaTeam {
+  id: ID!
+  type: String!
+  name: String!
+  role: String!
+  objectId: ID
+  objectType: String
+  members: [KetidaTeamMember!]
+  global: Boolean
+}
+
+extend type Query {
+  getBookTeams(bookId: ID!): [KetidaTeam]!
+  getGlobalTeams: [KetidaTeam]!
+}
+
+type TeamSub {
+  objectId: ID
+  teamId: ID!
+  role: String!
+  members: [User]!
+  global: Boolean!
+}
+
+extend type Mutation {
+  updateTeamMembers(id: String!, input: TeamInput!): KetidaTeam!
+}
+
+extend type Subscription {
+  teamMembersUpdated: TeamSub!
+  productionEditorsUpdated: TeamSub!
+}
