@@ -12,4 +12,6 @@ extend type Mutation {
   ): Book
 }
 
-extend type Subscription { bookComponentOrderUpdated: Book! }
+extend type Subscription {
+  bookComponentOrderUpdated: Book!
+}

@@ -1,24 +1,24 @@
-const applicationParameter = require("./applicationParameter");
-const book = require("./book");
-const bookCollection = require("./bookCollection");
-const bookCollectionTranslation = require("./bookCollectionTranslation");
-const bookComponent = require("./bookComponent");
-const bookComponentState = require("./bookComponentState");
-const bookComponentTranslation = require("./bookComponentTranslation");
-const bookTranslation = require("./bookTranslation");
-const customTag = require("./customTag");
-const { models } = require("./dataloader");
-const division = require("./division");
-const file = require("./file");
-const fileTranslation = require("./fileTranslation");
-const lock = require("./lock");
-const serviceCallbackToken = require("./serviceCallbackToken");
-const team = require("./team");
-const teamMember = require("./teamMember");
-const template = require("./template");
-const user = require("./user");
+const applicationParameter = require('./applicationParameter')
+const book = require('./book')
+const bookCollection = require('./bookCollection')
+const bookCollectionTranslation = require('./bookCollectionTranslation')
+const bookComponent = require('./bookComponent')
+const bookComponentState = require('./bookComponentState')
+const bookComponentTranslation = require('./bookComponentTranslation')
+const bookTranslation = require('./bookTranslation')
+const file = require('./file')
+const fileTranslation = require('./fileTranslation')
+const template = require('./template')
+const customTag = require('./customTag')
+const division = require('./division')
+const team = require('./team')
+const teamMember = require('./teamMember')
+const user = require('./user')
+const lock = require('./lock')
+const serviceCallbackToken = require('./serviceCallbackToken')
+const { models } = require('./dataloader')
 
-const loader = models.reduce((r, c) => Object.assign(r, c), {});
+const loader = models.reduce((r, c) => Object.assign(r, c), {})
 
 module.exports = {
   book,
@@ -61,4 +61,4 @@ module.exports = {
     loader,
     ServiceCallbackToken: serviceCallbackToken.model,
   },
-};
+}

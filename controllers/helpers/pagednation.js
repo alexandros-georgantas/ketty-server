@@ -5,7 +5,7 @@ const find = require('lodash/find')
 
 const map = require('lodash/map')
 const { locallyDownloadFile, signURL } = require('../objectStorage.controller')
-const { imageGatherer } = require('./gatherImages')
+const imageGatherer = require('./gatherImages')
 
 const { readFile, writeFile } = require('./filesystem')
 
@@ -27,11 +27,6 @@ const pagednation = async (
     const stylesheets = []
     const scripts = template.exportScripts
 
-    // const images = []
-    // const currentTime = new Date().getTime()
-    // const hash = crypto.randomBytes(32).toString('hex')
-    // const tempDir = `${process.cwd()}/${uploadsDir}/temp`
-    // const pagedDestination = path.join(tempDir, 'paged', `${currentTime}`)
     await fs.ensureDir(pagedJStempFolderAssetsPath)
 
     for (let i = 0; i < templateFiles.length; i += 1) {
@@ -172,6 +167,7 @@ const pagednation = async (
     const stylesheetContent = await readFile(stylesheets[0].target)
     const fixedCSS = fixFontFaceUrls(stylesheetContent, fonts, '.')
     await writeFile(`${stylesheets[0].target}`, fixedCSS)
+
     const output = cheerio.load(generatePagedjsContainer(book.title))
 
     book.divisions.forEach(division => {
@@ -191,11 +187,6 @@ const pagednation = async (
 
     await writeFile(`${pagedJStempFolderAssetsPath}/index.html`, output.html())
     return true
-    // return {
-    //   clientPath: `${currentTime}/template/${template.id}`,
-    //   currentTime,
-    //   hash,
-    // }
   } catch (e) {
     throw new Error(e)
   }

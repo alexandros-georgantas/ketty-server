@@ -4,13 +4,6 @@ type CustomTag {
   tagType: String!
 }
 
-# input CustomTagUpdateInput {
-#   id: ID!
-#   label: String
-#   tagType: String
-#   deleted: Boolean
-# }
-
 input CustomTagAddInput {
   label: String
   tagType: String

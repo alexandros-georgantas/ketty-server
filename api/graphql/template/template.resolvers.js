@@ -17,7 +17,7 @@ const {
   getExportScripts,
 } = require('../../../controllers/template.controller')
 
-const exporter = require('../../../controllers/utilities/exporter')
+const exporter = require('../../../controllers/helpers/exporter')
 
 const getTemplatesHandler = async (
   _,

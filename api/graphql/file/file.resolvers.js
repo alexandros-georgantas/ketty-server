@@ -5,21 +5,21 @@ const { pubsubManager } = require('@coko/server')
 const { FileTranslation, BookComponent } = require('../../../models').models
 
 const {
-  createFile,
-  updateFile,
-  getEntityFiles,
-  getFiles,
-  getSpecificFiles,
-  deleteFiles,
-  getFile,
-} = require('../../../controllers/file.controller')
-
-const {
   uploadFile,
   signURL,
 } = require('../../../controllers/objectStorage.controller')
 
-const imageFinder = require('../../../controllers/utilities/imageFinder')
+const {
+  updateFile,
+  deleteFiles,
+  getEntityFiles,
+  getFiles,
+  getSpecificFiles,
+  createFile,
+  getFile,
+} = require('../../../controllers/file.controller')
+
+const imageFinder = require('../../../controllers/helpers/imageFinder')
 
 const { FILES_UPLOADED, FILE_UPDATED, FILES_DELETED } = require('./constants')
 

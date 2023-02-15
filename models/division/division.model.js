@@ -41,7 +41,7 @@ class Division extends Base {
 
   static get relationMappings() {
     /* eslint-disable global-require */
-    const { model: Book } = require('../book')
+    const Book = require('../book/book.model')
     /* eslint-enable global-require */
     // const { model: BookComponent } = require('../bookComponent')
 

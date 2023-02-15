@@ -12,7 +12,7 @@ const { writeFile, readFile } = require('./filesystem')
 const { epubDecorator, fixFontFaceUrls } = require('./converters')
 
 const { locallyDownloadFile, signURL } = require('../objectStorage.controller')
-const { imageGatherer } = require('./gatherImages')
+const imageGatherer = require('./gatherImages')
 const objectKeyExtractor = require('./fileStorageObjectKeyExtractor')
 
 let images = []

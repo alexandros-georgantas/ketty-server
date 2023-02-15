@@ -7,11 +7,11 @@ const paginationExtractor = pagination => {
     return 'start-left start-right'
   }
 
- if (pagination.left) {
+  if (pagination.left) {
     return 'start-left'
   }
 
- if (pagination.right) {
+  if (pagination.right) {
     return 'start-right'
   }
 
@@ -42,8 +42,9 @@ const generateContainer = (
       `<section id="comp-number-${id}"  class="component-${division} ${componentType} ${paginationExtractor(
         pagination,
       )}"><div class="running-left">${runningHeadersLeft || '&#xA0;'}</div>
-      <div class="running-right">${runningHeadersRight ||
-        '&#xA0;'}</div><header><h1 class="component-title">${title}</h1></header><nav>
+      <div class="running-right">${
+        runningHeadersRight || '&#xA0;'
+      }</div><header><h1 class="component-title">${title}</h1></header><nav>
       <ol></ol></nav></section>`,
     )
   } else if (componentType === 'endnotes') {
@@ -62,12 +63,14 @@ const generateContainer = (
     }
 
     output = cheerio.load(
-      `<section id="comp-number-${id}"  class="component-${division} ${levelClass ||
-        ''} ${componentType} ${paginationExtractor(pagination)}">${
+      `<section id="comp-number-${id}"  class="component-${division} ${
+        levelClass || ''
+      } ${componentType} ${paginationExtractor(pagination)}">${
         firstInBody ? '<span class="restart-numbering"></span>' : ''
       }<div class="running-left">${runningHeadersLeft || '&#xA0;'}</div>
-      <div class="running-right">${runningHeadersRight ||
-        '&#xA0;'}</div><header>${componentNumber || ''}</header></section>`,
+      <div class="running-right">${
+        runningHeadersRight || '&#xA0;'
+      }</div><header>${componentNumber || ''}</header></section>`,
     )
   }
 

@@ -6,8 +6,10 @@ const path = require('path')
 const fs = require('fs-extra')
 const mime = require('mime-types')
 
-const { dirContents } = require('../../controllers/utilities/filesystem')
+const dirContents = require('../../utilities/dirContents')
+
 const { createFile } = require('../../controllers/file.controller')
+
 const { uploadFile } = require('../../controllers/objectStorage.controller')
 
 const Template = require('../../models/template/template.model')
@@ -167,6 +169,7 @@ const createTemplate = async (sourceRoot, data, cssFile, notes) => {
 
 const getTemplates = async () => {
   try {
+    // await cleanTemplatesFolder()
     await execute(`. ${path.join(__dirname, 'fetchTemplates.sh')}`)
   } catch (e) {
     throw new Error(e)
@@ -174,6 +177,7 @@ const getTemplates = async () => {
 }
 
 module.exports = {
+  execute,
   createTemplate,
   getTemplates,
 }

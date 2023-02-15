@@ -1,4 +1,4 @@
-/* eslint-disable global-require,no-param-reassign */
+/* eslint-disable global-require, no-param-reassign */
 const { logger } = require('@coko/server')
 const jwt = require('jsonwebtoken')
 const config = require('config')

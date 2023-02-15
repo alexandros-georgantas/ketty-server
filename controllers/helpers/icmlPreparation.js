@@ -11,7 +11,7 @@ const { locallyDownloadFile } = require('../objectStorage.controller')
 
 const { generatePagedjsContainer } = require('./htmlGenerators')
 const objectKeyExtractor = require('./fileStorageObjectKeyExtractor')
-const { imageGatherer } = require('./gatherImages')
+const imageGatherer = require('./gatherImages')
 
 const icmlPreparation = async (book, tempFolderPath) => {
   try {

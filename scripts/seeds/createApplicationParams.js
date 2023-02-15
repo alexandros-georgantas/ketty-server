@@ -4,6 +4,7 @@ const { logger, useTransaction } = require('@coko/server')
 const db = require('@pubsweet/db-manager/src/db')
 
 const ApplicationParameter = require('../../models/applicationParameter/applicationParameter.model')
+
 const configBooksprints = require('../../config/modules/bookBuilderBooksprints')
 const configVanilla = require('../../config/modules/bookBuilderVanilla')
 const configOEN = require('../../config/modules/bookBuilderOEN')

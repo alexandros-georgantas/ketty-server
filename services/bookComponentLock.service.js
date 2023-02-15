@@ -174,25 +174,6 @@ const cleanUpLocks = async (immediate = false) => {
             pubsub.publish('BOOK_COMPONENT_LOCK_UPDATED', {
               bookComponentLockUpdated: updatedBookComponent,
             })
-            // if (!immediate) {
-            //   setTimeout(() => {
-            //     logger.info(`broadcasting unlocked event`)
-            //     pubsub.publish('BOOK_COMPONENT_UPDATED', {
-            //       bookComponentUpdated: updatedBookComponent,
-            //     })
-            //     pubsub.publish('BOOK_UPDATED', {
-            //       bookUpdated: updatedBook,
-            //     })
-            //   }, 15000)
-            // } else {
-            //   logger.info(`broadcasting unlocked event`)
-            //   pubsub.publish('BOOK_COMPONENT_UPDATED', {
-            //     bookComponentUpdated: updatedBookComponent,
-            //   })
-            //   pubsub.publish('BOOK_UPDATED', {
-            //     bookUpdated: updatedBook,
-            //   })
-            // }
 
             return true
           }),

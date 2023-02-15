@@ -7,7 +7,7 @@ const querystring = require('querystring')
 const config = require('config')
 const crypto = require('crypto')
 
-const { User } = require('../models').models
+const User = require('../models/user/user.model')
 
 const isValidUser = ({ surname, givenName }) => surname && givenName
 

@@ -19,11 +19,9 @@ const {
   User,
 } = require('../models').models
 
-const { isEmptyString } = require('./utilities/isEmptyString')
+const isEmptyString = require('./helpers/isEmptyString')
 
-const {
-  bookComponentContentCreator,
-} = require('./utilities/bookComponentContentCreator')
+const bookComponentContentCreator = require('./helpers/bookComponentContentCreator')
 
 const getBookComponent = async (bookComponentId, options = {}) => {
   try {
@@ -686,7 +684,6 @@ const updateWorkflowState = async (bookComponentId, workflowStages, ctx) => {
 
     if (locks.length > 0) {
       const currentBookComponent = await BookComponent.findById(bookComponentId)
-
       currentBookComponent.workflowStages = update.workflowStages
 
       ctx.helpers

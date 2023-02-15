@@ -2,7 +2,6 @@ const { logger, useTransaction } = require('@coko/server')
 const orderBy = require('lodash/orderBy')
 const map = require('lodash/map')
 const find = require('lodash/find')
-const forEach = require('lodash/forEach')
 
 const path = require('path')
 
@@ -10,12 +9,14 @@ const { writeFileSync, createReadStream } = require('fs')
 const fs = require('fs-extra')
 const config = require('config')
 const mime = require('mime-types')
+const forEach = require('lodash/forEach')
+
+const scripts = config.get('export.scripts')
 
 const uploadsPath = config.get('pubsweet-server').uploads
 const { Template, File } = require('../models').models
 
-const scripts = config.get('export.scripts')
-const { isSupportedAsset } = require('./utilities/mimetypes')
+const { isSupportedAsset } = require('./helpers/mimetypes')
 
 const { createFile } = require('./file.controller')
 
@@ -56,9 +57,7 @@ const getTemplates = async (
           )
 
           const sorted = orderBy(sortable, sortKey, [order])
-
           const result = map(sorted, item => find(templates, { id: item.id }))
-
           return result
         }
 

@@ -124,7 +124,7 @@ input IngestWordFiles {
 
 extend type Query {
   getBookComponent(id: ID!): BookComponent!
-  # getBookComponentAndAcquireLock(id: ID!, tabId: ID!): BookComponent!
+  getBookComponentAndAcquireLock(id: ID!, tabId: ID!): BookComponent!
 }
 
 extend type Mutation {

@@ -147,16 +147,15 @@ services:
       - TEMP_DIRECTORY_CLEAN_UP=${TEMP_DIRECTORY_CLEAN_UP:-true}
 
     volumes:
-      - ./config:/home/node/ketida-server/config
-      - ./api:/home/node/ketida-server/api
-      - ./services:/home/node/ketida-server/services
-      - ./utils:/home/node/ketida-server/utils
-      - ./models:/home/node/ketida-server/models
-      - ./scripts:/home/node/ketida-server/scripts
-      - ./common:/home/node/ketida-server/common
-      - ./app.js:/home/node/ketida-server/app.js
-      - ./startServer.js:/home/node/ketida-server/startServer.js
-      - ./startWebSocketServer.js:/home/node/ketida-server/startWebSocketServer.js
+      - ./api:/home/node/server/api
+      - ./config:/home/node/server/config
+      - ./services:/home/node/server/services
+      - ./utilities:/home/node/server/utilities
+      - ./models:/home/node/server/models
+      - ./scripts:/home/node/server/scripts
+      - ./app.js:/home/node/server/app.js
+      - ./startServer.js:/home/node/server/startServer.js
+      - ./startWebSocketServer.js:/home/node/server/startWebSocketServer.js
       
   epubchecker:
     depends_on:

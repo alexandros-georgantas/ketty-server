@@ -23,10 +23,10 @@ class File extends Base {
 
   static get relationMappings() {
     /* eslint-disable global-require */
-    const { model: Book } = require('../book')
-    const { model: BookComponent } = require('../bookComponent')
-    const { model: FileTranslation } = require('../fileTranslation')
-    const { model: Template } = require('../template')
+    const Book = require('../book/book.model')
+    const BookComponent = require('../bookComponent/bookComponent.model')
+    const FileTranslation = require('../fileTranslation/fileTranslation.model')
+    const Template = require('../template/template.model')
     /* eslint-enable global-require */
 
     return {

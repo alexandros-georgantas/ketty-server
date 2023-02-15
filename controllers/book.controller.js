@@ -8,13 +8,9 @@ const omitBy = require('lodash/omitBy')
 const isNil = require('lodash/isNil')
 const config = require('config')
 const BPromise = require('bluebird')
-
-const exporter = require('./utilities/exporter')
-const { bookComponentCreator } = require('./utilities/createBookComponent')
-
-const {
-  bookComponentContentCreator,
-} = require('./utilities/bookComponentContentCreator')
+const exporter = require('./helpers/exporter')
+const bookComponentCreator = require('./helpers/createBookComponent')
+const bookComponentContentCreator = require('./helpers/bookComponentContentCreator')
 
 const {
   Book,
@@ -72,8 +68,15 @@ const defaultLevelCloserItem = {
 }
 
 const defaultBookStructure = {
+  // levels: [defaultLevelTwoItem, defaultLevelThreeItem, defaultLevelCloserItem],
   levels: [],
-  outline: [],
+  outline: [
+    // {
+    //   title: undefined,
+    //   type: 'chapter',
+    //   children: [{ title: undefined, type: 'section', children: [] }],
+    // },
+  ],
   finalized: false,
 }
 
@@ -666,6 +669,7 @@ const changeNumberOfLevels = async (bookId, levelsNumber, options = {}) => {
           return clonedBookStructure.levels
         }
 
+        // if (currentBookLevels === 0) {
         if (levelsNumber === 1) {
           clonedBookStructure.levels = []
           clonedBookStructure.levels.push(
@@ -674,6 +678,7 @@ const changeNumberOfLevels = async (bookId, levelsNumber, options = {}) => {
             defaultLevelCloserItem,
           )
 
+          // if (clonedBookStructure.outline.length > 0) {
           clonedBookStructure.outline = [
             {
               title: undefined,
@@ -681,6 +686,7 @@ const changeNumberOfLevels = async (bookId, levelsNumber, options = {}) => {
               children: [{ title: undefined, type: 'section', children: [] }],
             },
           ]
+          // }
         }
 
         if (levelsNumber === 2) {
@@ -693,6 +699,7 @@ const changeNumberOfLevels = async (bookId, levelsNumber, options = {}) => {
           )
 
           // ADD LEVEL THREE OUTLINE ITEMS
+          // if (clonedBookStructure.outline.length > 0) {
           clonedBookStructure.outline = [
             {
               title: undefined,
@@ -708,7 +715,80 @@ const changeNumberOfLevels = async (bookId, levelsNumber, options = {}) => {
               ],
             },
           ]
+          // }
         }
+        // } else {
+        //   // CASE DECREASE NUMBER OF LEVELS (2 TO 1)
+        //   if (currentBookLevels > levelsNumber) {
+        //     clonedBookStructure.levels = []
+        //     clonedBookStructure.levels.push(
+        //       defaultLevelTwoItem,
+        //       defaultLevelThreeItem,
+        //       defaultLevelCloserItem,
+        //     )
+
+        //     // clonedBookStructure.levels[1].contentStructure = [
+        //     //   ...clonedBookStructure.levels[1].contentStructure,
+        //     //   { type: 'mainContent', displayName: 'Main Content' },
+        //     // ]
+        //     // clonedBookStructure.levels.push(defaultLevelCloserItem)
+        //     // CLEAR ALL LEVEL THREE CHILDREN FROM OUTLINE
+        //     if (clonedBookStructure.outline.length > 0) {
+        //       clonedBookStructure.outline = [
+        //         {
+        //           title: undefined,
+        //           type: 'chapter',
+        //           children: [
+        //             { title: undefined, type: 'section', children: [] },
+        //           ],
+        //         },
+        //       ]
+        //     }
+        //   } else {
+        //     // CASE INCREASE NUMBER OF LEVELS (1 TO 2)
+
+        //     // REMOVE DEFAULT MAIN CONTENT ELEMENT FROM LEVEL 2
+        //     // clonedBookStructure.levels[1].contentStructure = clonedBookStructure.levels[1].contentStructure.filter(
+        //     //   item => item.type !== 'mainContent',
+        //     // )
+
+        //     // For the case of level two closers
+        //     clonedBookStructure.levels = []
+        //     clonedBookStructure.levels.push(
+        //       defaultLevelOneItem,
+        //       defaultLevelTwoItem,
+        //       defaultLevelThreeItem,
+        //       defaultLevelCloserItem,
+        //     )
+
+        //     // ADD LEVEL THREE OUTLINE ITEMS
+        //     if (clonedBookStructure.outline.length > 0) {
+        //       // clonedBookStructure.outline.forEach(levelOneComponent => {
+        //       //   levelOneComponent.children.forEach(levelTwoComponent => {
+        //       //     levelTwoComponent.children.push({
+        //       //       title: undefined,
+        //       //       type: clonedBookStructure.levels[2].type,
+        //       //     })
+        //       //   })
+        //       // })
+        //       clonedBookStructure.outline = [
+        //         {
+        //           title: undefined,
+        //           type: 'part',
+        //           children: [
+        //             {
+        //               title: undefined,
+        //               type: 'chapter',
+        //               children: [
+        //                 { title: undefined, type: 'section', children: [] },
+        //               ],
+        //             },
+        //           ],
+        //         },
+        //       ]
+        //     }
+        //   }
+        // }
 
         await Book.query(tr).patchAndFetchById(bookId, {
           bookStructure: clonedBookStructure,
@@ -763,6 +843,16 @@ const updateLevelContentStructure = async (bookId, levels, options = {}) => {
           JSON.stringify(book.bookStructure),
         )
 
+        // const levelIndex = findIndex(clonedBookStructure.levels, {
+        //   id: level.id,
+        // })
+
+        // if (levelIndex === -1) {
+        //   throw new Error(
+        //     `for book with id ${bookId} there is no book structure level with id ${level.id}`,
+        //   )
+        // }
+
         clonedBookStructure.levels = levels
 
         const updatedBook = await Book.query(tr).patchAndFetchById(bookId, {
@@ -808,6 +898,7 @@ const finalizeBookStructure = async (bookId, options = {}) => {
           deleted: false,
         })
 
+        // const numberOfLevels = clonedBookStructure.levels.length
         const newDivisionBookComponents = JSON.parse(
           JSON.stringify(bodyDivision.bookComponents),
         )
@@ -892,7 +983,7 @@ const finalizeBookStructure = async (bookId, options = {}) => {
         await Division.query(tr).patchAndFetchById(bodyDivision.id, {
           bookComponents: newDivisionBookComponents,
         })
-
+        // set finalized flag to true
         clonedBookStructure.finalized = true
 
         const updatedBook = await Book.query(tr).patchAndFetchById(bookId, {

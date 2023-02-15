@@ -1,4 +1,3 @@
-
 scalar JSON
 
 type applicationParameter {
@@ -15,11 +14,16 @@ input updateParametersInput {
 }
 
 extend type Query {
-  getApplicationParameters(context: String, area: String): [applicationParameter!]!
+  getApplicationParameters(
+    context: String
+    area: String
+  ): [applicationParameter!]!
 }
 
 extend type Mutation {
-  updateApplicationParameters(input: updateParametersInput!): applicationParameter!
+  updateApplicationParameters(
+    input: updateParametersInput!
+  ): applicationParameter!
 }
 
 extend type Subscription {

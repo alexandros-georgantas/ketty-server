@@ -24,7 +24,7 @@ const { icmlPreparation } = require('./icmlPreparation')
 const { pagedArchiver } = require('./pagedArchiver')
 const { scriptsRunner } = require('./scriptsRunner')
 
-const { Template } = require('../../models').models
+const Template = require('../../models/template/template.model')
 
 const uploadsDir = get(config, ['pubsweet-server', 'uploads'], 'uploads')
 
@@ -232,10 +232,7 @@ const ExporterService = async (
       const EPUBFileTimestamp = `${new Date().getTime() + 1}` // delay it a bit
 
       const EPUBtempFolderAssetsPath = path.join(
-        __dirname,
-        '..',
-        '..',
-        '..',
+        `${process.cwd()}`,
         uploadsDir,
         'temp',
         'epub',
@@ -243,10 +240,7 @@ const ExporterService = async (
       )
 
       const EPUBtempFolderFilePath = path.join(
-        __dirname,
-        '..',
-        '..',
-        '..',
+        `${process.cwd()}`,
         uploadsDir,
         'temp',
         'epub',
@@ -290,10 +284,7 @@ const ExporterService = async (
       const PDFFileTimestamp = `${new Date().getTime() + 2}` // delay it a bit
 
       const pagedJStempFolderAssetsPathForPDF = path.join(
-        __dirname,
-        '..',
-        '..',
-        '..',
+        `${process.cwd()}`,
         uploadsDir,
         'temp',
         'paged',
@@ -301,10 +292,7 @@ const ExporterService = async (
       )
 
       const pagedJStempFolderAssetsPathForPreviewer = path.join(
-        __dirname,
-        '..',
-        '..',
-        '..',
+        `${process.cwd()}`,
         uploadsDir,
         'temp',
         'previewer',
@@ -312,10 +300,7 @@ const ExporterService = async (
       )
 
       const zippedTempFolderFilePath = path.join(
-        __dirname,
-        '..',
-        '..',
-        '..',
+        `${process.cwd()}`,
         uploadsDir,
         'temp',
         'paged',
@@ -323,10 +308,7 @@ const ExporterService = async (
       )
 
       const PDFtempFolderFilePath = path.join(
-        __dirname,
-        '..',
-        '..',
-        '..',
+        `${process.cwd()}`,
         uploadsDir,
         'temp',
         'paged',
@@ -384,10 +366,7 @@ const ExporterService = async (
       const zippedFileTimestamp = `${new Date().getTime() + 1}` // delay it a bit
 
       const ICMLtempFolderAssetsPath = path.join(
-        __dirname,
-        '..',
-        '..',
-        '..',
+        `${process.cwd()}`,
         uploadsDir,
         'temp',
         'icml',
@@ -395,10 +374,7 @@ const ExporterService = async (
       )
 
       const ICMLtempFolderFilePath = path.join(
-        __dirname,
-        '..',
-        '..',
-        '..',
+        `${process.cwd()}`,
         uploadsDir,
         'temp',
         'icml',

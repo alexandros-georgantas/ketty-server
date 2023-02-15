@@ -26,9 +26,9 @@ class BookComponent extends Base {
 
   static get relationMappings() {
     /* eslint-disable global-require */
-    const { model: Book } = require('../book')
-    const { model: Division } = require('../division')
-    const { model: BookComponentState } = require('../bookComponentState')
+    const Book = require('../book/book.model')
+    const Division = require('../division/division.model')
+    const BookComponentState = require('../bookComponentState/bookComponentState.model')
     /* eslint-enable global-require */
     return {
       book: {

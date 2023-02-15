@@ -1,6 +1,7 @@
 const { logger, useTransaction } = require('@coko/server')
-const BookCollection = require('../../models/bookCollection/bookCollection.model')
-const BookCollectionTranslation = require('../../models/bookCollectionTranslation/bookCollectionTranslation.model')
+
+const { BookCollection, BookCollectionTranslation } =
+  require('../../models').models
 
 const createBookCollection = async trx => {
   logger.info('>>> creating a new books collection')

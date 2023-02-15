@@ -6,6 +6,8 @@ const find = require('lodash/find')
 const { BookCollectionTranslation, BookTranslation } =
   require('../../../models').models
 
+const { getEntityTeam } = require('../../../controllers/team.controller')
+
 const {
   getBookCollection,
   getBookCollections,
@@ -13,7 +15,6 @@ const {
 } = require('../../../controllers/bookCollection.controller')
 
 const { getBooks } = require('../../../controllers/book.controller')
-const { getEntityTeam } = require('../../../controllers/team.controller')
 
 const { COLLECTION_ADDED } = require('./constants')
 
@@ -58,9 +59,7 @@ const createBookCollectionHandler = async (_, { input }, ctx) => {
       'book collection resolver: broadcasting new book collection to clients',
     )
 
-    pubsub.publish(COLLECTION_ADDED, {
-      collectionAdded: createdBookCollection,
-    })
+    pubsub.publish(COLLECTION_ADDED, { collectionAdded: createdBookCollection })
 
     return createdBookCollection
   } catch (e) {

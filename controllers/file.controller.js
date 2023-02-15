@@ -11,7 +11,7 @@ const {
   signURL,
 } = require('./objectStorage.controller')
 
-const imageFinder = require('./utilities/imageFinder')
+const imageFinder = require('./helpers/imageFinder')
 
 const createFile = async (
   { name, size, mimetype, tags, metadata, extension },

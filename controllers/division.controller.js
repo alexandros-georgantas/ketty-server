@@ -3,17 +3,17 @@ const indexOf = require('lodash/indexOf')
 const find = require('lodash/find')
 
 const { Division, Book } = require('../models').models
+const reorderArray = require('./helpers/reorderArray')
 
 const {
   getApplicationParameters,
 } = require('./applicationParameter.controller')
 
+// const { getBook } = require('./book')
 const {
   getBookComponent,
   updateBookComponent,
 } = require('./bookComponent.controller')
-
-const reorderArray = require('./utilities/reorderArray')
 
 const createDivision = async (divisionData, options = {}) => {
   try {

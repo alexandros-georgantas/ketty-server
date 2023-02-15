@@ -9,6 +9,10 @@ input ExportScriptInput {
   value: String!
 }
 
+extend type Query {
+  getExportScripts(scope: String): [ExportScript!]!
+}
+
 type Template {
   id: ID!
   name: String!
@@ -72,7 +76,6 @@ extend type Query {
     notes: String
   ): [Template]!
   getTemplate(id: ID!): Template!
-  getExportScripts(scope: String): [ExportScript!]!
 }
 
 extend type Mutation {

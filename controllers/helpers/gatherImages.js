@@ -27,4 +27,4 @@ const imageGatherer = book => {
   return images
 }
 
-module.exports = { imageGatherer }
+module.exports = imageGatherer

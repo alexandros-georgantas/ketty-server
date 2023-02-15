@@ -121,4 +121,4 @@ const bookComponentCreator = async (
   }
 }
 
-module.exports = { bookComponentCreator }
+module.exports = bookComponentCreator

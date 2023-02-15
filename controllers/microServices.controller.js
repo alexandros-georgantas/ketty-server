@@ -8,13 +8,11 @@ const { callMicroservice } = require('@coko/server')
 
 const uploadsDir = get(config, ['pubsweet-server', 'uploads'], 'uploads')
 
-const { ServiceCallbackToken } = require('../models').models
+const ServiceCallbackToken = require('../models/serviceCallbackToken/serviceCallbackToken.model')
 
-const {
-  saveDataLocally,
-  writeLocallyFromReadStream,
-  zipper,
-} = require('./utilities/filesystem')
+const zipper = require('./helpers/zipper')
+const saveDataLocally = require('./helpers/saveDataLocally')
+const writeLocallyFromReadStream = require('./helpers/writeLocallyFromReadStream')
 
 const {
   uploadFile,
@@ -217,7 +215,7 @@ const xsweetHandler = async (bookComponentId, filePath) => {
   }
 }
 
-const getPagedPreviewerLink = async dirPath => {
+const pagedPreviewerLink = async dirPath => {
   const zipPath = await zipper(
     path.join(`${process.cwd()}`, uploadsDir, 'temp', 'previewer', dirPath),
   )
@@ -260,5 +258,5 @@ module.exports = {
   icmlHandler,
   xsweetHandler,
   pdfHandler,
-  getPagedPreviewerLink,
+  pagedPreviewerLink,
 }
