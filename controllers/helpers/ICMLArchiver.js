@@ -1,16 +1,15 @@
 const archiver = require('archiver')
-const fs = require('fs')
+const fs = require('fs-extra')
 const path = require('path')
-const fse = require('fs-extra')
 const crypto = require('crypto')
-const { dirContents } = require('./filesystem')
+const { dirContents } = require('../../utilities/filesystem')
 
-const icmlArchiver = async (
+const ICMLArchiver = async (
   ICMLtempFolderAssetsPath,
   ICMLtempFolderFilePath,
 ) => {
   try {
-    await fse.ensureDir(ICMLtempFolderFilePath)
+    await fs.ensureDir(ICMLtempFolderFilePath)
     const icmlFiles = await dirContents(ICMLtempFolderAssetsPath)
     return new Promise((resolve, reject) => {
       const tempFilename = `${crypto.randomBytes(32).toString('hex')}.zip`
@@ -43,4 +42,4 @@ const icmlArchiver = async (
   }
 }
 
-module.exports = { icmlArchiver }
+module.exports = ICMLArchiver

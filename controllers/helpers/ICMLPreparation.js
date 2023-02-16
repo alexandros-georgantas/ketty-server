@@ -4,16 +4,14 @@ const path = require('path')
 const mime = require('mime-types')
 const map = require('lodash/map')
 
-const { writeFile } = require('./filesystem')
-
 const { getFile } = require('../file.controller')
 const { locallyDownloadFile } = require('../objectStorage.controller')
 
 const { generatePagedjsContainer } = require('./htmlGenerators')
-const objectKeyExtractor = require('./fileStorageObjectKeyExtractor')
-const imageGatherer = require('./gatherImages')
+const { writeFile } = require('../../utilities/filesystem')
+const { imageGatherer, objectKeyExtractor } = require('../../utilities/image')
 
-const icmlPreparation = async (book, tempFolderPath) => {
+const ICMLPreparation = async (book, tempFolderPath) => {
   try {
     const images = []
 
@@ -90,4 +88,4 @@ const icmlPreparation = async (book, tempFolderPath) => {
   }
 }
 
-module.exports = { icmlPreparation }
+module.exports = ICMLPreparation

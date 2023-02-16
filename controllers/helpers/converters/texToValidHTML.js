@@ -61,4 +61,4 @@ const convertedContent = async (content, target) => {
   }
 }
 
-module.exports = { convertedContent }
+module.exports = convertedContent

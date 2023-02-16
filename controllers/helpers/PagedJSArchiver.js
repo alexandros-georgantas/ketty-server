@@ -1,16 +1,15 @@
 const archiver = require('archiver')
-const fs = require('fs')
+const fs = require('fs-extra')
 const path = require('path')
-const fse = require('fs-extra')
 const crypto = require('crypto')
-const { dirContents } = require('./filesystem')
+const { dirContents } = require('../../utilities/filesystem')
 
-const pagedArchiver = async (
+const PagedJSArchiver = async (
   pagedJStempFolderAssetsPath,
   zippedTempFolderFilePath,
 ) => {
   try {
-    await fse.ensureDir(zippedTempFolderFilePath)
+    await fs.ensureDir(zippedTempFolderFilePath)
     const bookFiles = await dirContents(pagedJStempFolderAssetsPath)
     return new Promise((resolve, reject) => {
       const tempFilename = `${crypto.randomBytes(32).toString('hex')}.zip`
@@ -42,4 +41,4 @@ const pagedArchiver = async (
   }
 }
 
-module.exports = { pagedArchiver }
+module.exports = PagedJSArchiver

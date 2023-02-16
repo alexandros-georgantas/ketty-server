@@ -1,19 +1,11 @@
 const { pubsubManager } = require('@coko/server')
-const fs = require('fs')
-const fse = require('fs-extra')
+const fs = require('fs-extra')
 const config = require('config')
 const mime = require('mime-types')
 const get = require('lodash/get')
 
 const uploadsDir = get(config, ['pubsweet-server', 'uploads'], 'uploads')
-
-const readFile = location =>
-  new Promise((resolve, reject) => {
-    fs.readFile(location, 'binary', (err, data) => {
-      if (err) return reject(err)
-      return resolve(data)
-    })
-  })
+const { readFile } = require('../../utilities/filesystem')
 
 const { BookComponent, ServiceCallbackToken } = require('../../models').models
 
@@ -91,7 +83,7 @@ const RESTEndpoints = app => {
     const path = `${process.cwd()}/${uploadsDir}/${scope}/${hash}`
 
     try {
-      await fse.remove(path)
+      await fs.remove(path)
       res.end()
     } catch (error) {
       res.status(500).json({ error: error.message })
@@ -103,9 +95,9 @@ const RESTEndpoints = app => {
     try {
       const path = `${process.cwd()}/${uploadsDir}/temp/previewer/${location}/${file}`
 
-      if (fse.existsSync(path)) {
+      if (fs.existsSync(path)) {
         const mimetype = mime.lookup(path)
-        const fileContent = await readFile(path)
+        const fileContent = await readFile(path, 'binary')
         res.setHeader('Content-Type', `${mimetype}`)
         res.setHeader('Content-Disposition', `attachment; filename=${file}`)
         res.write(fileContent, 'binary')

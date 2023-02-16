@@ -1,6 +1,6 @@
 const cheerio = require('cheerio')
 
-module.exports = content => {
+const cleanDataAttributes = content => {
   const $ = cheerio.load(content)
   $('section *').each((i, elem) => {
     const $elem = $(elem)
@@ -13,9 +13,6 @@ module.exports = content => {
       $elem.removeAttr('data-params')
     }
 
-    // if ($elem.attr('data-fileid')) {
-    //   $elem.removeAttr('data-fileid')
-    // }
     if ($elem.attr('data-track')) {
       $elem.removeAttr('data-track')
     }
@@ -71,3 +68,5 @@ module.exports = content => {
 
   return $.html('body')
 }
+
+module.exports = cleanDataAttributes

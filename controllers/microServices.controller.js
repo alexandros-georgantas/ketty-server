@@ -1,24 +1,26 @@
+const { callMicroservice } = require('@coko/server')
 const fs = require('fs-extra')
 const config = require('config')
-const get = require('lodash/get')
 const path = require('path')
-const FormData = require('form-data')
 const crypto = require('crypto')
-const { callMicroservice } = require('@coko/server')
+const get = require('lodash/get')
+const FormData = require('form-data')
 
 const uploadsDir = get(config, ['pubsweet-server', 'uploads'], 'uploads')
 
 const ServiceCallbackToken = require('../models/serviceCallbackToken/serviceCallbackToken.model')
-
-const zipper = require('./helpers/zipper')
-const saveDataLocally = require('./helpers/saveDataLocally')
-const writeLocallyFromReadStream = require('./helpers/writeLocallyFromReadStream')
 
 const {
   uploadFile,
   signURL,
   deleteFiles,
 } = require('./objectStorage.controller')
+
+const {
+  zipper,
+  saveDataLocally,
+  writeLocallyFromReadStream,
+} = require('../utilities/filesystem')
 
 // CONSTANTS
 const EPUBCHECKER = 'epub-checker'

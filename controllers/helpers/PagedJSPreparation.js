@@ -2,20 +2,16 @@ const cheerio = require('cheerio')
 const fs = require('fs-extra')
 const config = require('config')
 const find = require('lodash/find')
-
 const map = require('lodash/map')
+
 const { locallyDownloadFile, signURL } = require('../objectStorage.controller')
-const imageGatherer = require('./gatherImages')
-
-const { readFile, writeFile } = require('./filesystem')
-
-const { fixFontFaceUrls } = require('./converters')
 
 const { generatePagedjsContainer } = require('./htmlGenerators')
+const { fixFontFaceUrls } = require('./converters')
+const { writeFile, readFile } = require('../../utilities/filesystem')
+const { imageGatherer, objectKeyExtractor } = require('../../utilities/image')
 
-const objectKeyExtractor = require('./fileStorageObjectKeyExtractor')
-
-const pagednation = async (
+const PagedJSPreparation = async (
   book,
   template,
   pagedJStempFolderAssetsPath,
@@ -192,4 +188,4 @@ const pagednation = async (
   }
 }
 
-module.exports = { pagednation }
+module.exports = PagedJSPreparation

@@ -3,15 +3,15 @@ const path = require('path')
 const fs = require('fs-extra')
 const map = require('lodash/map')
 const crypto = require('crypto')
-const { dirContents } = require('./filesystem')
+const { dirContents } = require('../../utilities/filesystem')
 
-const epubArchiver = async (
+const EPUBArchiver = async (
   EPUBtempFolderAssetsPath,
   EPUBtempFolderFilePath,
 ) => {
   try {
     await fs.ensureDir(EPUBtempFolderFilePath)
-    const epubFiles = await dirContents(EPUBtempFolderAssetsPath)
+    const epubFiles = await dirContents(EPUBtempFolderAssetsPath, ['mimetype'])
     return new Promise((resolve, reject) => {
       const tempFilename = `${crypto.randomBytes(32).toString('hex')}.epub`
 
@@ -64,4 +64,4 @@ const epubArchiver = async (
   }
 }
 
-module.exports = { epubArchiver }
+module.exports = EPUBArchiver

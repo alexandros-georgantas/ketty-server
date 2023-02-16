@@ -1,18 +1,17 @@
-const { exec } = require('child_process')
 const { logger, useTransaction } = require('@coko/server')
-
-const map = require('lodash/map')
-const path = require('path')
+const { exec } = require('child_process')
 const fs = require('fs-extra')
+const path = require('path')
 const mime = require('mime-types')
 
-const dirContents = require('../../utilities/dirContents')
-
-const { createFile } = require('../../controllers/file.controller')
-
-const { uploadFile } = require('../../controllers/objectStorage.controller')
+const map = require('lodash/map')
 
 const Template = require('../../models/template/template.model')
+
+const { createFile } = require('../../controllers/file.controller')
+const { uploadFile } = require('../../controllers/objectStorage.controller')
+
+const { dirContents } = require('../../utilities/filesystem')
 
 const execute = async command =>
   new Promise((resolve, reject) => {

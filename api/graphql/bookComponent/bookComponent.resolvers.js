@@ -1,20 +1,19 @@
+const { logger } = require('@coko/server')
+const { pubsubManager } = require('@coko/server')
+const { withFilter } = require('graphql-subscriptions')
+const fs = require('fs-extra')
+const crypto = require('crypto')
+const path = require('path')
+const BPromise = require('bluebird')
+
 const findIndex = require('lodash/findIndex')
 const find = require('lodash/find')
 const groupBy = require('lodash/groupBy')
 const pullAll = require('lodash/pullAll')
-const path = require('path')
-const BPromise = require('bluebird')
 
-const { withFilter } = require('graphql-subscriptions')
-
-const fs = require('fs-extra')
-
-const { logger } = require('@coko/server')
-const { pubsubManager } = require('@coko/server')
-const crypto = require('crypto')
-const writeLocallyFromReadStream = require('../../../controllers/helpers/writeLocallyFromReadStream')
+const { writeLocallyFromReadStream } = require('../../../utilities/filesystem')
+const { replaceImageSource } = require('../../../utilities/image')
 const DOCXFilenameParser = require('../../../controllers/helpers/DOCXFilenameParser')
-const replaceImageSource = require('../../../controllers/helpers/replaceImageSource')
 
 const {
   BookComponentState,
@@ -61,6 +60,8 @@ const {
   deleteBookComponent,
   renameBookComponent,
 } = require('../../../controllers/bookComponent.controller')
+
+const { getContentFiles } = require('../../../controllers/file.controller')
 
 const { getBook } = require('../../../controllers/book.controller')
 
@@ -658,7 +659,10 @@ module.exports = {
       const hasContent = content.trim().length > 0
 
       if (hasContent) {
-        return replaceImageSource(bookComponentTranslation[0].content)
+        return replaceImageSource(
+          bookComponentTranslation[0].content,
+          getContentFiles,
+        )
       }
 
       return bookComponentTranslation[0].content

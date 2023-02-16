@@ -319,7 +319,7 @@ const updateTeamMembers = async (teamId, members, options = {}) => {
               }),
           ),
         )
-        return getTeam(teamId, true, { trx: tr })
+        return getTeam(teamId, false, { trx: tr })
       },
       { trx },
     )

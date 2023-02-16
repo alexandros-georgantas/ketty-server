@@ -1,12 +1,12 @@
+const { logger, useTransaction } = require('@coko/server')
+const { raw } = require('objection')
+const config = require('config')
 const findIndex = require('lodash/findIndex')
 const find = require('lodash/find')
-const { raw } = require('objection')
 const pullAll = require('lodash/pullAll')
 const map = require('lodash/map')
 const clone = require('lodash/clone')
-const config = require('config')
 const assign = require('lodash/assign')
-const { logger, useTransaction } = require('@coko/server')
 
 const {
   ApplicationParameter,
@@ -19,9 +19,9 @@ const {
   User,
 } = require('../models').models
 
-const isEmptyString = require('./helpers/isEmptyString')
-
 const bookComponentContentCreator = require('./helpers/bookComponentContentCreator')
+
+const { isEmptyString } = require('../utilities/generic')
 
 const getBookComponent = async (bookComponentId, options = {}) => {
   try {
@@ -794,6 +794,8 @@ const renameBookComponent = async (bookComponentId, title, languageIso) => {
       )
     }
 
+    const previousTitle = bookComponentTranslation.title
+
     const updatedTranslation =
       await BookComponentTranslation.query().patchAndFetchById(
         bookComponentTranslation.id,
@@ -814,9 +816,20 @@ const renameBookComponent = async (bookComponentId, title, languageIso) => {
       )
     }
 
+    const {
+      runningHeadersRight: previousRunningHeadersRight,
+      runningHeadersLeft: previousRunningHeadersLeft,
+    } = bookComponentState
+
     await BookComponentState.query().patchAndFetchById(bookComponentState.id, {
-      runningHeadersRight: title,
-      runningHeadersLeft: title,
+      runningHeadersRight:
+        previousRunningHeadersRight === previousTitle
+          ? title
+          : previousRunningHeadersRight,
+      runningHeadersLeft:
+        previousRunningHeadersLeft === previousTitle
+          ? title
+          : previousRunningHeadersLeft,
     })
 
     logger.info(
