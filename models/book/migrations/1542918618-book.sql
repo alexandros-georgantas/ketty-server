@@ -1,4 +1,3 @@
-
 create table book (
   -- base
   id uuid primary key,

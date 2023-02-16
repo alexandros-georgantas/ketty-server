@@ -12,7 +12,6 @@
 const { Model } = require('objection')
 
 const Base = require('../ketidaBase')
-const { model: BookComponent } = require('../bookComponent')
 
 const { array, booleanDefaultFalse, id, string, integerPositive } =
   require('../helpers').schema
@@ -28,6 +27,9 @@ class BookComponentState extends Base {
   }
 
   static get relationMappings() {
+    /* eslint-disable global-require */
+    const BookComponent = require('../bookComponent/bookComponent.model')
+    /* eslint-enable global-require */
     return {
       bookComponent: {
         relation: Model.BelongsToOneRelation,

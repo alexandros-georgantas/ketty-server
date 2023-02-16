@@ -1,21 +1,17 @@
 const { logger, useTransaction } = require('@coko/server')
+const fs = require('fs-extra')
+const path = require('path')
+const config = require('config')
+const mime = require('mime-types')
 const orderBy = require('lodash/orderBy')
 const map = require('lodash/map')
 const find = require('lodash/find')
 const forEach = require('lodash/forEach')
 
-const path = require('path')
-
-const { writeFileSync, createReadStream } = require('fs')
-const fs = require('fs-extra')
-const config = require('config')
-const mime = require('mime-types')
-
-const uploadsPath = config.get('pubsweet-server').uploads
-const { Template, File } = require('../models').models
-
 const scripts = config.get('export.scripts')
-const { isSupportedAsset } = require('./utilities/mimetypes')
+const uploadsPath = config.get('pubsweet-server').uploads
+
+const { Template, File } = require('../models').models
 
 const { createFile } = require('./file.controller')
 
@@ -23,6 +19,8 @@ const {
   uploadFile,
   locallyDownloadFile,
 } = require('./objectStorage.controller')
+
+const { isSupportedAsset } = require('../utilities/mimetype')
 
 const getTemplates = async (
   ascending,
@@ -56,9 +54,7 @@ const getTemplates = async (
           )
 
           const sorted = orderBy(sortable, sortKey, [order])
-
           const result = map(sorted, item => find(templates, { id: item.id }))
-
           return result
         }
 
@@ -246,12 +242,12 @@ const cloneTemplate = async (id, name, cssFile, hashed, options = {}) => {
             const filepath = path.join(tempFolder, `${fName}.${extension}`)
 
             if (mimetype === 'text/css') {
-              writeFileSync(filepath, cssFile)
+              fs.writeFileSync(filepath, cssFile)
             } else {
               await locallyDownloadFile(objectKey, filepath)
             }
 
-            const fileStream = createReadStream(filepath)
+            const fileStream = fs.createReadStream(filepath)
 
             const { original } = await uploadFile(
               fileStream,
@@ -534,7 +530,7 @@ const updateTemplateCSSFile = async (id, data, hashed, options = {}) => {
           data,
         )
 
-        const fileStream = createReadStream(
+        const fileStream = fs.createReadStream(
           path.join(
             uploadsPath,
             'temp',

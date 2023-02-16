@@ -1,5 +1,5 @@
 const { logger, useTransaction } = require('@coko/server')
-const { CustomTag } = require('../models').models
+const CustomTag = require('../models/customTag/customTag.model')
 
 const getCustomTags = async (options = {}) => {
   try {

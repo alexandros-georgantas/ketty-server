@@ -1,7 +1,7 @@
 variables:
   IMAGE_ORG: cokoapps
   IMAGE_NAME: ketida-server-develop
-  WORKDIR: /home/node/ketida
+  WORKDIR: /home/node/server
 
 stages:
   - build

@@ -16,4 +16,21 @@ const reorderArray = (array, item, to, from = undefined) => {
   return resArray
 }
 
-module.exports = reorderArray
+const isEmptyString = data => {
+  let isEmpty = false
+
+  if (!data) {
+    isEmpty = true
+  } else {
+    isEmpty = data.trim().length === 0
+  }
+
+  return isEmpty
+}
+
+const camelCaseToKebabCase = string =>
+  string
+    .replace(/\B(?:([A-Z])(?=[a-z]))|(?:(?<=[a-z0-9])([A-Z]))/g, '-$1$2')
+    .toLowerCase()
+
+module.exports = { reorderArray, isEmptyString, camelCaseToKebabCase }

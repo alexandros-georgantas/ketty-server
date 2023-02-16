@@ -1,5 +1,5 @@
-const controllers = require('./RESTEndpoints')
+const RESTEndpoints = require('./RESTEndpoints')
 
 module.exports = {
-  server: () => app => controllers(app),
+  server: () => app => RESTEndpoints(app),
 }

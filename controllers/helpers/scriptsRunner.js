@@ -79,4 +79,4 @@ const scriptsRunner = async (book, template) => {
   }
 }
 
-module.exports = { scriptsRunner }
+module.exports = scriptsRunner

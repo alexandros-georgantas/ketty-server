@@ -2,20 +2,16 @@ const cheerio = require('cheerio')
 const fs = require('fs-extra')
 const config = require('config')
 const find = require('lodash/find')
-
 const map = require('lodash/map')
+
 const { locallyDownloadFile, signURL } = require('../objectStorage.controller')
-const { imageGatherer } = require('./gatherImages')
-
-const { readFile, writeFile } = require('./filesystem')
-
-const { fixFontFaceUrls } = require('./converters')
 
 const { generatePagedjsContainer } = require('./htmlGenerators')
+const { fixFontFaceUrls } = require('./converters')
+const { writeFile, readFile } = require('../../utilities/filesystem')
+const { imageGatherer, objectKeyExtractor } = require('../../utilities/image')
 
-const objectKeyExtractor = require('./fileStorageObjectKeyExtractor')
-
-const pagednation = async (
+const PagedJSPreparation = async (
   book,
   template,
   pagedJStempFolderAssetsPath,
@@ -27,11 +23,6 @@ const pagednation = async (
     const stylesheets = []
     const scripts = template.exportScripts
 
-    // const images = []
-    // const currentTime = new Date().getTime()
-    // const hash = crypto.randomBytes(32).toString('hex')
-    // const tempDir = `${process.cwd()}/${uploadsDir}/temp`
-    // const pagedDestination = path.join(tempDir, 'paged', `${currentTime}`)
     await fs.ensureDir(pagedJStempFolderAssetsPath)
 
     for (let i = 0; i < templateFiles.length; i += 1) {
@@ -172,6 +163,7 @@ const pagednation = async (
     const stylesheetContent = await readFile(stylesheets[0].target)
     const fixedCSS = fixFontFaceUrls(stylesheetContent, fonts, '.')
     await writeFile(`${stylesheets[0].target}`, fixedCSS)
+
     const output = cheerio.load(generatePagedjsContainer(book.title))
 
     book.divisions.forEach(division => {
@@ -191,14 +183,9 @@ const pagednation = async (
 
     await writeFile(`${pagedJStempFolderAssetsPath}/index.html`, output.html())
     return true
-    // return {
-    //   clientPath: `${currentTime}/template/${template.id}`,
-    //   currentTime,
-    //   hash,
-    // }
   } catch (e) {
     throw new Error(e)
   }
 }
 
-module.exports = { pagednation }
+module.exports = PagedJSPreparation

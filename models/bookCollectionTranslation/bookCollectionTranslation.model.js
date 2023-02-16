@@ -9,7 +9,6 @@
 const { Model } = require('objection')
 
 const Translation = require('../translation')
-const { model: BookCollection } = require('../bookCollection')
 const { id, string } = require('../helpers').schema
 
 class BookCollectionTranslation extends Translation {
@@ -23,6 +22,9 @@ class BookCollectionTranslation extends Translation {
   }
 
   static get relationMappings() {
+    /* eslint-disable global-require */
+    const BookCollection = require('../bookCollection/bookCollection.model')
+    /* eslint-enable global-require */
     return {
       bookCollection: {
         relation: Model.BelongsToOneRelation,

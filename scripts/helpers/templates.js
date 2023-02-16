@@ -1,16 +1,17 @@
-const { exec } = require('child_process')
 const { logger, useTransaction } = require('@coko/server')
-
-const map = require('lodash/map')
-const path = require('path')
+const { exec } = require('child_process')
 const fs = require('fs-extra')
+const path = require('path')
 const mime = require('mime-types')
 
-const { dirContents } = require('../../controllers/utilities/filesystem')
+const map = require('lodash/map')
+
+const Template = require('../../models/template/template.model')
+
 const { createFile } = require('../../controllers/file.controller')
 const { uploadFile } = require('../../controllers/objectStorage.controller')
 
-const Template = require('../../models/template/template.model')
+const { dirContents } = require('../../utilities/filesystem')
 
 const execute = async command =>
   new Promise((resolve, reject) => {
@@ -167,6 +168,7 @@ const createTemplate = async (sourceRoot, data, cssFile, notes) => {
 
 const getTemplates = async () => {
   try {
+    // await cleanTemplatesFolder()
     await execute(`. ${path.join(__dirname, 'fetchTemplates.sh')}`)
   } catch (e) {
     throw new Error(e)
@@ -174,6 +176,7 @@ const getTemplates = async () => {
 }
 
 module.exports = {
+  execute,
   createTemplate,
   getTemplates,
 }

@@ -1,7 +1,7 @@
 type BookCollection {
   id: ID!
   title: String!
-  books(ascending: Boolean, sortKey: String, archived:Boolean): [Book]!
+  books(ascending: Boolean, sortKey: String, archived: Boolean): [Book]!
 }
 
 input BookCollectionInput {

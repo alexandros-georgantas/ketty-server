@@ -2,7 +2,7 @@ FROM node:16.19.0-alpine3.16
 
 RUN apk add --no-cache git python3 make g++
 
-WORKDIR /home/node/ketida-server
+WORKDIR /home/node/server
 
 COPY package.json .
 COPY yarn.lock .

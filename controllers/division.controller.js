@@ -13,7 +13,7 @@ const {
   updateBookComponent,
 } = require('./bookComponent.controller')
 
-const reorderArray = require('./utilities/reorderArray')
+const { reorderArray } = require('../utilities/generic')
 
 const createDivision = async (divisionData, options = {}) => {
   try {

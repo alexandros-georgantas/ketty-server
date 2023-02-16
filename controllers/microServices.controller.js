@@ -1,26 +1,26 @@
+const { callMicroservice } = require('@coko/server')
 const fs = require('fs-extra')
 const config = require('config')
-const get = require('lodash/get')
 const path = require('path')
-const FormData = require('form-data')
 const crypto = require('crypto')
-const { callMicroservice } = require('@coko/server')
+const get = require('lodash/get')
+const FormData = require('form-data')
 
 const uploadsDir = get(config, ['pubsweet-server', 'uploads'], 'uploads')
 
-const { ServiceCallbackToken } = require('../models').models
-
-const {
-  saveDataLocally,
-  writeLocallyFromReadStream,
-  zipper,
-} = require('./utilities/filesystem')
+const ServiceCallbackToken = require('../models/serviceCallbackToken/serviceCallbackToken.model')
 
 const {
   uploadFile,
   signURL,
   deleteFiles,
 } = require('./objectStorage.controller')
+
+const {
+  zipper,
+  saveDataLocally,
+  writeLocallyFromReadStream,
+} = require('../utilities/filesystem')
 
 // CONSTANTS
 const EPUBCHECKER = 'epub-checker'
@@ -217,7 +217,7 @@ const xsweetHandler = async (bookComponentId, filePath) => {
   }
 }
 
-const getPagedPreviewerLink = async dirPath => {
+const pagedPreviewerLink = async dirPath => {
   const zipPath = await zipper(
     path.join(`${process.cwd()}`, uploadsDir, 'temp', 'previewer', dirPath),
   )
@@ -260,5 +260,5 @@ module.exports = {
   icmlHandler,
   xsweetHandler,
   pdfHandler,
-  getPagedPreviewerLink,
+  pagedPreviewerLink,
 }

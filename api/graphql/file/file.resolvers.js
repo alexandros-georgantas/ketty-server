@@ -1,33 +1,31 @@
 const { logger } = require('@coko/server')
-const map = require('lodash/map')
 const { pubsubManager } = require('@coko/server')
+const map = require('lodash/map')
 
 const { FileTranslation, BookComponent } = require('../../../models').models
-
-const {
-  createFile,
-  updateFile,
-  getEntityFiles,
-  getFiles,
-  getSpecificFiles,
-  deleteFiles,
-  getFile,
-} = require('../../../controllers/file.controller')
 
 const {
   uploadFile,
   signURL,
 } = require('../../../controllers/objectStorage.controller')
 
-const imageFinder = require('../../../controllers/utilities/imageFinder')
+const {
+  updateFile,
+  deleteFiles,
+  getEntityFiles,
+  getFiles,
+  getSpecificFiles,
+  createFile,
+  getFile,
+} = require('../../../controllers/file.controller')
+
+const { imageFinder } = require('../../../utilities/image')
 
 const { FILES_UPLOADED, FILE_UPDATED, FILES_DELETED } = require('./constants')
 
 const getEntityFilesHandler = async (_, { input }, ctx) => {
   try {
     const { entityId, entityType, sortingParams, includeInUse = false } = input
-
-    // return useCaseGetEntityFiles(entityId, entityType, sortingParams)
     const files = await getEntityFiles(entityId, entityType, sortingParams)
 
     if (includeInUse) {

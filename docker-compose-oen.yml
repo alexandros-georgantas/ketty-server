@@ -153,8 +153,6 @@ services:
       - ./app.js:/home/node/ketida-server/app.js
       - ./startServer.js:/home/node/ketida-server/startServer.js
       - ./startWebSocketServer.js:/home/node/ketida-server/startWebSocketServer.js
-      - ./utils/wsAuthentication.js:/home/node/ketida-server/utils/wsAuthentication.js
-      - ./utils/wsConnectionHandlers.js:/home/node/ketida-server/utils/wsConnectionHandlers.js
   
   epubchecker:
     depends_on:

@@ -11,7 +11,7 @@ const {
   signURL,
 } = require('./objectStorage.controller')
 
-const imageFinder = require('./utilities/imageFinder')
+const { imageFinder } = require('../utilities/image')
 
 const createFile = async (
   { name, size, mimetype, tags, metadata, extension },
@@ -22,7 +22,6 @@ const createFile = async (
 ) => {
   try {
     const tempFile = {
-      // name: name.replace(/\.[^/.]+$/, ''), // strip the extension from the filename
       name: path.parse(name).name,
       source: location,
       objectKey: key,

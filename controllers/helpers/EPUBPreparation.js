@@ -8,12 +8,11 @@ const map = require('lodash/map')
 const filter = require('lodash/filter')
 const beautify = require('js-beautify').html
 
-const { writeFile, readFile } = require('./filesystem')
-const { epubDecorator, fixFontFaceUrls } = require('./converters')
-
 const { locallyDownloadFile, signURL } = require('../objectStorage.controller')
-const { imageGatherer } = require('./gatherImages')
-const objectKeyExtractor = require('./fileStorageObjectKeyExtractor')
+
+const { epubDecorator, fixFontFaceUrls } = require('./converters')
+const { writeFile, readFile } = require('../../utilities/filesystem')
+const { imageGatherer, objectKeyExtractor } = require('../../utilities/image')
 
 let images = []
 let stylesheets = []
@@ -484,7 +483,6 @@ const convertToXML = async content => {
       } else if (!result.output) {
         reject(new Error('The document failed to parse'))
       } else {
-        // console.warn(result.errlog)
         try {
           resolve(result.output.toString())
         } catch (e) {
@@ -554,7 +552,7 @@ const cleaner = () => {
   xhtmls = []
 }
 
-const htmlToEPUB = async (book, template, EPUBtempFolderAssetsPath) => {
+const EPUBPreparation = async (book, template, EPUBtempFolderAssetsPath) => {
   try {
     const templateFiles = await template.getFiles()
     const hasEndnotes = template.notes === 'endnotes'
@@ -577,6 +575,4 @@ const htmlToEPUB = async (book, template, EPUBtempFolderAssetsPath) => {
   }
 }
 
-module.exports = {
-  htmlToEPUB,
-}
+module.exports = EPUBPreparation

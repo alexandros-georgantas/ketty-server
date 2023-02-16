@@ -12,7 +12,13 @@ const {
   BOOK_RUNNING_HEADERS_UPDATED,
 } = require('./constants')
 
-const { BookTranslation } = require('../../../models').models
+const BookTranslation = require('../../../models/bookTranslation/bookTranslation.model')
+
+const { getEntityTeam } = require('../../../controllers/team.controller')
+
+const {
+  pagedPreviewerLink,
+} = require('../../../controllers/microServices.controller')
 
 const {
   getBook,
@@ -30,12 +36,6 @@ const {
   updateShowWelcome,
   finalizeBookStructure,
 } = require('../../../controllers/book.controller')
-
-const {
-  getPagedPreviewerLink,
-} = require('../../../controllers/microServices.controller')
-
-const { getEntityTeam } = require('../../../controllers/team.controller')
 
 const getBookHandler = async (_, { id }, ctx, info) => {
   try {
@@ -260,7 +260,7 @@ const updateBookOutlineHandler = async (_, { bookId, outline }, ctx) => {
 const getPagedPreviewerLinkHandler = async (_, { hash }, ctx) => {
   try {
     logger.info('book resolver: executing getPreviewerLink use case')
-    return getPagedPreviewerLink(hash)
+    return pagedPreviewerLink(hash)
   } catch (e) {
     throw new Error(e)
   }

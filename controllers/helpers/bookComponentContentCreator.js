@@ -1,13 +1,9 @@
 const { useTransaction } = require('@coko/server')
 const cheerio = require('cheerio')
 const uuid = require('uuid/v4')
-const { BookComponentTranslation } = require('../../models').models
 
-const camelCaseToKebabCase = string =>
-  string
-    .replace(/\B(?:([A-Z])(?=[a-z]))|(?:(?<=[a-z0-9])([A-Z]))/g, '-$1$2')
-    .toLowerCase()
-// convert to kebab case classes
+const { camelCaseToKebabCase } = require('../../utilities/generic')
+const BookComponentTranslation = require('../../models/bookComponentTranslation/bookComponentTranslation.model')
 
 const bookComponentContentCreator = async (
   bookComponent,
@@ -436,4 +432,4 @@ const bookComponentContentCreator = async (
   }
 }
 
-module.exports = { bookComponentContentCreator }
+module.exports = bookComponentContentCreator

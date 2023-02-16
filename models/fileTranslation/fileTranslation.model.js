@@ -17,7 +17,7 @@ class FileTranslation extends Translation {
 
   static get relationMappings() {
     /* eslint-disable global-require */
-    const { model: File } = require('../file')
+    const File = require('../file/file.model')
     /* eslint-enable global-require */
 
     return {

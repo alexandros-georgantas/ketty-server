@@ -1,14 +1,9 @@
 const { Model } = require('objection')
 
 const Translation = require('../translation')
-const { model: Book } = require('../book')
 
-const {
-  arrayOfStringsNotEmpty,
-  id,
-  string,
-  stringNotEmpty,
-} = require('../helpers').schema
+const { arrayOfStringsNotEmpty, id, string, stringNotEmpty } =
+  require('../helpers').schema
 
 class BookTranslation extends Translation {
   constructor(properties) {
@@ -21,6 +16,9 @@ class BookTranslation extends Translation {
   }
 
   static get relationMappings() {
+    /* eslint-disable global-require */
+    const Book = require('../book/book.model')
+    /* eslint-enable global-require */
     return {
       book: {
         relation: Model.BelongsToOneRelation,

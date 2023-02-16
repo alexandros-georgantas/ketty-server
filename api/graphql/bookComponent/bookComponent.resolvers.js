@@ -1,31 +1,24 @@
+const { logger } = require('@coko/server')
+const { pubsubManager } = require('@coko/server')
+const { withFilter } = require('graphql-subscriptions')
+const fs = require('fs-extra')
+const crypto = require('crypto')
+const path = require('path')
+const BPromise = require('bluebird')
+
 const findIndex = require('lodash/findIndex')
 const find = require('lodash/find')
 const groupBy = require('lodash/groupBy')
 const pullAll = require('lodash/pullAll')
-const path = require('path')
-const BPromise = require('bluebird')
 
-const { withFilter } = require('graphql-subscriptions')
-
-const fs = require('fs-extra')
-
-const { logger } = require('@coko/server')
-const { pubsubManager } = require('@coko/server')
-const crypto = require('crypto')
-
-const {
-  writeLocallyFromReadStream,
-} = require('../../../controllers/utilities/filesystem')
-
-const DOCXFilenameParser = require('../../../controllers/utilities/DOCXFilenameParser')
-const replaceImageSource = require('../../../controllers/utilities/replaceImageSource')
+const { writeLocallyFromReadStream } = require('../../../utilities/filesystem')
+const { replaceImageSource } = require('../../../utilities/image')
+const DOCXFilenameParser = require('../../../controllers/helpers/DOCXFilenameParser')
 
 const {
   BookComponentState,
-  BookComponent,
   BookComponentTranslation,
   Division,
-  Book,
   BookTranslation,
   Lock,
   User,
@@ -48,6 +41,10 @@ const {
 } = require('./constants')
 
 const {
+  xsweetHandler,
+} = require('../../../controllers/microServices.controller')
+
+const {
   getBookComponent,
   // getBookComponentAndAcquireLock,
   addBookComponent,
@@ -62,8 +59,11 @@ const {
   updateWorkflowState,
   deleteBookComponent,
   renameBookComponent,
-  xSweet,
 } = require('../../../controllers/bookComponent.controller')
+
+const { getContentFiles } = require('../../../controllers/file.controller')
+
+const { getBook } = require('../../../controllers/book.controller')
 
 const getBookComponentHandler = async (_, { id }, ctx) => {
   const bookComponent = await getBookComponent(id)
@@ -75,11 +75,11 @@ const getBookComponentHandler = async (_, { id }, ctx) => {
   return bookComponent
 }
 
-// const getBookComponentAndAcquireLockHandler = async (_, { id, tabId }, ctx) => {
+// const getBookComponentAndAcquireLock = async (_, { id, tabId }, ctx) => {
 //   try {
 //     const pubsub = await pubsubManager.getPubsub()
 
-//     const bookComponent = await getBookComponentAndAcquireLock(
+//     const bookComponent = await useCaseGetBookComponentAndAcquireLock(
 //       id,
 //       ctx.user,
 //       tabId,
@@ -169,7 +169,7 @@ const ingestWordFileHandler = async (_, { bookComponentFiles }, ctx) => {
 
       await renameBookComponent(componentId, title, 'en')
 
-      const updatedBookComponent = await BookComponent.findById(componentId)
+      const updatedBookComponent = await getBookComponent(componentId)
       bookComponents.push(updatedBookComponent)
       pubsub.publish(BOOK_COMPONENT_UPLOADING_UPDATED, {
         bookComponentUploadingUpdated: updatedBookComponent,
@@ -179,7 +179,7 @@ const ingestWordFileHandler = async (_, { bookComponentFiles }, ctx) => {
       })
 
       // await useCaseXSweet(componentId, `${tempFilePath}/${randomFilename}`)
-      return xSweet(componentId, `${tempFilePath}/${randomFilename}`)
+      return xsweetHandler(componentId, `${tempFilePath}/${randomFilename}`)
     })
     return bookComponents
   } catch (e) {
@@ -200,7 +200,7 @@ const addBookComponentHandler = async (_, { input }, ctx, info) => {
       title,
     )
 
-    const updatedBook = await Book.findById(bookId)
+    const updatedBook = await getBook(bookId)
 
     pubsub.publish(`BOOK_UPDATED`, {
       bookUpdated: updatedBook,
@@ -224,9 +224,9 @@ const renameBookComponentHandler = async (_, { input }, ctx) => {
 
     await renameBookComponent(id, title, 'en')
 
-    const updatedBookComponent = await BookComponent.findById(id)
+    const updatedBookComponent = await getBookComponent(id)
 
-    const updatedBook = await Book.findById(updatedBookComponent.bookId)
+    const updatedBook = await getBook(updatedBookComponent.bookId)
 
     pubsub.publish(`BOOK_UPDATED`, {
       bookUpdated: updatedBook,
@@ -252,7 +252,7 @@ const deleteBookComponentHandler = async (_, { input }, ctx) => {
   try {
     const { id, deleted } = input
     const pubsub = await pubsubManager.getPubsub()
-    const bookComponent = await BookComponent.findById(id)
+    const bookComponent = await getBookComponent(id)
 
     if (!bookComponent) {
       throw new Error(`book component with id ${id} does not exists`)
@@ -267,7 +267,7 @@ const deleteBookComponentHandler = async (_, { input }, ctx) => {
 
     const deletedBookComponent = await deleteBookComponent(bookComponent)
 
-    const updatedBook = await Book.findById(bookComponent.bookId)
+    const updatedBook = await getBook(bookComponent.bookId)
 
     pubsub.publish(`BOOK_UPDATED`, {
       bookUpdated: updatedBook,
@@ -288,9 +288,6 @@ const deleteBookComponentHandler = async (_, { input }, ctx) => {
     throw new Error(e)
   }
 }
-
-// Could be implemented in the future
-const archiveBookComponentHandler = async (_, args, ctx) => {}
 
 const updateWorkflowStateHandler = async (_, { input }, ctx) => {
   try {
@@ -317,7 +314,7 @@ const updateWorkflowStateHandler = async (_, { input }, ctx) => {
     await updateWorkflowState(id, workflowStages, ctx)
 
     const isReviewing = find(workflowStages, { type: 'review' }).value === 0
-    const updatedBookComponent = await BookComponent.findById(id)
+    const updatedBookComponent = await getBookComponent(id)
 
     pubsub.publish(BOOK_COMPONENT_WORKFLOW_UPDATED, {
       bookComponentWorkflowUpdated: updatedBookComponent,
@@ -347,7 +344,7 @@ const unlockBookComponentHandler = async (_, { input }, ctx) => {
 
     await unlockBookComponent(bookComponentId, ctx.user)
 
-    const updatedBookComponent = await BookComponent.findById(bookComponentId)
+    const updatedBookComponent = await getBookComponent(bookComponentId)
 
     // This should be replaced with book component updated, when refactor Book Builder
     pubsub.publish(BOOK_COMPONENT_LOCK_UPDATED, {
@@ -369,7 +366,7 @@ const lockBookComponentHandler = async (_, { id, tabId, userAgent }, ctx) => {
     const pubsub = await pubsubManager.getPubsub()
     await lockBookComponent(id, tabId, userAgent, ctx.user)
 
-    const bookComponent = await BookComponent.findById(id)
+    const bookComponent = await getBookComponent(id)
 
     // This should be replaced with book component updated, when refactor Book Builder
     pubsub.publish(BOOK_COMPONENT_LOCK_UPDATED, {
@@ -398,7 +395,7 @@ const updateContentHandler = async (_, { input }, ctx) => {
       'en',
     )
 
-    const updatedBookComponent = await BookComponent.findById(id)
+    const updatedBookComponent = await getBookComponent(id)
 
     pubsub.publish(BOOK_COMPONENT_CONTENT_UPDATED, {
       bookComponentContentUpdated: updatedBookComponent,
@@ -429,7 +426,7 @@ const updatePaginationHandler = async (_, { input }, ctx) => {
     const { id, pagination } = input
     const pubsub = await pubsubManager.getPubsub()
 
-    const currentBookComponent = await BookComponent.findById(id)
+    const currentBookComponent = await getBookComponent(id)
 
     if (!currentBookComponent) {
       throw new Error(`book component with id ${id} does not exists`)
@@ -483,7 +480,7 @@ const updateTrackChangesHandler = async (_, { input }, ctx) => {
 
     await updateTrackChanges(id, trackChangesEnabled)
 
-    const updatedBookComponent = await BookComponent.findById(id)
+    const updatedBookComponent = await getBookComponent(id)
 
     pubsub.publish(BOOK_COMPONENT_TRACK_CHANGES_UPDATED, {
       bookComponentTrackChangesUpdated: updatedBookComponent,
@@ -524,7 +521,7 @@ const updateUploadingHandler = async (_, { input }, ctx) => {
 
     await updateUploading(id, uploading)
 
-    const updatedBookComponent = await BookComponent.findById(id)
+    const updatedBookComponent = await getBookComponent(id)
 
     pubsub.publish(BOOK_COMPONENT_UPLOADING_UPDATED, {
       bookComponentUploadingUpdated: updatedBookComponent,
@@ -569,7 +566,7 @@ const toggleIncludeInTOCHandler = async (_, { input }, ctx) => {
 
     await toggleIncludeInTOC(id)
 
-    const updatedBookComponent = await BookComponent.query().findOne({ id })
+    const updatedBookComponent = await getBookComponent(id)
 
     pubsub.publish(BOOK_COMPONENT_TOC_UPDATED, {
       bookComponentTOCToggled: updatedBookComponent,
@@ -588,14 +585,13 @@ const toggleIncludeInTOCHandler = async (_, { input }, ctx) => {
 module.exports = {
   Query: {
     getBookComponent: getBookComponentHandler,
-    // getBookComponentAndAcquireLock: getBookComponentAndAcquireLockHandler,
+    // getBookComponentAndAcquireLock,
   },
   Mutation: {
     ingestWordFile: ingestWordFileHandler,
     addBookComponent: addBookComponentHandler,
     renameBookComponent: renameBookComponentHandler,
     deleteBookComponent: deleteBookComponentHandler,
-    archiveBookComponent: archiveBookComponentHandler,
     updateWorkflowState: updateWorkflowStateHandler,
     updatePagination: updatePaginationHandler,
     unlockBookComponent: unlockBookComponentHandler,
@@ -631,7 +627,7 @@ module.exports = {
       return bookComponentState.status
     },
     async bookTitle(bookComponent, _, ctx) {
-      const book = await Book.findById(bookComponent.bookId)
+      const book = await getBook(bookComponent.bookId)
 
       const bookTranslation = await BookTranslation.query()
         .where('bookId', book.id)
@@ -663,7 +659,10 @@ module.exports = {
       const hasContent = content.trim().length > 0
 
       if (hasContent) {
-        return replaceImageSource(bookComponentTranslation[0].content)
+        return replaceImageSource(
+          bookComponentTranslation[0].content,
+          getContentFiles,
+        )
       }
 
       return bookComponentTranslation[0].content
@@ -756,9 +755,7 @@ module.exports = {
       return state.includeInToc
     },
     async bookStructureElements(bookComponent, _, ctx) {
-      // const book = await Book.findById(bookComponent.bookId)
-
-      const book = await Book.findById(bookComponent.bookId)
+      const book = await getBook(bookComponent.bookId)
 
       const hasThreeLevels = book.bookStructure.levels.length > 2
 

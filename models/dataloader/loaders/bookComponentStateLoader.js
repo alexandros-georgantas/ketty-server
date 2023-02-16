@@ -1,12 +1,12 @@
-const Loader = require("../loader");
-const { model } = require("../../bookComponentState");
+const Loader = require('../loader')
+const { model } = require('../../bookComponentState')
 
 const BookComponentStateLoader = {
   state: new Loader(
-    async (bookComponentId) =>
+    async bookComponentId =>
       // eslint-disable-next-line no-return-await
-      await model.query().where("bookComponentId", bookComponentId)
+      await model.query().where('bookComponentId', bookComponentId),
   ),
-};
+}
 
-module.exports = BookComponentStateLoader;
+module.exports = BookComponentStateLoader

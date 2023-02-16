@@ -1,76 +1,76 @@
-const { logger, useTransaction } = require("@coko/server");
-const ApplicationParameter = require("../models/applicationParameter/applicationParameter.model");
+const { logger, useTransaction } = require('@coko/server')
+const ApplicationParameter = require('../models/applicationParameter/applicationParameter.model')
 
 const getApplicationParameters = async (context, area, options = {}) => {
   try {
-    const { trx } = options;
+    const { trx } = options
     return useTransaction(
-      async (tr) => {
+      async tr => {
         if (context && area) {
           logger.info(
-            `>>> fetching application parameters for ${context} - ${area}`
-          );
+            `>>> fetching application parameters for ${context} - ${area}`,
+          )
 
           const ap = await ApplicationParameter.query(tr)
             .skipUndefined()
-            .where({ context, area });
+            .where({ context, area })
 
-          return ap[0];
+          return ap[0]
         }
 
-        logger.info(`>>> fetching application parameters`);
+        logger.info(`>>> fetching application parameters`)
         return ApplicationParameter.query(tr)
           .skipUndefined()
-          .where({ context, area });
+          .where({ context, area })
       },
-      { trx, passedTrxOnly: true }
-    );
+      { trx, passedTrxOnly: true },
+    )
   } catch (e) {
-    throw new Error(e);
+    throw new Error(e)
   }
-};
+}
 
 const updateApplicationParameters = async (
   context,
   area,
   config,
-  options = {}
+  options = {},
 ) => {
   try {
-    const { trx } = options;
+    const { trx } = options
     return useTransaction(
-      async (tr) => {
+      async tr => {
         logger.info(
-          `>>> updating application parameters for ${context} - ${area}`
-        );
+          `>>> updating application parameters for ${context} - ${area}`,
+        )
 
         const applicationParameter = await ApplicationParameter.query(tr).where(
           {
             context,
             area,
-          }
-        );
+          },
+        )
 
         if (applicationParameter.length !== 1) {
           throw new Error(
-            "multiple records for the same application parameters context and area"
-          );
+            'multiple records for the same application parameters context and area',
+          )
         }
 
-        const { id } = applicationParameter[0];
+        const { id } = applicationParameter[0]
 
         return ApplicationParameter.query(tr).patchAndFetchById(id, {
           config,
-        });
+        })
       },
-      { trx }
-    );
+      { trx },
+    )
   } catch (e) {
-    throw new Error(e);
+    throw new Error(e)
   }
-};
+}
 
 module.exports = {
   getApplicationParameters,
   updateApplicationParameters,
-};
+}

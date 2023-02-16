@@ -6,25 +6,24 @@ const config = require('config')
 const get = require('lodash/get')
 const findIndex = require('lodash/findIndex')
 const crypto = require('crypto')
-const { epubArchiver } = require('./epubArchiver')
 
 const {
   cleanHTML,
-  cleanDataIdAttributes,
+  cleanDataAttributes,
   convertedContent,
 } = require('./converters')
 
-const { generateContainer } = require('./htmlGenerators')
-
-const { htmlToEPUB } = require('./htmlToEPUB')
 const bookConstructor = require('./bookConstructor')
-const { pagednation } = require('./pagednation')
-const { icmlArchiver } = require('./icmlArchiver')
-const { icmlPreparation } = require('./icmlPreparation')
-const { pagedArchiver } = require('./pagedArchiver')
-const { scriptsRunner } = require('./scriptsRunner')
+const { generateContainer } = require('./htmlGenerators')
+const EPUBPreparation = require('./EPUBPreparation')
+const ICMLPreparation = require('./ICMLPreparation')
+const PagedJSPreparation = require('./PagedJSPreparation')
+const EPUBArchiver = require('./EPUBArchiver')
+const PagedJSArchiver = require('./PagedJSArchiver')
+const ICMLArchiver = require('./ICMLArchiver')
+const scriptsRunner = require('./scriptsRunner')
 
-const { Template } = require('../../models').models
+const Template = require('../../models/template/template.model')
 
 const uploadsDir = get(config, ['pubsweet-server', 'uploads'], 'uploads')
 
@@ -172,7 +171,7 @@ const ExporterService = async (
         const { content, hasMath } = cleanedContent
         /* eslint-disable no-param-reassign */
         bookComponent.hasMath = hasMath
-        bookComponent.content = cleanDataIdAttributes(content)
+        bookComponent.content = cleanDataAttributes(content)
         /* eslint-enable no-param-reassign */
         counter += 1
       })
@@ -232,10 +231,7 @@ const ExporterService = async (
       const EPUBFileTimestamp = `${new Date().getTime() + 1}` // delay it a bit
 
       const EPUBtempFolderAssetsPath = path.join(
-        __dirname,
-        '..',
-        '..',
-        '..',
+        `${process.cwd()}`,
         uploadsDir,
         'temp',
         'epub',
@@ -243,19 +239,16 @@ const ExporterService = async (
       )
 
       const EPUBtempFolderFilePath = path.join(
-        __dirname,
-        '..',
-        '..',
-        '..',
+        `${process.cwd()}`,
         uploadsDir,
         'temp',
         'epub',
         EPUBFileTimestamp,
       )
 
-      await htmlToEPUB(book, template, EPUBtempFolderAssetsPath)
+      await EPUBPreparation(book, template, EPUBtempFolderAssetsPath)
 
-      const filename = await epubArchiver(
+      const filename = await EPUBArchiver(
         EPUBtempFolderAssetsPath,
         EPUBtempFolderFilePath,
       )
@@ -290,10 +283,7 @@ const ExporterService = async (
       const PDFFileTimestamp = `${new Date().getTime() + 2}` // delay it a bit
 
       const pagedJStempFolderAssetsPathForPDF = path.join(
-        __dirname,
-        '..',
-        '..',
-        '..',
+        `${process.cwd()}`,
         uploadsDir,
         'temp',
         'paged',
@@ -301,10 +291,7 @@ const ExporterService = async (
       )
 
       const pagedJStempFolderAssetsPathForPreviewer = path.join(
-        __dirname,
-        '..',
-        '..',
-        '..',
+        `${process.cwd()}`,
         uploadsDir,
         'temp',
         'previewer',
@@ -312,10 +299,7 @@ const ExporterService = async (
       )
 
       const zippedTempFolderFilePath = path.join(
-        __dirname,
-        '..',
-        '..',
-        '..',
+        `${process.cwd()}`,
         uploadsDir,
         'temp',
         'paged',
@@ -323,10 +307,7 @@ const ExporterService = async (
       )
 
       const PDFtempFolderFilePath = path.join(
-        __dirname,
-        '..',
-        '..',
-        '..',
+        `${process.cwd()}`,
         uploadsDir,
         'temp',
         'paged',
@@ -335,14 +316,14 @@ const ExporterService = async (
 
       if (fileExtension === 'pdf') {
         const PDFFilename = `${crypto.randomBytes(32).toString('hex')}.pdf`
-        await pagednation(
+        await PagedJSPreparation(
           book,
           template,
           pagedJStempFolderAssetsPathForPDF,
           true,
         )
 
-        const zippedAssetsFilename = await pagedArchiver(
+        const zippedAssetsFilename = await PagedJSArchiver(
           pagedJStempFolderAssetsPathForPDF,
           zippedTempFolderFilePath,
         )
@@ -371,7 +352,11 @@ const ExporterService = async (
         }
       }
 
-      await pagednation(book, template, pagedJStempFolderAssetsPathForPreviewer)
+      await PagedJSPreparation(
+        book,
+        template,
+        pagedJStempFolderAssetsPathForPreviewer,
+      )
 
       return {
         path: `${assetsTimestamp}/template/${templateId}`,
@@ -384,10 +369,7 @@ const ExporterService = async (
       const zippedFileTimestamp = `${new Date().getTime() + 1}` // delay it a bit
 
       const ICMLtempFolderAssetsPath = path.join(
-        __dirname,
-        '..',
-        '..',
-        '..',
+        `${process.cwd()}`,
         uploadsDir,
         'temp',
         'icml',
@@ -395,21 +377,18 @@ const ExporterService = async (
       )
 
       const ICMLtempFolderFilePath = path.join(
-        __dirname,
-        '..',
-        '..',
-        '..',
+        `${process.cwd()}`,
         uploadsDir,
         'temp',
         'icml',
         zippedFileTimestamp,
       )
 
-      await icmlPreparation(book, ICMLtempFolderAssetsPath)
+      await ICMLPreparation(book, ICMLtempFolderAssetsPath)
       await icmlHandler(ICMLtempFolderAssetsPath)
       await fs.remove(`${ICMLtempFolderAssetsPath}/index.html`)
 
-      const filename = await icmlArchiver(
+      const filename = await ICMLArchiver(
         ICMLtempFolderAssetsPath,
         ICMLtempFolderFilePath,
       )

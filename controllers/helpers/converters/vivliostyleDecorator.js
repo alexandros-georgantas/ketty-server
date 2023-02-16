@@ -8,19 +8,11 @@ module.exports = (bookComponent, bookTitle) => {
     .html(title || componentType)
     .prependTo($('section'))
 
-  $('<div/>')
-    .attr('class', 'booktitle')
-    .html(bookTitle)
-    .prependTo($('section'))
+  $('<div/>').attr('class', 'booktitle').html(bookTitle).prependTo($('section'))
 
-  $('<div>&#xA0;</div>')
-    .attr('class', 'folio')
-    .prependTo($('section'))
+  $('<div>&#xA0;</div>').attr('class', 'folio').prependTo($('section'))
 
-  $('<p/>')
-    .attr('class', 'ch-start')
-    .html('beginning')
-    .prependTo($('section'))
+  $('<p/>').attr('class', 'ch-start').html('beginning').prependTo($('section'))
 
   return $.html('body')
 }
