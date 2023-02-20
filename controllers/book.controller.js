@@ -86,15 +86,15 @@ const getBook = async (id, options = {}) => {
     logger.info(`>>> fetching book with id ${id}`)
 
     const book = await useTransaction(
-      async tr => Book.query(tr).where({ id, deleted: false }),
+      async tr => Book.findOne({ id, deleted: false }, { trx: tr }),
       { trx, passedTrxOnly: true },
     )
 
-    if (book.length === 0) {
+    if (!book) {
       throw new Error(`book with id: ${id} does not exist`)
     }
 
-    return book[0]
+    return book
   } catch (e) {
     throw new Error(e)
   }
@@ -103,6 +103,7 @@ const getBook = async (id, options = {}) => {
 const getBooks = async (collectionId, archived, userId, options = {}) => {
   try {
     const { trx } = options
+
     logger.info(`>>> fetching books for collection with id ${collectionId}`)
     return useTransaction(
       async tr => {
@@ -123,17 +124,27 @@ const getBooks = async (collectionId, archived, userId, options = {}) => {
 
         if (isAdmin || isGlobalProductionEditor) {
           if (!archived) {
-            return Book.query(tr).where({
-              collectionId,
-              deleted: false,
-              archived: false,
-            })
+            const { result } = await Book.find(
+              {
+                collectionId,
+                deleted: false,
+                archived: false,
+              },
+              { trx: tr },
+            )
+
+            return result
           }
 
-          return Book.query(tr).where({
-            collectionId,
-            deleted: false,
-          })
+          const { result } = await Book.find(
+            {
+              collectionId,
+              deleted: false,
+            },
+            { trx: tr },
+          )
+
+          return result
         }
 
         if (!archived) {
@@ -187,17 +198,20 @@ const createBook = async (collectionId, title, options = {}) => {
           newBookData.bookStructure = defaultBookStructure
         }
 
-        const newBook = await Book.query(tr).insert(newBookData)
+        const newBook = await Book.insert(newBookData, { trx: tr })
 
         const { id: bookId } = newBook
 
         logger.info(`>>> new book created with id ${bookId}`)
 
-        await BookTranslation.query(tr).insert({
-          bookId,
-          title,
-          languageIso: 'en',
-        })
+        await BookTranslation.insert(
+          {
+            bookId,
+            title,
+            languageIso: 'en',
+          },
+          { trx: tr },
+        )
 
         logger.info(
           `>>> new book translation (title: ${title}) created for the book with id ${bookId}`,
@@ -281,18 +295,19 @@ const createBook = async (collectionId, title, options = {}) => {
 
         let bookComponentWorkflowStages
 
-        const division = await Division.query(tr)
-          .where({ bookId, label: 'Frontmatter' })
-          .andWhere({ deleted: false })
+        const division = await Division.findOne(
+          { bookId, label: 'Frontmatter', deleted: false },
+          { trx: tr },
+        )
 
         logger.info(
-          `>>> division which will hold the TOC found with id ${division[0].id}`,
+          `>>> division which will hold the TOC found with id ${division.id}`,
         )
 
         const newBookComponent = {
           bookId,
           componentType: 'toc',
-          divisionId: division[0].id,
+          divisionId: division.id,
           pagination: {
             left: false,
             right: true,
@@ -301,33 +316,38 @@ const createBook = async (collectionId, title, options = {}) => {
           deleted: false,
         }
 
-        const createdBookComponent = await BookComponent.query(tr).insert(
+        const createdBookComponent = await BookComponent.insert(
           newBookComponent,
+          { trx: tr },
         )
 
         logger.info(
           `>>> new book component (TOC) created with id ${createdBookComponent.id}`,
         )
 
-        const translation = await BookComponentTranslation.query(tr).insert({
-          bookComponentId: createdBookComponent.id,
-          languageIso: 'en',
-          title: 'Table of Contents',
-        })
+        const translation = await BookComponentTranslation.insert(
+          {
+            bookComponentId: createdBookComponent.id,
+            languageIso: 'en',
+            title: 'Table of Contents',
+          },
+          { trx: tr },
+        )
 
         logger.info(
           `>>> new book component translation for TOC created with id ${translation.id}`,
         )
 
-        const newBookComponents = division[0].bookComponents
+        const newBookComponents = division.bookComponents
 
         newBookComponents.push(createdBookComponent.id)
 
-        const updatedDivision = await Division.query(tr).patchAndFetchById(
-          division[0].id,
+        const updatedDivision = await Division.patchAndFetchById(
+          division.id,
           {
             bookComponents: newBookComponents,
           },
+          { trx: tr },
         )
 
         logger.info(
@@ -344,7 +364,7 @@ const createBook = async (collectionId, title, options = {}) => {
           }
         }
 
-        await BookComponentState.query(tr).insert(
+        await BookComponentState.insert(
           assign(
             {},
             {
@@ -355,6 +375,7 @@ const createBook = async (collectionId, title, options = {}) => {
             },
             bookComponentWorkflowStages,
           ),
+          { trx: tr },
         )
 
         return newBook
@@ -371,17 +392,23 @@ const renameBook = async (bookId, title, options = {}) => {
     const { trx } = options
     return useTransaction(
       async tr => {
-        const bookTranslation = await BookTranslation.query(tr)
-          .where('bookId', bookId)
-          .andWhere('languageIso', 'en')
+        const bookTranslation = await BookTranslation.findOne(
+          { bookId, languageIso: 'en' },
+          { trx: tr },
+        )
 
         await BookTranslation.query(tr)
           .patch({ title })
-          .where({ id: bookTranslation[0].id })
+          .where({ id: bookTranslation.id })
 
         logger.info(`>>> title updated for book with id ${bookId}`)
-        const book = await Book.query(tr).where({ id: bookId, deleted: false })
-        return book[0]
+
+        const book = await Book.findOne(
+          { id: bookId, deleted: false },
+          { trx: tr },
+        )
+
+        return book
       },
       { trx },
     )
@@ -395,25 +422,30 @@ const deleteBook = async (bookId, options = {}) => {
     const { trx } = options
     return useTransaction(
       async tr => {
-        const deletedBook = await Book.query(tr).patchAndFetchById(bookId, {
-          deleted: true,
-        })
+        const deletedBook = await Book.patchAndFetchById(
+          bookId,
+          {
+            deleted: true,
+          },
+          { trx: tr },
+        )
 
         logger.info(`>>> book with id ${bookId} deleted`)
 
-        const associatedBookComponents = await BookComponent.query(tr).where(
-          'bookId',
-          bookId,
+        const { result: associatedBookComponents } = await BookComponent.find(
+          { bookId },
+          { trx: tr },
         )
 
         if (associatedBookComponents.length > 0) {
           await Promise.all(
             map(associatedBookComponents, async bookComponent => {
-              await BookComponent.query(tr).patchAndFetchById(
+              await BookComponent.patchAndFetchById(
                 bookComponent.id,
                 {
                   deleted: true,
                 },
+                { trx: tr },
               )
               logger.info(
                 `>>> associated book component with id ${bookComponent.id} deleted`,
@@ -422,19 +454,20 @@ const deleteBook = async (bookId, options = {}) => {
           )
         }
 
-        const associatedDivisions = await Division.query(tr).where(
-          'bookId',
-          deletedBook.id,
+        const { result: associatedDivisions } = await Division.find(
+          { bookId: deletedBook.id },
+          { trx: tr },
         )
 
         await Promise.all(
           map(associatedDivisions, async division => {
-            const updatedDivision = await Division.query(tr).patchAndFetchById(
+            const updatedDivision = await Division.patchAndFetchById(
               division.id,
               {
                 bookComponents: [],
                 deleted: true,
               },
+              { trx: tr },
             )
 
             logger.info(
@@ -472,25 +505,30 @@ const archiveBook = async (bookId, archive, options = {}) => {
     const { trx } = options
     return useTransaction(
       async tr => {
-        const archivedBook = await Book.query(tr).patchAndFetchById(bookId, {
-          archived: archive,
-        })
+        const archivedBook = await Book.patchAndFetchById(
+          bookId,
+          {
+            archived: archive,
+          },
+          { trx: tr },
+        )
 
         logger.info(`>>> book with id ${archivedBook.id} archived`)
 
-        const associatedBookComponents = await BookComponent.query(tr).where(
-          'bookId',
-          bookId,
+        const { result: associatedBookComponents } = await BookComponent.find(
+          { bookId },
+          { trx: tr },
         )
 
         if (associatedBookComponents.length > 0) {
           await Promise.all(
             map(associatedBookComponents, async bookComponent => {
-              await BookComponent.query(tr).patchAndFetchById(
+              await BookComponent.patchAndFetchById(
                 bookComponent.id,
                 {
                   archived: archive,
                 },
+                { trx: tr },
               )
               logger.info(
                 `>>> associated book component with id ${bookComponent.id} archived`,
@@ -517,9 +555,13 @@ const updateMetadata = async (metadata, options = {}) => {
 
         const { id, ...rest } = clean
 
-        const updatedBook = await Book.query(tr).patchAndFetchById(id, {
-          ...rest,
-        })
+        const updatedBook = await Book.patchAndFetchById(
+          id,
+          {
+            ...rest,
+          },
+          { trx: tr },
+        )
 
         logger.info(`>>> book with id ${updatedBook.id} has new metadata`)
 
@@ -562,26 +604,24 @@ const updateRunningHeaders = async (bookComponents, bookId, options = {}) => {
           map(bookComponents, async bookComponent => {
             const { id } = bookComponent
 
-            const bookComponentState = await BookComponentState.query(tr).where(
-              'bookComponentId',
-              id,
-            )
+            const bookComponentState = await BookComponentState.query(
+              tr,
+            ).findOne({ bookComponentId: id }, { trx: tr })
 
-            return BookComponentState.query(tr).patchAndFetchById(
-              bookComponentState[0].id,
+            return BookComponentState.patchAndFetchById(
+              bookComponentState.id,
               {
                 runningHeadersRight: bookComponent.runningHeadersRight,
                 runningHeadersLeft: bookComponent.runningHeadersLeft,
               },
+              { trx: tr },
             )
           }),
         )
 
         logger.info(`>>> running headers updated for book with id ${bookId}`)
 
-        const book = await Book.query(tr).where({ id: bookId, deleted: false })
-
-        return book[0]
+        return Book.findOne({ id: bookId, deleted: false }, { trx: tr })
       },
       { trx },
     )
@@ -596,7 +636,7 @@ const changeLevelLabel = async (bookId, levelId, label, options = {}) => {
     const { trx } = options
     return useTransaction(
       async tr => {
-        const book = await Book.query(tr).findById(bookId)
+        const book = await Book.findById(bookId, { trx: tr })
         const clonedBookStructure = { ...book.bookStructure }
 
         const levelIndex = findIndex(clonedBookStructure.levels, {
@@ -637,9 +677,13 @@ const changeLevelLabel = async (bookId, levelId, label, options = {}) => {
           })
         }
 
-        await Book.query(tr).patchAndFetchById(bookId, {
-          bookStructure: clonedBookStructure,
-        })
+        await Book.patchAndFetchById(
+          bookId,
+          {
+            bookStructure: clonedBookStructure,
+          },
+          { trx: tr },
+        )
 
         logger.info(`>>> level label changed for book with id ${bookId}`)
 
@@ -657,7 +701,7 @@ const changeNumberOfLevels = async (bookId, levelsNumber, options = {}) => {
     const { trx } = options
     return useTransaction(
       async tr => {
-        const book = await Book.query(tr).findById(bookId)
+        const book = await Book.findById(bookId, { trx: tr })
         const clonedBookStructure = { ...book.bookStructure }
 
         const currentBookLevels =
@@ -669,7 +713,6 @@ const changeNumberOfLevels = async (bookId, levelsNumber, options = {}) => {
           return clonedBookStructure.levels
         }
 
-        // if (currentBookLevels === 0) {
         if (levelsNumber === 1) {
           clonedBookStructure.levels = []
           clonedBookStructure.levels.push(
@@ -678,7 +721,6 @@ const changeNumberOfLevels = async (bookId, levelsNumber, options = {}) => {
             defaultLevelCloserItem,
           )
 
-          // if (clonedBookStructure.outline.length > 0) {
           clonedBookStructure.outline = [
             {
               title: undefined,
@@ -686,7 +728,6 @@ const changeNumberOfLevels = async (bookId, levelsNumber, options = {}) => {
               children: [{ title: undefined, type: 'section', children: [] }],
             },
           ]
-          // }
         }
 
         if (levelsNumber === 2) {
@@ -699,7 +740,6 @@ const changeNumberOfLevels = async (bookId, levelsNumber, options = {}) => {
           )
 
           // ADD LEVEL THREE OUTLINE ITEMS
-          // if (clonedBookStructure.outline.length > 0) {
           clonedBookStructure.outline = [
             {
               title: undefined,
@@ -715,84 +755,15 @@ const changeNumberOfLevels = async (bookId, levelsNumber, options = {}) => {
               ],
             },
           ]
-          // }
         }
-        // } else {
-        //   // CASE DECREASE NUMBER OF LEVELS (2 TO 1)
-        //   if (currentBookLevels > levelsNumber) {
-        //     clonedBookStructure.levels = []
-        //     clonedBookStructure.levels.push(
-        //       defaultLevelTwoItem,
-        //       defaultLevelThreeItem,
-        //       defaultLevelCloserItem,
-        //     )
 
-        //     // clonedBookStructure.levels[1].contentStructure = [
-        //     //   ...clonedBookStructure.levels[1].contentStructure,
-        //     //   { type: 'mainContent', displayName: 'Main Content' },
-        //     // ]
-        //     // clonedBookStructure.levels.push(defaultLevelCloserItem)
-        //     // CLEAR ALL LEVEL THREE CHILDREN FROM OUTLINE
-        //     if (clonedBookStructure.outline.length > 0) {
-        //       clonedBookStructure.outline = [
-        //         {
-        //           title: undefined,
-        //           type: 'chapter',
-        //           children: [
-        //             { title: undefined, type: 'section', children: [] },
-        //           ],
-        //         },
-        //       ]
-        //     }
-        //   } else {
-        //     // CASE INCREASE NUMBER OF LEVELS (1 TO 2)
-
-        //     // REMOVE DEFAULT MAIN CONTENT ELEMENT FROM LEVEL 2
-        //     // clonedBookStructure.levels[1].contentStructure = clonedBookStructure.levels[1].contentStructure.filter(
-        //     //   item => item.type !== 'mainContent',
-        //     // )
-
-        //     // For the case of level two closers
-        //     clonedBookStructure.levels = []
-        //     clonedBookStructure.levels.push(
-        //       defaultLevelOneItem,
-        //       defaultLevelTwoItem,
-        //       defaultLevelThreeItem,
-        //       defaultLevelCloserItem,
-        //     )
-
-        //     // ADD LEVEL THREE OUTLINE ITEMS
-        //     if (clonedBookStructure.outline.length > 0) {
-        //       // clonedBookStructure.outline.forEach(levelOneComponent => {
-        //       //   levelOneComponent.children.forEach(levelTwoComponent => {
-        //       //     levelTwoComponent.children.push({
-        //       //       title: undefined,
-        //       //       type: clonedBookStructure.levels[2].type,
-        //       //     })
-        //       //   })
-        //       // })
-        //       clonedBookStructure.outline = [
-        //         {
-        //           title: undefined,
-        //           type: 'part',
-        //           children: [
-        //             {
-        //               title: undefined,
-        //               type: 'chapter',
-        //               children: [
-        //                 { title: undefined, type: 'section', children: [] },
-        //               ],
-        //             },
-        //           ],
-        //         },
-        //       ]
-        //     }
-        //   }
-        // }
-
-        await Book.query(tr).patchAndFetchById(bookId, {
-          bookStructure: clonedBookStructure,
-        })
+        await Book.patchAndFetchById(
+          bookId,
+          {
+            bookStructure: clonedBookStructure,
+          },
+          { trx: tr },
+        )
 
         logger.info(`>>> number of levels changed for book with id ${bookId}`)
         return clonedBookStructure.levels
@@ -809,7 +780,7 @@ const updateBookOutline = async (bookId, outline, options = {}) => {
     const { trx } = options
     return useTransaction(
       async tr => {
-        const book = await Book.query(tr).findById(bookId)
+        const book = await Book.findById(bookId, { trx: tr })
 
         const clonedBookStructure = JSON.parse(
           JSON.stringify(book.bookStructure),
@@ -817,9 +788,13 @@ const updateBookOutline = async (bookId, outline, options = {}) => {
 
         clonedBookStructure.outline = outline
 
-        const updatedBook = await Book.query(tr).patchAndFetchById(bookId, {
-          bookStructure: clonedBookStructure,
-        })
+        const updatedBook = await Book.patchAndFetchById(
+          bookId,
+          {
+            bookStructure: clonedBookStructure,
+          },
+          { trx: tr },
+        )
 
         logger.info(`>>> outline changed for book with id ${bookId}`)
 
@@ -837,27 +812,21 @@ const updateLevelContentStructure = async (bookId, levels, options = {}) => {
     const { trx } = options
     return useTransaction(
       async tr => {
-        const book = await Book.query(tr).findById(bookId)
+        const book = await Book.findById(bookId, { trx: tr })
 
         const clonedBookStructure = JSON.parse(
           JSON.stringify(book.bookStructure),
         )
 
-        // const levelIndex = findIndex(clonedBookStructure.levels, {
-        //   id: level.id,
-        // })
-
-        // if (levelIndex === -1) {
-        //   throw new Error(
-        //     `for book with id ${bookId} there is no book structure level with id ${level.id}`,
-        //   )
-        // }
-
         clonedBookStructure.levels = levels
 
-        const updatedBook = await Book.query(tr).patchAndFetchById(bookId, {
-          bookStructure: clonedBookStructure,
-        })
+        const updatedBook = await Book.patchAndFetchById(
+          bookId,
+          {
+            bookStructure: clonedBookStructure,
+          },
+          { trx: tr },
+        )
 
         logger.info(`>>> level changed for book with id ${bookId}`)
 
@@ -875,7 +844,7 @@ const finalizeBookStructure = async (bookId, options = {}) => {
     const { trx } = options
     return useTransaction(
       async tr => {
-        const book = await Book.query(tr).findById(bookId)
+        const book = await Book.findById(bookId, { trx: tr })
 
         const clonedBookStructure = JSON.parse(
           JSON.stringify(book.bookStructure),
@@ -892,13 +861,15 @@ const finalizeBookStructure = async (bookId, options = {}) => {
         const { config: workflowStages } = workflowConfig
 
         // find book's body division to append book components declared in bookStructure outline
-        const bodyDivision = await Division.query(tr).findOne({
-          bookId,
-          label: 'Body',
-          deleted: false,
-        })
+        const bodyDivision = await Division.findOne(
+          {
+            bookId,
+            label: 'Body',
+            deleted: false,
+          },
+          { trx: tr },
+        )
 
-        // const numberOfLevels = clonedBookStructure.levels.length
         const newDivisionBookComponents = JSON.parse(
           JSON.stringify(bodyDivision.bookComponents),
         )
@@ -980,15 +951,23 @@ const finalizeBookStructure = async (bookId, options = {}) => {
           },
         )
 
-        await Division.query(tr).patchAndFetchById(bodyDivision.id, {
-          bookComponents: newDivisionBookComponents,
-        })
+        await Division.patchAndFetchById(
+          bodyDivision.id,
+          {
+            bookComponents: newDivisionBookComponents,
+          },
+          { trx: tr },
+        )
         // set finalized flag to true
         clonedBookStructure.finalized = true
 
-        const updatedBook = await Book.query(tr).patchAndFetchById(bookId, {
-          bookStructure: clonedBookStructure,
-        })
+        const updatedBook = await Book.patchAndFetchById(
+          bookId,
+          {
+            bookStructure: clonedBookStructure,
+          },
+          { trx: tr },
+        )
 
         logger.info(`>>> book structure finalized  for book with id ${bookId}`)
 
@@ -1006,7 +985,7 @@ const updateShowWelcome = async (bookId, options = {}) => {
     const { trx } = options
     return useTransaction(
       async tr => {
-        const book = await Book.query(tr).findById(bookId)
+        const book = await Book.findById(bookId, { trx: tr })
 
         const clonedBookStructure = JSON.parse(
           JSON.stringify(book.bookStructure),
@@ -1014,9 +993,13 @@ const updateShowWelcome = async (bookId, options = {}) => {
 
         clonedBookStructure.showWelcome = false
 
-        const updatedBook = await Book.query(tr).patchAndFetchById(bookId, {
-          bookStructure: clonedBookStructure,
-        })
+        const updatedBook = await Book.patchAndFetchById(
+          bookId,
+          {
+            bookStructure: clonedBookStructure,
+          },
+          { trx: tr },
+        )
 
         logger.info(
           `>>> book structure initialized and set show welcome to false for book with id ${bookId}`,

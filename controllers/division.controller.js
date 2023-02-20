@@ -22,9 +22,12 @@ const createDivision = async (divisionData, options = {}) => {
       `>>> creating division ${divisionData.label} for the book with id ${divisionData.bookId}`,
     )
 
-    return useTransaction(async tr => Division.query(tr).insert(divisionData), {
-      trx,
-    })
+    return useTransaction(
+      async tr => Division.insert(divisionData, { trx: tr }),
+      {
+        trx,
+      },
+    )
   } catch (e) {
     throw new Error(e)
   }
@@ -36,15 +39,16 @@ const getDivision = async (divisionId, options = {}) => {
     logger.info(`>>> fetching division with id ${divisionId}`)
 
     const division = await useTransaction(
-      async tr => Division.query(tr).where({ id: divisionId, deleted: false }),
+      async tr =>
+        Division.findOne({ id: divisionId, deleted: false }, { trx: tr }),
       { trx, passedTrxOnly: true },
     )
 
-    if (division.length === 0) {
+    if (!division) {
       throw new Error(`division with id: ${divisionId} does not exist`)
     }
 
-    return division[0]
+    return division
   } catch (e) {
     throw new Error(e)
   }
@@ -56,7 +60,7 @@ const updateDivision = async (divisionId, patch, options = {}) => {
     logger.info(`>>> updating division with id ${divisionId}`)
 
     return useTransaction(
-      async tr => Division.query(tr).patchAndFetchById(divisionId, patch),
+      async tr => Division.patchAndFetchById(divisionId, patch, { trx: tr }),
       {
         trx,
       },
@@ -151,8 +155,7 @@ const updateBookComponentOrder = async (
           )
         }
 
-        // return getBook(sourceDivision.bookId, { trx: tr })
-        return Book.query(tr).findById(sourceDivision.bookId).throwIfNotFound()
+        return Book.findById(sourceDivision.bookId, { trx: tr })
       },
       { trx },
     )

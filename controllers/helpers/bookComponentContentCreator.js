@@ -420,9 +420,10 @@ const bookComponentContentCreator = async (
           languageIso: languageIso || 'en',
         })
 
-        return BookComponentTranslation.query(tr).patchAndFetchById(
+        return BookComponentTranslation.patchAndFetchById(
           bookComponentTranslation.id,
           { content },
+          { trx: tr },
         )
       },
       { trx },

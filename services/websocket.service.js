@@ -18,6 +18,7 @@ const userExists = async userId => {
     }
 
     const foundUser = await User.findById(userId)
+
     return foundUser || false
   } catch (e) {
     throw new Error(e)

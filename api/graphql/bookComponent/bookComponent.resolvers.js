@@ -122,7 +122,7 @@ const ingestWordFileHandler = async (_, { bookComponentFiles }, ctx) => {
         const name = filename.replace(/\.[^/.]+$/, '')
         const { componentType, label } = DOCXFilenameParser(name)
 
-        const division = await Division.query().findOne({
+        const division = await Division.findOne({
           bookId,
           label,
         })
@@ -148,7 +148,7 @@ const ingestWordFileHandler = async (_, { bookComponentFiles }, ctx) => {
 
       const uploading = true
 
-      const currentComponentState = await BookComponentState.query().findOne({
+      const currentComponentState = await BookComponentState.findOne({
         bookComponentId: componentId,
       })
 
@@ -294,7 +294,7 @@ const updateWorkflowStateHandler = async (_, { input }, ctx) => {
     const { id, workflowStages } = input
     const pubsub = await pubsubManager.getPubsub()
 
-    const bookComponentState = await BookComponentState.query().findOne({
+    const bookComponentState = await BookComponentState.findOne({
       bookComponentId: id,
     })
 
@@ -461,7 +461,7 @@ const updateTrackChangesHandler = async (_, { input }, ctx) => {
     const { id, trackChangesEnabled } = input
     const pubsub = await pubsubManager.getPubsub()
 
-    const currentState = await BookComponentState.query().findOne({
+    const currentState = await BookComponentState.findOne({
       bookComponentId: id,
     })
 
@@ -502,7 +502,7 @@ const updateUploadingHandler = async (_, { input }, ctx) => {
     const { id, uploading } = input
     const pubsub = await pubsubManager.getPubsub()
 
-    const currentState = await BookComponentState.query().findOne({
+    const currentState = await BookComponentState.findOne({
       bookComponentId: id,
     })
 
@@ -607,11 +607,11 @@ module.exports = {
       let { title } = bookComponent
 
       if (!title) {
-        const bookComponentTranslation = await BookComponentTranslation.query()
-          .where('bookComponentId', bookComponent.id)
-          .andWhere('languageIso', 'en')
+        const bookComponentTranslation = await BookComponentTranslation.findOne(
+          { bookComponentId: bookComponent.id, languageIso: 'en' },
+        )
 
-        title = bookComponentTranslation[0].title
+        title = bookComponentTranslation.title
       }
 
       return title
@@ -620,7 +620,7 @@ module.exports = {
       return bookComponent.bookId
     },
     async status(bookComponent, _, ctx) {
-      const bookComponentState = await BookComponentState.query().findOne({
+      const bookComponentState = await BookComponentState.findOne({
         bookComponentId: bookComponent.id,
       })
 
@@ -629,11 +629,12 @@ module.exports = {
     async bookTitle(bookComponent, _, ctx) {
       const book = await getBook(bookComponent.bookId)
 
-      const bookTranslation = await BookTranslation.query()
-        .where('bookId', book.id)
-        .andWhere('languageIso', 'en')
+      const bookTranslation = await BookTranslation.findOne({
+        bookId: book.id,
+        languageIso: 'en',
+      })
 
-      return bookTranslation[0].title
+      return bookTranslation.title
     },
     async runningHeadersRight(bookComponent, _, ctx) {
       const bookComponentState = await bookComponent.getBookComponentState()
@@ -651,43 +652,44 @@ module.exports = {
       return bookComponent.divisionId
     },
     async content(bookComponent, _, ctx) {
-      const bookComponentTranslation = await BookComponentTranslation.query()
-        .where('bookComponentId', bookComponent.id)
-        .andWhere('languageIso', 'en')
+      const bookComponentTranslation = await BookComponentTranslation.findOne({
+        bookComponentId: bookComponent.id,
+        languageIso: 'en',
+      })
 
-      const content = bookComponentTranslation[0].content || ''
+      const content = bookComponentTranslation.content || ''
       const hasContent = content.trim().length > 0
 
       if (hasContent) {
         return replaceImageSource(
-          bookComponentTranslation[0].content,
+          bookComponentTranslation.content,
           getContentFiles,
         )
       }
 
-      return bookComponentTranslation[0].content
+      return bookComponentTranslation.content
     },
     async trackChangesEnabled(bookComponent, _, ctx) {
-      const bookComponentState = await BookComponentState.query().where(
-        'bookComponentId',
-        bookComponent.id,
-      )
+      const bookComponentState = await BookComponentState.findOne({
+        bookComponentId: bookComponent.id,
+      })
 
-      return bookComponentState[0].trackChangesEnabled
+      return bookComponentState.trackChangesEnabled
     },
     async hasContent(bookComponent, _, ctx) {
-      const bookComponentTranslation = await BookComponentTranslation.query()
-        .where('bookComponentId', bookComponent.id)
-        .andWhere('languageIso', 'en')
+      const bookComponentTranslation = await BookComponentTranslation.findOne({
+        bookComponentId: bookComponent.id,
+        languageIso: 'en',
+      })
 
-      const content = bookComponentTranslation[0].content || ''
+      const content = bookComponentTranslation.content || ''
       const hasContent = content.trim().length > 0
       return hasContent
     },
     async lock(bookComponent, _, ctx) {
       let locked = null
 
-      const lock = await Lock.query().findOne('foreignId', bookComponent.id)
+      const lock = await Lock.findOne({ foreignId: bookComponent.id })
 
       if (lock) {
         const user = await User.findById(lock.userId)

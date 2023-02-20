@@ -168,7 +168,7 @@ const xsweetHandler = async (bookComponentId, filePath) => {
     form.append('docx', fs.createReadStream(filePath))
     form.append('objectId', bookComponentId)
 
-    const serviceCallbackToken = await ServiceCallbackToken.query().insert({
+    const serviceCallbackToken = await ServiceCallbackToken.insert({
       bookComponentId,
       responseToken: crypto.randomBytes(32).toString('hex'),
     })

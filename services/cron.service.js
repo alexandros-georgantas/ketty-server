@@ -100,7 +100,11 @@ cron.schedule('*/10 * * * *', async () => {
     logger.info(`executing locks clean-up procedure for idle locks`)
 
     await useTransaction(async tr => {
-      const locks = await Lock.query(tr).where({ serverIdentifier })
+      const { result: locks } = await Lock.find(
+        { serverIdentifier },
+        { trx: tr },
+      )
+
       const bookComponentIds = locks.map(lock => lock.foreignId)
 
       if (bookComponentIds.length > 0) {
@@ -143,8 +147,9 @@ cron.schedule('*/10 * * * *', async () => {
                 tr,
               ).findById(bookComponentId)
 
-              const updatedBook = await Book.query(tr).findById(
+              const updatedBook = await Book.findById(
                 updatedBookComponent.bookId,
+                { trx: tr },
               )
 
               pubsub.publish('BOOK_COMPONENT_UPDATED', {

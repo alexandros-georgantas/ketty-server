@@ -24,9 +24,9 @@ class KetidaBase extends BaseModel {
     }
   }
 
-  static async findById(id) {
-    return this.find(id)
-  }
+  // static async findById(id) {
+  //   return this.findById(id)
+  // }
 }
 
 module.exports = KetidaBase

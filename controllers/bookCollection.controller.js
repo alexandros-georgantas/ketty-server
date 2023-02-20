@@ -10,18 +10,21 @@ const getBookCollection = async (id, options = {}) => {
 
     const bookCollection = await useTransaction(
       async tr =>
-        BookCollection.query(tr).where({
-          id,
-          deleted: false,
-        }),
+        BookCollection.findOne(
+          {
+            id,
+            deleted: false,
+          },
+          { trx: tr },
+        ),
       { trx, passedTrxOnly: true },
     )
 
-    if (bookCollection.length === 0) {
+    if (!bookCollection) {
       throw Error(`book collection with id ${id} does not exist`)
     }
 
-    return bookCollection[0]
+    return bookCollection
   } catch (e) {
     throw new Error(e)
   }
@@ -33,7 +36,14 @@ const getBookCollections = async (options = {}) => {
     logger.info(`>>> fetching all book collections`)
 
     return useTransaction(
-      async tr => BookCollection.query(tr).where({ deleted: false }),
+      async tr => {
+        const { result: bookCollections } = await BookCollection.find(
+          { deleted: false },
+          { trx: tr },
+        )
+
+        return bookCollections
+      },
       { trx, passedTrxOnly: true },
     )
   } catch (e) {
@@ -52,7 +62,10 @@ const createBookCollection = async (
       async tr => {
         logger.info('>>> creating a new books collection')
 
-        const createdBookCollection = await BookCollection.query(tr).insert({})
+        const createdBookCollection = await BookCollection.insert(
+          {},
+          { trx: tr },
+        )
 
         logger.info(
           `>>> books collection created with id: ${createdBookCollection.id}`,
@@ -61,11 +74,14 @@ const createBookCollection = async (
         logger.info('>>> creating a new books collection translation')
 
         const createdBookCollectionTranslation =
-          await BookCollectionTranslation.query(tr).insert({
-            collectionId: createdBookCollection.id,
-            languageIso,
-            title,
-          })
+          await BookCollectionTranslation.insert(
+            {
+              collectionId: createdBookCollection.id,
+              languageIso,
+              title,
+            },
+            { trx: tr },
+          )
 
         logger.info(
           `>>> books collection translation created with id: ${createdBookCollectionTranslation.id}`,

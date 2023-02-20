@@ -40,7 +40,7 @@ const createFile = async (
     logger.info(
       `>>> creating file representation for the file with name ${cleanedObject.name}`,
     )
-    return useTransaction(async tr => File.query(tr).insert(cleanedObject), {
+    return useTransaction(async tr => File.insert(cleanedObject, { trx: tr }), {
       trx,
     })
   } catch (e) {
@@ -57,30 +57,37 @@ const updateFile = async (id, data, options = {}) => {
         logger.info(`>>> updating file with id ${id}`)
 
         if (alt) {
-          const fileTranslation = await FileTranslation.query(tr).findOne({
-            fileId: id,
-            languageIso: 'en',
-          })
+          const fileTranslation = await FileTranslation.findOne(
+            {
+              fileId: id,
+              languageIso: 'en',
+            },
+            { trx: tr },
+          )
 
           if (fileTranslation) {
-            await FileTranslation.query(tr).patchAndFetchById(
+            await FileTranslation.patchAndFetchById(
               fileTranslation.id,
               {
                 alt,
               },
+              { trx: tr },
             )
           } else {
-            await FileTranslation.query(tr).insert({
-              fileId: id,
-              languageIso: 'en',
-              alt,
-            })
+            await FileTranslation.insert(
+              {
+                fileId: id,
+                languageIso: 'en',
+                alt,
+              },
+              { trx: tr },
+            )
           }
 
-          return File.query(tr).findById(id)
+          return File.findById(id, { trx: tr })
         }
 
-        return File.query(tr).patchAndFetchById(id, { name })
+        return File.patchAndFetchById(id, { name }, { trx: tr })
       },
       { trx },
     )
@@ -113,9 +120,13 @@ const deleteFile = async (id, remoteToo = false, options = {}) => {
           `>>> deleting file representation from db with file id ${id}`,
         )
 
-        const deletedFile = await File.query(tr).patchAndFetchById(id, {
-          deleted: true,
-        })
+        const deletedFile = await File.patchAndFetchById(
+          id,
+          {
+            deleted: true,
+          },
+          { trx: tr },
+        )
 
         const { id: deletedId, mimetype, objectKey } = deletedFile
 
@@ -166,7 +177,7 @@ const deleteFiles = async (ids, remoteToo = false, options = {}) => {
     return useTransaction(
       async tr => {
         await File.query(tr).patch({ deleted: true }).whereIn('id', ids)
-        const deletedFiles = await File.query(tr).whereIn('id', ids)
+        const deletedFiles = await File.findByIds(ids, { trx: tr })
 
         if (remoteToo) {
           await Promise.all(
@@ -232,15 +243,24 @@ const getEntityFiles = async (
 
           logger.info(`>>> constructing orderBy params: ${orderByParams}`)
 
-          return File.query(tr)
-            .where({ [`${entityType}Id`]: entityId })
-            .andWhere({ deleted: false })
-            .orderBy(orderByParams)
+          const { result } = await File.find(
+            { [`${entityType}Id`]: entityId, deleted: false },
+            { trx: tr, orderBy: orderByParams },
+          )
+
+          return result
+          // return File.query(tr)
+          //   .where({ [`${entityType}Id`]: entityId })
+          //   .andWhere({ deleted: false })
+          //   .orderBy(orderByParams)
         }
 
-        return File.query(tr)
-          .where({ [`${entityType}Id`]: entityId })
-          .andWhere({ deleted: false })
+        const { result } = File.find(
+          { [`${entityType}Id`]: entityId, deleted: false },
+          { trx: tr },
+        )
+
+        return result
       },
       { trx, passedTrxOnly: true },
     )
@@ -254,7 +274,10 @@ const getFiles = async (options = {}) => {
     const { trx } = options
     logger.info(`>>> fetching all files`)
     return useTransaction(
-      async tr => File.query(tr).where({ deleted: false }),
+      async tr => {
+        const { result } = await File.find({ deleted: false }, { trx: tr })
+        return result
+      },
       { trx, passedTrxOnly: true },
     )
   } catch (e) {
@@ -283,7 +306,7 @@ const getFile = async (id, options = {}) => {
 
     const file = await useTransaction(
       async tr => {
-        const item = await File.query(tr).findById(id)
+        const item = await File.findById(id, { trx: tr })
 
         if (item.deleted) {
           throw new Error('this file is deleted')
@@ -307,7 +330,7 @@ const getFileURL = async (id, size = undefined, options = {}) => {
 
     const file = await useTransaction(
       async tr => {
-        const item = await File.query(tr).findById(id)
+        const item = await File.findById(id, { trx: tr })
 
         if (item.deleted) {
           throw new Error('this file is deleted')
@@ -350,13 +373,16 @@ const getContentFiles = async (fileIds, options = {}) => {
           map(files, async file => {
             const { id, mimetype, objectKey } = file
 
-            const translation = await FileTranslation.query(tr).where({
-              fileId: id,
-              languageIso: 'en',
-            })
+            const translation = await FileTranslation.findOne(
+              {
+                fileId: id,
+                languageIso: 'en',
+              },
+              { trx: tr },
+            )
 
             /* eslint-disable no-param-reassign */
-            file.alt = translation.length === 1 ? translation[0].alt : null
+            file.alt = translation ? translation.alt : null
 
             if (mimetype.match(/^image\//)) {
               if (mimetype !== 'image/svg+xml') {

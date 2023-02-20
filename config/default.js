@@ -88,6 +88,16 @@ module.exports = {
       path: path.join(__dirname, '..', 'services', 'cron.service.js'),
     },
   },
+  teams: {
+    global: {
+      productionEditor: {
+        displayName: 'Production Editor',
+        role: 'productionEditor',
+      },
+    },
+    nonGlobal: {},
+  },
+
   'file-server': {
     accessKeyId: 'S3_ACCESS_KEY_ID_USER',
     secretAccessKey: 'S3_SECRET_ACCESS_KEY_USER',

@@ -23,30 +23,36 @@ const bookComponentCreator = async (
 
         if (bookComponentId) {
           logger.info(`>>> enforcing book component id ${bookComponentId}`)
-          newBookComponent = await BookComponent.query(tr).insert({
-            bookId,
-            id: bookComponentId,
-            componentType,
-            divisionId,
-            pagination: {
-              left: false,
-              right: false,
+          newBookComponent = await BookComponent.insert(
+            {
+              bookId,
+              id: bookComponentId,
+              componentType,
+              divisionId,
+              pagination: {
+                left: false,
+                right: false,
+              },
+              archived: false,
+              deleted: false,
             },
-            archived: false,
-            deleted: false,
-          })
+            { trx: tr },
+          )
         } else {
-          newBookComponent = await BookComponent.query(tr).insert({
-            bookId,
-            componentType,
-            divisionId,
-            pagination: {
-              left: false,
-              right: false,
+          newBookComponent = await BookComponent.insert(
+            {
+              bookId,
+              componentType,
+              divisionId,
+              pagination: {
+                left: false,
+                right: false,
+              },
+              archived: false,
+              deleted: false,
             },
-            archived: false,
-            deleted: false,
-          })
+            { trx: tr },
+          )
         }
 
         logger.info(`>>> book component created with id ${newBookComponent.id}`)
@@ -98,7 +104,7 @@ const bookComponentCreator = async (
           `>>> creating book component state for book component with id ${newBookComponent.id}`,
         )
 
-        const bookComponentState = await BookComponentState.query(tr).insert(
+        const bookComponentState = await BookComponentState.insert(
           assign(
             {},
             {
@@ -109,6 +115,7 @@ const bookComponentCreator = async (
             },
             bookComponentWorkflowStages,
           ),
+          { trx: tr },
         )
 
         logger.info(`>>> book component state with id ${bookComponentState.id}`)

@@ -71,7 +71,7 @@ services:
         '--',
         'scripts',
         '--',
-        'startServer.js',
+        'startWebSocketServer.js',
         '--',
         'app.js',
         '--ext',
@@ -147,10 +147,11 @@ services:
       - TEMP_DIRECTORY_CLEAN_UP=${TEMP_DIRECTORY_CLEAN_UP:-true}
 
     volumes:
-      - ./api:/home/node/server/api
       - ./config:/home/node/server/config
+      - ./api:/home/node/server/api
       - ./services:/home/node/server/services
       - ./utilities:/home/node/server/utilities
+      - ./controllers:/home/node/server/controllers
       - ./models:/home/node/server/models
       - ./scripts:/home/node/server/scripts
       - ./app.js:/home/node/server/app.js

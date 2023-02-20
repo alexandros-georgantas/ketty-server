@@ -44,24 +44,30 @@ const updateApplicationParameters = async (
           `>>> updating application parameters for ${context} - ${area}`,
         )
 
-        const applicationParameter = await ApplicationParameter.query(tr).where(
-          {
-            context,
-            area,
-          },
-        )
+        const { result: applicationParameters } =
+          await ApplicationParameter.find(
+            {
+              context,
+              area,
+            },
+            { trx: tr },
+          )
 
-        if (applicationParameter.length !== 1) {
+        if (applicationParameters.length !== 1) {
           throw new Error(
             'multiple records for the same application parameters context and area',
           )
         }
 
-        const { id } = applicationParameter[0]
+        const { id } = applicationParameters[0]
 
-        return ApplicationParameter.query(tr).patchAndFetchById(id, {
-          config,
-        })
+        return ApplicationParameter.patchAndFetchById(
+          id,
+          {
+            config,
+          },
+          { trx: tr },
+        )
       },
       { trx },
     )

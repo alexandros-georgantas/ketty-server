@@ -143,13 +143,12 @@ const createTemplate = async (sourceRoot, data, cssFile, notes) => {
     if (areAssetsOK) {
       logger.info('Checking if template with that name already exists')
 
-      const existingTemplate = await Template.query()
-        .where({
-          name: `${name} (${notes})`,
-        })
-        .andWhere({ target })
+      const { result: existingTemplates } = await Template.find({
+        name: `${name} (${notes})`,
+        target,
+      })
 
-      if (existingTemplate.length > 0) {
+      if (existingTemplates.length > 0) {
         logger.info(`Template with name ${name} (${notes}) already exists`)
       } else {
         await useTransaction(transactionWrapper)

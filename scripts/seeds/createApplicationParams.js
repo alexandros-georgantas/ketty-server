@@ -41,11 +41,14 @@ const createApplicationParams = async () => {
                   configVanilla[area],
                 )}`,
               )
-              return ApplicationParameter.query(trx).insert({
-                context: 'bookBuilder',
-                area,
-                config: JSON.stringify(configVanilla[area]),
-              })
+              return ApplicationParameter.insert(
+                {
+                  context: 'bookBuilder',
+                  area,
+                  config: JSON.stringify(configVanilla[area]),
+                },
+                { trx },
+              )
             }),
           ),
         )
@@ -60,11 +63,14 @@ const createApplicationParams = async () => {
                   configBooksprints[area],
                 )}`,
               )
-              return ApplicationParameter.query(trx).insert({
-                context: 'bookBuilder',
-                area,
-                config: JSON.stringify(configBooksprints[area]),
-              })
+              return ApplicationParameter.insert(
+                {
+                  context: 'bookBuilder',
+                  area,
+                  config: JSON.stringify(configBooksprints[area]),
+                },
+                { trx },
+              )
             }),
           ),
         )
@@ -80,11 +86,14 @@ const createApplicationParams = async () => {
                 configOEN[area],
               )}`,
             )
-            return ApplicationParameter.query(trx).insert({
-              context: 'bookBuilder',
-              area,
-              config: JSON.stringify(configOEN[area]),
-            })
+            return ApplicationParameter.insert(
+              {
+                context: 'bookBuilder',
+                area,
+                config: JSON.stringify(configOEN[area]),
+              },
+              { trx },
+            )
           }),
         ),
       )

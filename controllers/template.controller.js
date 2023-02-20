@@ -35,7 +35,10 @@ const getTemplates = async (
     return useTransaction(
       async tr => {
         if (!target) {
-          const templates = await Template.query(tr).where('deleted', false)
+          const { result: templates } = await Template.find(
+            { deleted: false },
+            { trx: tr },
+          )
 
           const sortable = map(templates, template => {
             const { id, name, author, target: innerTarget } = template
@@ -61,10 +64,12 @@ const getTemplates = async (
         logger.info(`>>> with target ${target} and notes ${notes}`)
 
         if (notes && notes === 'endnotes') {
-          return Template.query(tr)
-            .where('deleted', false)
-            .andWhere('target', target)
-            .andWhere('notes', notes)
+          const { result } = await Template.find(
+            { deleted: false, target, notes },
+            { trx: tr },
+          )
+
+          return result
         }
 
         return Template.query(tr)
@@ -83,7 +88,7 @@ const getTemplate = async (id, options = {}) => {
   try {
     const { trx } = options
     logger.info(`>>> fetching template with id ${id}`)
-    return useTransaction(async tr => Template.query(tr).findById(id), {
+    return useTransaction(async tr => Template.findById(id, { trx: tr }), {
       trx,
       passedTrxOnly: true,
     })
@@ -109,14 +114,17 @@ const createTemplate = async (
     logger.info('>>> creating new template')
     return useTransaction(
       async tr => {
-        const newTemplate = await Template.query(tr).insert({
-          name,
-          author,
-          target,
-          notes,
-          trimSize,
-          exportScripts,
-        })
+        const newTemplate = await Template.insert(
+          {
+            name,
+            author,
+            target,
+            notes,
+            trimSize,
+            exportScripts,
+          },
+          { trx: tr },
+        )
 
         logger.info(`>>> new template created with id ${newTemplate.id}`)
 
@@ -218,23 +226,27 @@ const cloneTemplate = async (id, name, cssFile, hashed, options = {}) => {
         await fs.ensureDir(uploadsPath)
         await fs.ensureDir(tempFolder)
 
-        const template = await Template.query(tr).findById(id)
+        const template = await Template.findById(id, { trx: tr })
 
-        const newTemplate = await Template.query(tr).insert({
-          name,
-          author: template.author,
-          target: template.target,
-          trimSize: template.trimSize,
-          exportScripts: template.exportScripts,
-          notes: template.notes,
-          referenceId: template.id,
-        })
+        const newTemplate = await Template.insert(
+          {
+            name,
+            author: template.author,
+            target: template.target,
+            trimSize: template.trimSize,
+            exportScripts: template.exportScripts,
+            notes: template.notes,
+            referenceId: template.id,
+          },
+          { trx: tr },
+        )
 
         logger.info(`>>> new template created with id ${newTemplate.id}`)
 
-        const files = await File.query(tr)
-          .where('templateId', id)
-          .andWhere({ deleted: false })
+        const { result: files } = await File.find(
+          { templateId: id, deleted: false },
+          { trx: tr },
+        )
 
         await Promise.all(
           map(files, async file => {
@@ -281,9 +293,13 @@ const cloneTemplate = async (id, name, cssFile, hashed, options = {}) => {
             )
 
             if (template.thumbnailId === file.id) {
-              await Template.query(tr).patchAndFetchById(newTemplate.id, {
-                thumbnailId: newFile.id,
-              })
+              await Template.patchAndFetchById(
+                newTemplate.id,
+                {
+                  thumbnailId: newFile.id,
+                },
+                { trx: tr },
+              )
             }
           }),
         )
@@ -322,9 +338,10 @@ const updateTemplate = async (data, options = {}) => {
             `>>> existing thumbnail with id ${deleteThumbnail} will be patched and set to deleted true`,
           )
 
-          const deletedThumbnail = await File.query(tr).patchAndFetchById(
+          const deletedThumbnail = await File.patchAndFetchById(
             deleteThumbnail,
             { deleted: true },
+            { trx: tr },
           )
 
           logger.info(`>>> file with id ${deletedThumbnail.id} was patched`)
@@ -338,11 +355,12 @@ const updateTemplate = async (data, options = {}) => {
           )
           await Promise.all(
             map(deleteFiles, async fileId => {
-              const deletedFile = await File.query(tr).patchAndFetchById(
+              const deletedFile = await File.patchAndFetchById(
                 fileId,
                 {
                   deleted: true,
                 },
+                { trx: tr },
               )
 
               logger.info(`>>> file with id ${deletedFile.id} was patched`)
@@ -430,14 +448,18 @@ const updateTemplate = async (data, options = {}) => {
             .findById(id)
         }
 
-        const updatedTemplate = await Template.query(tr).patchAndFetchById(id, {
-          name,
-          author,
-          trimSize,
-          exportScripts,
-          target,
-          notes,
-        })
+        const updatedTemplate = await Template.patchAndFetchById(
+          id,
+          {
+            name,
+            author,
+            trimSize,
+            exportScripts,
+            target,
+            notes,
+          },
+          { trx: tr },
+        )
 
         return updatedTemplate
       },
@@ -453,9 +475,13 @@ const deleteTemplate = async (id, options = {}) => {
     const { trx } = options
     return useTransaction(
       async tr => {
-        const toBeDeleted = await Template.query(tr).patchAndFetchById(id, {
-          deleted: true,
-        })
+        const toBeDeleted = await Template.patchAndFetchById(
+          id,
+          {
+            deleted: true,
+          },
+          { trx: tr },
+        )
 
         logger.info(
           `>>> template with id ${toBeDeleted.id} patched with deleted set to true`,
@@ -465,11 +491,12 @@ const deleteTemplate = async (id, options = {}) => {
         const thumbnail = await toBeDeleted.getThumbnail(tr)
 
         if (thumbnail) {
-          const deletedThumbnail = await File.query(tr).patchAndFetchById(
+          const deletedThumbnail = await File.patchAndFetchById(
             thumbnail.id,
             {
               deleted: true,
             },
+            { trx: tr },
           )
 
           logger.info(
@@ -483,11 +510,12 @@ const deleteTemplate = async (id, options = {}) => {
         await Promise.all(
           map(files, async file => {
             try {
-              const deletedFile = await File.query(tr).patchAndFetchById(
+              const deletedFile = await File.patchAndFetchById(
                 file.id,
                 {
                   deleted: true,
                 },
+                { trx: tr },
               )
 
               logger.info(
@@ -513,9 +541,13 @@ const updateTemplateCSSFile = async (id, data, hashed, options = {}) => {
     const { trx } = options
     return useTransaction(
       async tr => {
-        const oldFile = await File.query(tr).patchAndFetchById(id, {
-          deleted: true,
-        })
+        const oldFile = await File.patchAndFetchById(
+          id,
+          {
+            deleted: true,
+          },
+          { trx: tr },
+        )
 
         const { mimetype, name, extension, templateId } = oldFile
 
@@ -557,7 +589,7 @@ const updateTemplateCSSFile = async (id, data, hashed, options = {}) => {
           { trx: tr },
         )
         await fs.remove(path.join(uploadsPath, 'temp', 'previewer', hashed))
-        return Template.query(tr).findById(templateId)
+        return Template.findById(templateId, { trx: tr })
       },
       { trx },
     )

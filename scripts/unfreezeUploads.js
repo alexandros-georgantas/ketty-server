@@ -5,20 +5,23 @@ const BookComponentState = require('../models/bookComponentState/bookComponentSt
 
 const unfreezeUploading = async () => {
   try {
-    const hanged = await BookComponentState.query().where('uploading', true)
+    const { result: hanged } = await BookComponentState.find({
+      uploading: true,
+    })
+
     logger.info(`Found ${hanged.length} with hanging uploading`)
     await Promise.all(
       map(hanged, async bookComponentState => {
         logger.info(`Unfreezing ${bookComponentState.id}`)
-        return BookComponentState.query().patchAndFetchById(
-          bookComponentState.id,
-          {
-            uploading: false,
-          },
-        )
+        return BookComponentState.patchAndFetchById(bookComponentState.id, {
+          uploading: false,
+        })
       }),
     )
-    const after = await BookComponentState.query().where('uploading', true)
+
+    const after = await BookComponentState.find({
+      uploading: true,
+    })
 
     if (after.length === 0) {
       logger.info('Job done')
