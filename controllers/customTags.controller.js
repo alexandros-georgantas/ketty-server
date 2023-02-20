@@ -7,7 +7,11 @@ const getCustomTags = async (options = {}) => {
     return useTransaction(
       async tr => {
         logger.info('>>> fetching all the custom tags')
-        const customTags = await CustomTag.query(tr).where({ deleted: false })
+
+        const { result: customTags } = await CustomTag.find(
+          { deleted: false },
+          { trx: tr },
+        )
 
         if (!customTags) {
           throw new Error(`CustomTags error: Could not fetch Tags`)
@@ -27,10 +31,13 @@ const addCustomTag = async (label, tagType, options = {}) => {
     const { trx } = options
     return useTransaction(
       async tr => {
-        const newCustomTag = await CustomTag.query(tr).insert({
-          label,
-          tagType,
-        })
+        const newCustomTag = await CustomTag.insert(
+          {
+            label,
+            tagType,
+          },
+          { trx: tr },
+        )
 
         logger.info(`>>> new custom tag created with id ${newCustomTag.id}`)
         return newCustomTag
@@ -51,15 +58,22 @@ const updateCustomTag = async (tags, options = {}) => {
           tags.map(async tag => {
             const { id, deleted, tagType, label } = tag
             logger.info(`>>> updating custom tag with id ${id}`)
-            return CustomTag.query(tr).patchAndFetchById(id, {
-              label,
-              deleted,
-              tagType,
-            })
+            return CustomTag.patchAndFetchById(
+              id,
+              {
+                label,
+                deleted,
+                tagType,
+              },
+              { trx: tr },
+            )
           }),
         )
 
-        const customTags = await CustomTag.query(tr).where({ deleted: false })
+        const { result: customTags } = await CustomTag.find(
+          { deleted: false },
+          { trx: tr },
+        )
 
         return customTags
       },

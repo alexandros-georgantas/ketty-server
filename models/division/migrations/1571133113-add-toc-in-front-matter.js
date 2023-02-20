@@ -20,9 +20,10 @@ const assign = require('lodash/assign')
 exports.up = async knex => {
   try {
     await transaction(Division.knex(), async trx => {
-      const frontMatterDivisions = await Division.query(trx)
-        .where('label', 'Frontmatter')
-        .andWhere('deleted', false)
+      const { result: frontMatterDivisions } = await Division.find(
+        { label: 'Frontmatter', deleted: false },
+        { trx },
+      )
 
       await Promise.all(
         frontMatterDivisions.map(async division => {
@@ -30,7 +31,7 @@ exports.up = async knex => {
 
           const dbBookComponents = await Promise.all(
             bookComponents.map(async bookComponentId =>
-              BookComponent.query(trx).findById(bookComponentId),
+              BookComponent.findById(bookComponentId, { trx }),
             ),
           )
 
@@ -40,12 +41,15 @@ exports.up = async knex => {
             }) || false
 
           if (!divisionHasTOC) {
-            const workflowConfig = await ApplicationParameter.query().where({
-              context: 'bookBuilder',
-              area: 'stages',
-            })
+            const workflowConfig = await ApplicationParameter.findOne(
+              {
+                context: 'bookBuilder',
+                area: 'stages',
+              },
+              { trx },
+            )
 
-            const { config: workflowStages } = workflowConfig[0]
+            const { config: workflowStages } = workflowConfig
 
             let bookComponentWorkflowStages
 
@@ -65,8 +69,9 @@ exports.up = async knex => {
               deleted: false,
             }
 
-            const createdBookComponent = await BookComponent.query(trx).insert(
+            const createdBookComponent = await BookComponent.insert(
               newBookComponent,
+              { trx },
             )
 
             logger.info(
@@ -75,11 +80,14 @@ exports.up = async knex => {
 
             const translation = await BookComponentTranslation.query(
               trx,
-            ).insert({
-              bookComponentId: createdBookComponent.id,
-              languageIso: 'en',
-              title: 'Table of Contents',
-            })
+            ).insert(
+              {
+                bookComponentId: createdBookComponent.id,
+                languageIso: 'en',
+                title: 'Table of Contents',
+              },
+              { trx },
+            )
 
             logger.info(
               `New book component translation created with id ${translation.id}`,
@@ -95,7 +103,7 @@ exports.up = async knex => {
               }
             }
 
-            await BookComponentState.query(trx).insert(
+            await BookComponentState.insert(
               assign(
                 {},
                 {
@@ -106,6 +114,7 @@ exports.up = async knex => {
                 },
                 bookComponentWorkflowStages,
               ),
+              { trx },
             )
             const newBookComponents = division.bookComponents
 
@@ -114,9 +123,13 @@ exports.up = async knex => {
             logger.info(
               `Book component pushed to the array of division's book components [${newBookComponents}]`,
             )
-            return Division.query(trx).patchAndFetchById(division.id, {
-              bookComponents: newBookComponents,
-            })
+            return Division.patchAndFetchById(
+              division.id,
+              {
+                bookComponents: newBookComponents,
+              },
+              { trx },
+            )
           }
 
           return false

@@ -45,7 +45,7 @@ const RESTEndpoints = app => {
         throw new Error('error in xsweet conversion')
       }
 
-      const serviceCallbackToken = await ServiceCallbackToken.query().where({
+      const { result: serviceCallbackToken } = await ServiceCallbackToken.find({
         id: serviceCallbackTokenId,
         responseToken,
         bookComponentId,
@@ -60,7 +60,7 @@ const RESTEndpoints = app => {
 
       await updateUploading(bookComponentId, uploading)
       const updatedBookComponent = await BookComponent.findById(bookComponentId)
-      await ServiceCallbackToken.query().deleteById(serviceCallbackTokenId)
+      await ServiceCallbackToken.deleteById(serviceCallbackTokenId)
 
       await pubsub.publish(BOOK_COMPONENT_UPLOADING_UPDATED, {
         bookComponentUploadingUpdated: updatedBookComponent,

@@ -177,14 +177,12 @@ module.exports = {
   },
   File: {
     async alt({ id }, _, ctx) {
-      const translation = await FileTranslation.query().where({
+      const translation = await FileTranslation.findOne({
         fileId: id,
         languageIso: 'en',
       })
 
-      if (translation.length === 1) return translation[0].alt
-
-      return null
+      return translation ? translation.alt : null
     },
     async source({ objectKey, mimetype }, { size }, ctx) {
       if (mimetype.match(/^image\//)) {

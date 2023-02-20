@@ -26,9 +26,9 @@ const createBookCollectionHandler = async () => {
   try {
     logger.info('>>> checking if books collection already exists...')
 
-    const collection = await BookCollection.query()
+    const { result: collections } = await BookCollection.find({})
 
-    if (collection.length !== 0) {
+    if (collections.length !== 0) {
       logger.warn('>>> collection already exists')
       return false
     }

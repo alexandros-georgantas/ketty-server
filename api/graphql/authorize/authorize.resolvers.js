@@ -40,7 +40,7 @@ const executeMultipleAuthorizeRules = async (ctx, value, rules) => {
 const getDashBoardRules = async (_, args, ctx) => {
   await ctx.connectors.UserLoader.model.userTeams.clear()
 
-  const books = await Book.query().where({ deleted: false })
+  const { result: books } = await Book.find({ deleted: false })
 
   const canAddBook = await executeMultipleAuthorizeRules(
     ctx,
@@ -70,15 +70,15 @@ const getDashBoardRules = async (_, args, ctx) => {
 }
 
 const getBookBuilderRules = async (_, args, ctx) => {
-  const bookBuilderAppConfig = await ApplicationParameter.query().where({
+  const { result: bookBuilderAppConfig } = await ApplicationParameter.find({
     context: 'bookBuilder',
     area: 'stages',
   })
 
   await ctx.connectors.UserLoader.model.userTeams.clear()
-  const book = await Book.find(args.id)
+  const book = await Book.findById(args.id)
 
-  const bookComponents = await BookComponent.query().where({
+  const { result: bookComponents } = await BookComponent.find({
     deleted: false,
     bookId: args.id,
   })
@@ -163,12 +163,11 @@ const getBookBuilderRules = async (_, args, ctx) => {
 
 const getWaxRules = async (_, args, ctx) => {
   await ctx.connectors.UserLoader.model.userTeams.clear()
-  const bookComponent = await BookComponent.findOneByField('id', args.id)
+  const bookComponent = await BookComponent.findById(args.id)
 
-  const { workflowStages } = await BookComponentState.findOneByField(
-    'book_component_id',
-    bookComponent.id,
-  )
+  const { workflowStages } = await BookComponentState.findOne({
+    bookComponentId: bookComponent.id,
+  })
 
   bookComponent.workflowStages = workflowStages
 

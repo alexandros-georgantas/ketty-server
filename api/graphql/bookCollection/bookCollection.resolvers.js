@@ -77,22 +77,23 @@ module.exports = {
   },
   BookCollection: {
     async title(bookCollection, _, ctx) {
-      const bookCollectionTranslation = await BookCollectionTranslation.query()
-        .where('collectionId', bookCollection.id)
-        .andWhere('languageIso', 'en')
+      const bookCollectionTranslation = await BookCollectionTranslation.findOne(
+        { collectionId: bookCollection.id, languageIso: 'en' },
+      )
 
-      return bookCollectionTranslation[0].title
+      return bookCollectionTranslation.title
     },
     async books(bookCollection, { ascending, sortKey, archived }, ctx, info) {
       const books = await getBooks(bookCollection.id, archived, ctx.user)
 
       const sortable = await Promise.all(
         map(books, async book => {
-          const translation = await BookTranslation.query()
-            .where('bookId', book.id)
-            .andWhere('languageIso', 'en')
+          const translation = await BookTranslation.findOne({
+            bookId: book.id,
+            languageIso: 'en',
+          })
 
-          const { title } = translation[0]
+          const { title } = translation
 
           const authorsTeam = await getEntityTeam(
             book.id,

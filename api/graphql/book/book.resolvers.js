@@ -337,11 +337,12 @@ module.exports = {
   },
   Book: {
     async title(book, _, ctx) {
-      const bookTranslation = await BookTranslation.query()
-        .where('bookId', book.id)
-        .andWhere('languageIso', 'en')
+      const bookTranslation = await BookTranslation.findOne({
+        bookId: book.id,
+        languageIso: 'en',
+      })
 
-      return bookTranslation[0].title
+      return bookTranslation.title
     },
     divisions(book, _, ctx) {
       return book.divisions

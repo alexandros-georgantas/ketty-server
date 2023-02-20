@@ -7,7 +7,7 @@ const { model: divisionModel } = require('../../division')
 const DivisionLoader = {
   bookComponents: new Loader(async divisionId => {
     // eslint-disable-next-line no-return-await
-    const division = await divisionModel.query().findById(divisionId)
+    const division = await divisionModel.findById(divisionId)
     const bookComponentsOrder = division.bookComponents
 
     const bookComponents = await model

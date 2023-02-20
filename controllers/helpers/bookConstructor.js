@@ -36,39 +36,41 @@ module.exports = async bookId => {
     finalBook.bookStructure.levels = book.bookStructure.levels
   }
 
-  const bookTranslation = await BookTranslation.query()
-    .where('bookId', bookId)
-    .andWhere('languageIso', 'en')
-    .andWhere('deleted', false)
+  const bookTranslation = await BookTranslation.findOne({
+    bookId,
+    languageIso: 'en',
+    deleted: false,
+  })
 
-  const divisions = await Division.query()
-    .where('bookId', bookId)
-    .andWhere('deleted', false)
+  const { result: divisions } = await Division.find({ bookId, deleted: false })
 
-  const bookComponents = await BookComponent.query()
-    .where('bookId', bookId)
-    .andWhere('deleted', false)
+  const { result: bookComponents } = await BookComponent.find({
+    bookId,
+    deleted: false,
+  })
 
   const bookComponentsWithState = await Promise.all(
     map(bookComponents, async bookComponent => {
-      const bookComponentTranslation = await BookComponentTranslation.query()
-        .where('bookComponentId', bookComponent.id)
-        .andWhere('languageIso', 'en')
-        .andWhere('deleted', false)
+      const bookComponentTranslation = await BookComponentTranslation.findOne({
+        bookComponentId: bookComponent.id,
+        languageIso: 'en',
+        deleted: false,
+      })
 
-      const bookComponentState = await BookComponentState.query()
-        .where('bookComponentId', bookComponent.id)
-        .andWhere('deleted', false)
+      const bookComponentState = await BookComponentState.findOne({
+        bookComponentId: bookComponent.id,
+        deleted: false,
+      })
 
       return {
         id: bookComponent.id,
         divisionId: bookComponent.divisionId,
-        content: bookComponentTranslation[0].content,
-        title: bookComponentTranslation[0].title,
+        content: bookComponentTranslation.content,
+        title: bookComponentTranslation.title,
         componentType: bookComponent.componentType,
-        includeInTOC: bookComponentState[0].includeInToc,
-        runningHeadersRight: bookComponentState[0].runningHeadersRight,
-        runningHeadersLeft: bookComponentState[0].runningHeadersLeft,
+        includeInTOC: bookComponentState.includeInToc,
+        runningHeadersRight: bookComponentState.runningHeadersRight,
+        runningHeadersLeft: bookComponentState.runningHeadersLeft,
         pagination: bookComponent.pagination,
       }
     }),
@@ -171,7 +173,7 @@ module.exports = async bookId => {
     bookDivisions.set(divisionTypeMapper[division.label], tempDivision)
   }
 
-  finalBook.title = bookTranslation[0].title
+  finalBook.title = bookTranslation.title
   finalBook.metadata = bookMetadata
   finalBook.divisions = bookDivisions
   finalBook.id = book.id

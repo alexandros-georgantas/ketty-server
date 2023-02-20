@@ -73,7 +73,7 @@ describe('Book', () => {
     const collection = await new BookCollection().save()
     const book = await new Book({ collectionId: collection.id }).save()
 
-    const divisions = await Division.query().where('bookId', book.id)
+    const { result: divisions } = await Division.find({ bookId: book.id })
     expect(divisions).toHaveLength(3)
     expect(book.divisions).toHaveLength(3)
 
@@ -97,7 +97,7 @@ describe('Book', () => {
   it('creates a default division on book creation if no config is found', async () => {
     const collection = await new BookCollection().save()
     const book = await new Book({ collectionId: collection.id }).save()
-    const divisions = await Division.query().where('bookId', book.id)
+    const { result: divisions } = await Division.find({ bookId: book.id })
 
     expect(divisions).toHaveLength(1)
     expect(book.divisions).toHaveLength(1)

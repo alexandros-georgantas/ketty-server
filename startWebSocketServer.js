@@ -56,7 +56,12 @@ const startWSServer = async () => {
         logger.info(
           `WS close event for book component with id ${ws.bookComponentId}, tabId ${ws.tabId} and userId ${ws.userId}`,
         )
-        return unlockBookComponent(ws.bookComponentId, ws.userId, ws.tabId)
+
+        if (ws.bookComponentId && ws.userId && ws.tabId) {
+          return unlockBookComponent(ws.bookComponentId, ws.userId, ws.tabId)
+        }
+
+        return false
       })
       // WS EVENT LISTENERS SECTION END
     })
