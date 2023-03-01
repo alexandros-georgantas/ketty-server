@@ -39,11 +39,13 @@ const isAuthenticatedUser = async token => {
 
 const establishConnection = async (ws, req) => {
   try {
-    const serverURL = config.has('pubsweet-server.publicURL')
-      ? config.get('pubsweet-server.publicURL')
-      : config.get('pubsweet-server.baseUrl')
+    const serverUrl = config.has('pubsweet-server.serverUrl')
+      ? config.get('pubsweet-server.serverUrl')
+      : undefined
 
-    const url = new URL(req.url, serverURL)
+    if (!serverUrl)
+      throw new Error('serverUrl variable should not be undefined')
+    const url = new URL(req.url, serverUrl)
 
     const token = url.searchParams.get('token')
     const bookComponentId = url.searchParams.get('bookComponentId')

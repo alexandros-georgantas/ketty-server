@@ -36,16 +36,16 @@ const {
 const levelMapper = { 0: 'one', 1: 'two', 2: 'three' }
 
 const getURL = relativePath => {
-  const publicURL = config.has('pubsweet-server.publicURL')
-    ? config.get('pubsweet-server.publicURL')
+  const serverUrl = config.has('pubsweet-server.serverUrl')
+    ? config.get('pubsweet-server.serverUrl')
     : undefined
 
   // temp code for solving docker networking for macOS
   if (process.env.NODE_ENV !== 'production') {
-    return `${publicURL.replace('server', 'localhost')}/${relativePath}`
+    return `${serverUrl.replace('server', 'localhost')}/${relativePath}`
   }
 
-  return `${publicURL}/${relativePath}`
+  return `${serverUrl}/${relativePath}`
 }
 
 const ExporterService = async (

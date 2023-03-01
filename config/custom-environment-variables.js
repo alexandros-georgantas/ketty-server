@@ -24,8 +24,7 @@ module.exports = {
     host: 'SERVER_HOST',
     secret: 'PUBSWEET_SECRET',
     serveClient: 'SERVER_SERVE_CLIENT',
-    publicURL: 'PUBLIC_SERVER_URL',
-    clientURL: 'PUBLIC_CLIENT_URL',
+    serverUrl: 'SERVER_URL',
     WSServerPort: 'WS_SERVER_PORT',
     wsHeartbeatInterval: 'WS_HEARTBEAT_INTERVAL',
     failSafeUnlockingInterval: 'FAIL_SAFE_UNLOCKING_INTERVAL',
@@ -37,6 +36,7 @@ module.exports = {
       port: 'POSTGRES_PORT',
     },
   },
+  clientUrl: 'CLIENT_URL',
   services: {
     'epub-checker': {
       clientId: 'SERVICE_EPUB_CHECKER_CLIENT_ID',

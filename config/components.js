@@ -21,6 +21,7 @@ module.exports = [
   "./models/teamMember",
   "./models/user",
   "./models/dataloader",
+  "./models/serviceCredential",
   "./models/serviceCallbackToken",
   "./api/graphql",
   "./api/rest",
