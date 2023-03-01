@@ -176,9 +176,9 @@ const xsweetHandler = async (bookComponentId, filePath) => {
     const { responseToken, id: serviceCallbackTokenId } = serviceCallbackToken
     form.append('responseToken', responseToken)
     form.append('serviceCallbackTokenId', serviceCallbackTokenId)
-    const publicURL = config.get('pubsweet-server.publicURL')
+    const serverUrl = config.get('pubsweet-server.serverUrl')
 
-    form.append('callbackURL', `${publicURL}/api/xsweet`)
+    form.append('callbackURL', `${serverUrl}/api/xsweet`)
 
     return new Promise((resolve, reject) => {
       callMicroservice(XSWEET, {

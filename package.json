@@ -33,7 +33,7 @@
     "sharp": "0.29.3"
   },
   "dependencies": {
-    "@coko/server":"3.0.0-beta.2",
+    "@coko/server": "3.0.0-beta.5",
     "@pubsweet/component-password-reset-server": "^2.2.26",
     "@pubsweet/db-manager": "^3.1.5",
     "@pubsweet/errors": "^2.0.51",

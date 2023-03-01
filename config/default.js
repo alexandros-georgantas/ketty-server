@@ -71,7 +71,7 @@ module.exports = {
     serveClient: false,
     graphiql: true,
     tokenExpiresIn: '360 days',
-    publicURL: undefined,
+    serverUrl: undefined,
     port: 3000,
     protocol: 'http',
     host: 'localhost',
@@ -93,6 +93,10 @@ module.exports = {
       productionEditor: {
         displayName: 'Production Editor',
         role: 'productionEditor',
+      },
+      admin: {
+        displayName: 'Admin',
+        role: 'admin',
       },
     },
     nonGlobal: {},
