@@ -13,13 +13,13 @@ const adminUser = config.get('pubsweet-server.admin')
 
 const runner = async () => {
   try {
+    await createGlobalTeams()
     await createAdminUser({
       ...adminUser,
       admin: true,
     })
     await createApplicationParams()
     await createBookCollection()
-    await createGlobalTeams()
     await createTemplates()
   } catch (e) {
     logger.error(e.message)

@@ -14,7 +14,10 @@ const {
 
 const BookTranslation = require('../../../models/bookTranslation/bookTranslation.model')
 
-const { getEntityTeam } = require('../../../controllers/team.controller')
+const {
+  // getEntityTeam,
+  getObjectTeam,
+} = require('../../../controllers/team.controller')
 
 const {
   pagedPreviewerLink,
@@ -351,12 +354,13 @@ module.exports = {
       return book.archived
     },
     async authors(book, args, ctx, info) {
-      const authorsTeam = await getEntityTeam(book.id, 'book', 'author', true)
+      // const authorsTeam = await getEntityTeam(book.id, 'book', 'author', true)
+      const authorsTeam = await getObjectTeam('author', book.id, true)
 
       let authors = []
 
-      if (authorsTeam && authorsTeam.members.length > 0) {
-        authors = authorsTeam.members
+      if (authorsTeam && authorsTeam.users.length > 0) {
+        authors = authorsTeam.users
       }
 
       return authors
@@ -380,19 +384,18 @@ module.exports = {
       return isPublished
     },
     async productionEditors(book, _, ctx) {
-      const productionEditorsTeam = await getEntityTeam(
-        book.id,
-        'book',
+      const productionEditorsTeam = await getObjectTeam(
         'productionEditor',
+        book.id,
         true,
       )
 
       let productionEditors = []
 
-      if (productionEditorsTeam && productionEditorsTeam.members.length > 0) {
-        productionEditors = map(productionEditorsTeam.members, teamMember => {
-          const { givenName, surname } = teamMember
-          return `${givenName} ${surname}`
+      if (productionEditorsTeam && productionEditorsTeam.users.length > 0) {
+        productionEditors = map(productionEditorsTeam.users, teamMember => {
+          const { givenNames, surname } = teamMember
+          return `${givenNames} ${surname}`
         })
       }
 

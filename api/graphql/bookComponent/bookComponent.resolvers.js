@@ -697,7 +697,7 @@ module.exports = {
           created: lock.created,
           tabId: lock.tabId,
           username: user.username,
-          givenName: user.givenName,
+          givenName: user.givenNames,
           surname: user.surname,
           isAdmin: user.admin,
           userId: lock.userId,
@@ -736,7 +736,7 @@ module.exports = {
           bookComponent.id,
         )
 
-      return bookComponentState[0].uploading
+      return bookComponentState.uploading
     },
     async pagination(bookComponent, _, ctx) {
       return bookComponent.pagination
@@ -749,7 +749,7 @@ module.exports = {
           bookComponent.id,
         )
 
-      return bookComponentState[0].workflowStages || null
+      return bookComponentState.workflowStages || null
     },
 
     async includeInToc(bookComponent, _, ctx) {

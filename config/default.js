@@ -76,6 +76,14 @@ module.exports = {
     protocol: 'http',
     host: 'localhost',
     uploads: 'uploads',
+    emailVerificationTokenExpiry: {
+      amount: 24,
+      unit: 'hours',
+    },
+    passwordResetTokenExpiry: {
+      amount: 24,
+      unit: 'hours',
+    },
     pool: { min: 0, max: 10, idleTimeoutMillis: 1000 },
     admin: {
       username: 'ADMIN_USERNAME',
@@ -99,7 +107,20 @@ module.exports = {
         role: 'admin',
       },
     },
-    nonGlobal: {},
+    nonGlobal: {
+      productionEditor: {
+        displayName: 'Production Editor',
+        role: 'productionEditor',
+      },
+      copyEditor: {
+        displayName: 'Copy Editor',
+        role: 'copyEditor',
+      },
+      author: {
+        displayName: 'Author',
+        role: 'author',
+      },
+    },
   },
 
   'file-server': {

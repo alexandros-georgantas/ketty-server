@@ -8,6 +8,28 @@ const isUndefined = require('lodash/isUndefined')
 
 const { Team, TeamMember, User } = require('../models').models
 
+const getObjectTeam = async (
+  role,
+  objectId,
+  withTeamMembers = false,
+  options = {},
+) => {
+  try {
+    const { trx } = options
+
+    if (!withTeamMembers) {
+      return Team.findTeamByRoleAndObject(role, objectId, options)
+    }
+
+    return Team.findOne(
+      { role, objectId, global: false },
+      { trx, related: 'users' },
+    )
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
 const getTeamMembers = async (
   teamId,
   options = {},
@@ -62,7 +84,7 @@ const getTeamMembers = async (
 }
 
 const createTeam = async (
-  name,
+  displayName,
   objectId = undefined,
   objectType = undefined,
   role = undefined,
@@ -75,7 +97,7 @@ const createTeam = async (
     return useTransaction(
       async tr => {
         const teamData = {
-          name,
+          displayName,
           objectId,
           objectType,
           role,
@@ -83,7 +105,7 @@ const createTeam = async (
         }
 
         const cleanedData = omitBy(teamData, isUndefined)
-        const newTeam = await Team.query(tr).insert(cleanedData)
+        const newTeam = await Team.insert(cleanedData, { trx: tr })
 
         logger.info(`>>> team of type ${role} created with id ${newTeam.id}`)
 
@@ -111,26 +133,28 @@ const getEntityTeam = async (
           `>>> fetching team of ${objectType} with id ${objectId} and role ${role}`,
         )
 
-        const team = await Team.query(tr).where({
-          objectId,
-          objectType,
-          role,
-          deleted: false,
-        })
+        const team = await Team.findOne(
+          {
+            objectId,
+            objectType,
+            role,
+          },
+          { trx: tr },
+        )
 
-        if (team.length === 0) {
-          throw new Error(
-            `team of ${objectType} with id ${objectId} does not exist`,
-          )
-        }
+        // if (!team) {
+        //   throw new Error(
+        //     `team of ${objectType} with id ${objectId} does not exist`,
+        //   )
+        // }
 
         if (!withTeamMembers) {
-          return team[0]
+          return team
         }
 
-        team[0].members = await getTeamMembers(team[0].id, { trx: tr })
+        team.members = await getTeamMembers(team.id, { trx: tr })
 
-        return team[0]
+        return team
       },
       { trx, passedTrxOnly: true },
     )
@@ -153,7 +177,6 @@ const getEntityTeams = async (
         const teams = await Team.query(tr).where({
           objectId,
           objectType,
-          deleted: false,
           global: false,
         })
 
@@ -188,7 +211,6 @@ const deleteTeam = async (teamId, options = {}) => {
     return useTransaction(
       async tr => {
         const deletedTeam = await Team.query(tr).patchAndFetchById(teamId, {
-          deleted: false,
           objectId: null,
           objectType: null,
         })
@@ -227,7 +249,6 @@ const getGlobalTeams = async (withTeamMembers = false, options = {}) => {
       async tr => {
         const teams = await Team.query(tr).where({
           global: true,
-          deleted: false,
         })
 
         if (teams.length === 0) {
@@ -257,7 +278,7 @@ const getTeam = async (teamId, withTeamMembers = false, options = {}) => {
     const { trx } = options
     return useTransaction(
       async tr => {
-        const team = await Team.query(tr).where({ id: teamId, deleted: false })
+        const team = await Team.query(tr).where({ id: teamId })
 
         if (team.length === 0) {
           throw Error(`team with id ${teamId} does not exist`)
@@ -332,6 +353,7 @@ module.exports = {
   createTeam,
   getEntityTeams,
   getEntityTeam,
+  getObjectTeam,
   getTeam,
   getTeamMembers,
   getGlobalTeams,

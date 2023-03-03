@@ -888,12 +888,10 @@ module.exports = {
     const user = await context.models.UserLoader.userTeams.load(userId)
 
     if (user) {
-      const { teams, admin } = user
+      const { teams } = user
 
       if (teams.length > 0) {
         decision = findIndex(teams, { global: true }) !== -1
-      } else {
-        decision = admin || false
       }
     }
 

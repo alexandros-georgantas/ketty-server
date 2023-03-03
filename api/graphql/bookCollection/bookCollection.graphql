@@ -14,7 +14,7 @@ input NewBookCollectionInput {
 
 extend type Query {
   getBookCollection(input: BookCollectionInput!): BookCollection!
-  getBookCollections: [BookCollection]!
+  getBookCollections: [BookCollection!]!
   # getBookCollections(archivedBooks:Boolean!, deletedBooks:Boolean!): [BookCollection]!
 }
 

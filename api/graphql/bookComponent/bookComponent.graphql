@@ -14,7 +14,7 @@ type Lock {
   created: Date
   username: String
   isAdmin: Boolean
-  givenName: String
+  givenNames: String
   foreignId: ID
   foreignType: String
   surname: String
@@ -28,7 +28,7 @@ input LockInput {
   created: Date
   username: String
   isAdmin: Boolean
-  givenName: String
+  givenNames: String
   foreignId: ID
   foreignType: String
   surname: String

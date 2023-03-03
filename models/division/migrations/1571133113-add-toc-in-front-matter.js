@@ -14,7 +14,7 @@ const map = require('lodash/map')
 const assign = require('lodash/assign')
 
 /* 
-  For each Fronmatter division which doesn't have a TOC create one
+  For each Frontmatter division which doesn't have a TOC create one
 */
 
 exports.up = async knex => {
