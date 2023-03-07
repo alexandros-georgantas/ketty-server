@@ -1,5 +1,4 @@
 const { useTransaction, logger } = require('@coko/server')
-const keys = require('lodash/keys')
 const map = require('lodash/map')
 const find = require('lodash/find')
 const findIndex = require('lodash/findIndex')
