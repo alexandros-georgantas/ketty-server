@@ -1,6 +1,6 @@
 const { logger, useTransaction } = require('@coko/server')
 const Identity = require('@coko/server/src/models/identity/identity.model')
-const Team = require('../../models/team/ketidaTeam.model')
+const Team = require('../../models/team/team.model')
 const User = require('../../models/user/user.model')
 
 const createAdmin = async userData => {
@@ -10,7 +10,7 @@ const createAdmin = async userData => {
       '>>> checking if admin user with provided email and username already exists...',
     )
 
-    const { username, password, email, givenName, surname } = userData
+    const { username, password, email, givenNames, surname } = userData
 
     await useTransaction(async trx => {
       let adminUser
@@ -48,7 +48,7 @@ const createAdmin = async userData => {
         const newAdminUser = await User.insert(
           {
             password,
-            givenNames: givenName,
+            givenNames,
             surname,
             agreedTc: true,
             isActive: true,

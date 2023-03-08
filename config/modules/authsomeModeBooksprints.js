@@ -1,4 +1,7 @@
-const { transform, isEqual, isObject } = require('lodash')
+const findIndex = require('lodash/findIndex')
+const transform = require('lodash/transform')
+const isEqual = require('lodash/isEqual')
+const isObject = require('lodash/isObject')
 
 class KetidaMode {
   /**
@@ -79,7 +82,7 @@ class KetidaMode {
         this.userId,
       )
     } else {
-      this.user = await this.context.models.User.find(this.userId)
+      this.user = await this.context.models.User.findOne({ id: this.userId })
     }
   }
 
@@ -102,7 +105,9 @@ class KetidaMode {
 
     const memberships = await Promise.all(
       this.user.teams.map(async teamId => {
-        const teamFound = await this.context.models.Team.find(teamId.id)
+        const teamFound = await this.context.models.Team.findOne({
+          id: teamId.id,
+        })
 
         if (teamFound) {
           return membershipCondition(teamFound)
@@ -153,7 +158,7 @@ class KetidaMode {
     }
 
     if (id) {
-      return this.context.models.Book.find(id)
+      return this.context.models.Book.findOne({ id })
     }
 
     return undefined
@@ -161,7 +166,15 @@ class KetidaMode {
 
   async canReadBook() {
     await this.getUser()
-    const Book = await this.context.models.Book.find(this.object.id)
+    let bookId
+
+    if (this.object.type === 'bookComponent') {
+      bookId = this.object.bookId
+    } else {
+      bookId = this.object.id
+    }
+
+    const Book = await this.context.models.Book.findOne({ id: bookId })
 
     const permission =
       (await this.isAuthor(Book)) ||
@@ -263,7 +276,7 @@ class KetidaMode {
   }
 
   async canDeleteCollection() {
-    this.user = await this.context.models.User.find(this.userId)
+    this.user = await this.context.models.User.findOne({ id: this.userId })
     let current
 
     if (this.object.current) {
@@ -329,9 +342,9 @@ class KetidaMode {
     let collection = { id: current.bookId }
 
     if (current.type === 'bookComponentState') {
-      const { bookId } = await this.context.models.BookComponent.find(
-        current.bookComponentId,
-      )
+      const { bookId } = await this.context.models.BookComponent.findOne({
+        id: current.bookComponentId,
+      })
 
       collection = { id: bookId }
     }
@@ -347,17 +360,6 @@ class KetidaMode {
     }
 
     return false
-  }
-
-  async canBroadcastFragmentPatchEvent() {
-    await this.getUser()
-
-    const foundFragment = await this.context.models.Fragment.find(
-      this.object.fragment.id,
-    )
-
-    const collection = await this.findBookByObject(foundFragment)
-    return foundFragment && collection && this.hasMembership(collection)
   }
 
   async canFragmentEdit() {
@@ -484,25 +486,20 @@ class KetidaMode {
 
 module.exports = {
   before: async (userId, operation, object, context) => {
-    if (!userId) return false
+    let decision = false
+    if (!userId) return decision
     const user = await context.models.UserLoader.userTeams.load(userId)
-    // // if (user.admin) {
-    // //   if (operation && operation === 'PATCH') {
-    // //     if (object.current.type === 'fragment') {
-    // //       const diff = KetidaMode.difference(object.update, object.current)
-    // //       if (
-    // //         object.current.lock !== null &&
-    // //         diff.lock !== undefined &&
-    // //         diff.lock !== null &&
-    // //         object.current.lock.editor.userId !== user.id
-    // //       ) {
-    // //         return false
-    // //       }
-    // //     }
-    // //   }
-    // // }
 
-    return user && user.admin
+    if (user) {
+      const { teams } = user
+
+      if (teams.length > 0) {
+        decision = findIndex(teams, { global: true, role: 'admin' }) !== -1
+      }
+    }
+
+    return decision
+    // return user && user.admin
   },
   create: async (userId, operation, object, context) => {
     const mode = new KetidaMode(userId, operation, object, context)

@@ -2,33 +2,6 @@ extend type User {
   admin: Boolean!
 }
 
-# input KetidaUserInput {
-#   username: String!
-#   email: String!
-#   password: String!
-#   surname: String!
-#   givenName: String!
-# }
-
-# input UpdatePersonalInformationInput {
-#   givenName: String!
-#   surname: String!
-# }
-
-# input UpdateUsernameInput {
-#   username: String!
-# }
-
-# input UpdatePasswordInput {
-#   currentPassword: String!
-#   newPassword: String!
-# }
-
 extend type Mutation {
   searchForUsers(search: String!, exclude: [ID]!): [User]!
-  #   createKetidaUser(input: KetidaUserInput): User!
-  #   updateKetidaUser(id: ID, input: KetidaUserInput): User!
-  #   updatePassword(input: UpdatePasswordInput): ID!
-  #   updatePersonalInformation(input: UpdatePersonalInformationInput!): User!
-  #   updateUsername(input: UpdateUsernameInput!): User!
 }

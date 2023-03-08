@@ -16,12 +16,12 @@ const {
   Division,
   Book,
   Lock,
-  User,
 } = require('../models').models
 
 const bookComponentContentCreator = require('./helpers/bookComponentContentCreator')
 
 const { isEmptyString } = require('../utilities/generic')
+const { isAdmin } = require('./user.controller')
 
 const getBookComponent = async (bookComponentId, options = {}) => {
   try {
@@ -545,9 +545,9 @@ const unlockBookComponent = async (
       logger.info(`lock for book component with id ${bookComponentId} deleted `)
 
       if (actingUserId) {
-        const user = await User.query(tr).findById(actingUserId)
+        const adminUser = await isAdmin(actingUserId)
 
-        if (user.admin && locks[0].userId !== actingUserId) {
+        if (adminUser && locks[0].userId !== actingUserId) {
           status = 100
         }
       }

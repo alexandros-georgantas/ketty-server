@@ -1,10 +1,8 @@
-const {
-  transform,
-  isEqual,
-  isObject,
-  differenceWith,
-  findIndex,
-} = require('lodash')
+const findIndex = require('lodash/findIndex')
+const transform = require('lodash/transform')
+const isEqual = require('lodash/isEqual')
+const isObject = require('lodash/isObject')
+const differenceWith = require('lodash/differenceWith')
 
 class KetidaMode {
   /**

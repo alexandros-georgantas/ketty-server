@@ -16,7 +16,6 @@ const runner = async () => {
     await createGlobalTeams()
     await createAdminUser({
       ...adminUser,
-      admin: true,
     })
     await createApplicationParams()
     await createBookCollection()

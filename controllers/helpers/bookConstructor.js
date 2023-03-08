@@ -14,7 +14,7 @@ const {
   BookComponentState,
 } = require('../../models').models
 
-const { getEntityTeam } = require('../team.controller')
+const { getObjectTeam } = require('../team.controller')
 
 const divisionTypeMapper = {
   Frontmatter: 'front',
@@ -122,13 +122,13 @@ module.exports = async bookId => {
     },
   )
 
-  const authorTeams = await getEntityTeam(bookId, 'book', 'author', true)
+  const authorTeam = await getObjectTeam('author', bookId, true)
   let authors = []
 
-  if (authorTeams[0] && authorTeams[0].members.length > 0) {
-    authors = map(authorTeams[0].members, teamMember => {
-      const { givenName, surname } = teamMember
-      return `${givenName} ${surname}`
+  if (authorTeam && authorTeam.users.length > 0) {
+    authors = map(authorTeam.users, user => {
+      const { givenNames, surname } = user
+      return `${givenNames} ${surname}`
     })
   }
 

@@ -7,6 +7,11 @@ const omitBy = require('lodash/omitBy')
 const isNil = require('lodash/isNil')
 const config = require('config')
 const BPromise = require('bluebird')
+
+const {
+  getObjectTeams,
+} = require('@coko/server/src/models/team/team.controller')
+
 const exporter = require('./helpers/exporter')
 const bookComponentCreator = require('./helpers/createBookComponent')
 const bookComponentContentCreator = require('./helpers/bookComponentContentCreator')
@@ -28,12 +33,7 @@ const {
 
 const { createDivision } = require('./division.controller')
 
-const {
-  createTeam,
-  getEntityTeams,
-  getEntityTeam,
-  deleteTeam,
-} = require('./team.controller')
+const { createTeam, getObjectTeam, deleteTeam } = require('./team.controller')
 
 const { isAdmin } = require('./user.controller')
 
@@ -287,13 +287,16 @@ const createBook = async (collectionId, title, options = {}) => {
             Object.keys(configNonGlobalTeams).map(async k => {
               const teamData = configNonGlobalTeams[k]
 
-              const exists = await getEntityTeam(
-                bookId,
-                'book',
-                teamData.role,
-                false,
-                { trx: tr },
-              )
+              // const exists = await getEntityTeam(
+              //   bookId,
+              //   'book',
+              //   teamData.role,
+              //   false,
+              //   { trx: tr },
+              // )
+              const exists = await getObjectTeam(teamData.role, bookId, false, {
+                trx: tr,
+              })
 
               if (exists) {
                 logger.info(
@@ -517,9 +520,13 @@ const deleteBook = async (bookId, options = {}) => {
           }),
         )
 
-        const associatedTeams = await getEntityTeams(bookId, 'book', false, {
-          trx: tr,
-        })
+        const { result: associatedTeams } = await getObjectTeams(
+          bookId,
+          'book',
+          {
+            trx: tr,
+          },
+        )
 
         if (associatedTeams.length > 0) {
           await Promise.all(

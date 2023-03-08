@@ -85,13 +85,6 @@ module.exports = {
       unit: 'hours',
     },
     pool: { min: 0, max: 10, idleTimeoutMillis: 1000 },
-    admin: {
-      username: 'ADMIN_USERNAME',
-      password: 'ADMIN_PASSWORD',
-      givenName: 'ADMIN_GIVEN_NAME',
-      surname: 'ADMIN_SURNAME',
-      email: 'ADMIN_EMAIL',
-    },
     cron: {
       path: path.join(__dirname, '..', 'services', 'cron.service.js'),
     },
@@ -132,36 +125,7 @@ module.exports = {
     port: 'S3_PORT',
     minioConsolePort: 'MINIO_CONSOLE_PORT',
   },
-  services: {
-    'epub-checker': {
-      clientId: 'SERVICE_EPUB_CHECKER_CLIENT_ID',
-      clientSecret: 'SERVICE_EPUB_CHECKER_SECRET',
-      protocol: 'SERVICE_EPUB_CHECKER_PROTOCOL',
-      host: 'SERVICE_EPUB_CHECKER_HOST',
-      port: 'SERVICE_EPUB_CHECKER_PORT',
-    },
-    icml: {
-      clientId: 'SERVICE_ICML_CLIENT_ID',
-      clientSecret: 'SERVICE_ICML_SECRET',
-      protocol: 'SERVICE_ICML_PROTOCOL',
-      host: 'SERVICE_ICML_HOST',
-      port: 'SERVICE_ICML_PORT',
-    },
-    pagedjs: {
-      clientId: 'SERVICE_PAGEDJS_CLIENT_ID',
-      clientSecret: 'SERVICE_PAGEDJS_SECRET',
-      protocol: 'SERVICE_PAGEDJS_PROTOCOL',
-      host: 'SERVICE_PAGEDJS_HOST',
-      port: 'SERVICE_PAGEDJS_PORT',
-    },
-    xsweet: {
-      clientId: 'SERVICE_XSWEET_CLIENT_ID',
-      clientSecret: 'SERVICE_XSWEET_SECRET',
-      protocol: 'SERVICE_XSWEET_PROTOCOL',
-      host: 'SERVICE_XSWEET_HOST',
-      port: 'SERVICE_XSWEET_PORT',
-    },
-  },
+  services: {},
   templates: ['Atla'],
   export: {
     rootFolder: 'config/exportScripts',

@@ -1,6 +1,6 @@
 const { logger } = require('@coko/server')
 const config = require('config')
-const Team = require('../../models/team/ketidaTeam.model')
+const Team = require('../../models/team/team.model')
 
 const createGlobalTeams = async () => {
   try {

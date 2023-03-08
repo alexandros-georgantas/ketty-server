@@ -10,33 +10,6 @@ const {
   BOOK_PRODUCTION_EDITORS_UPDATED,
 } = require('./constants')
 
-// const {
-//   getEntityTeams,
-//   getTeamMembers,
-//   getGlobalTeams,
-//   updateTeamMembers,
-// } = require('../../../controllers/team.controller')
-
-// const getBookTeamsHandler = async (_, { bookId }, ctx) => {
-//   try {
-//     logger.info('team resolver: executing getEntityTeams use case')
-//     const test = await getEntityTeams(bookId, 'book')
-//     return test
-//   } catch (e) {
-//     logger.error(e)
-//     throw new Error(e)
-//   }
-// }
-
-// const getGlobalTeamsHandler = async (_, __, ctx) => {
-//   try {
-//     logger.info('team resolver: executing getGlobalTeams use case')
-//     return getGlobalTeams()
-//   } catch (e) {
-//     throw new Error(e)
-//   }
-// }
-
 const updateKetidaTeamMembersHandler = async (_, { teamId, members }, ctx) => {
   try {
     const pubsub = await pubsubManager.getPubsub()
@@ -68,10 +41,6 @@ const updateKetidaTeamMembersHandler = async (_, { teamId, members }, ctx) => {
 }
 
 module.exports = {
-  //   Query: {
-  //     getBookTeams: getBookTeamsHandler,
-  //     getGlobalTeams: getGlobalTeamsHandler,
-  //   },
   Mutation: {
     updateKetidaTeamMembers: updateKetidaTeamMembersHandler,
   },

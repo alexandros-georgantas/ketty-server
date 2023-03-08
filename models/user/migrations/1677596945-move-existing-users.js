@@ -3,7 +3,7 @@ const { logger } = require('@coko/server')
 
 /* eslint-disable import/no-unresolved */
 const User = require('../models/user/user.model')
-const Team = require('../models/team/ketidaTeam.model')
+const Team = require('../models/team/team.model')
 /* eslint-enable import/no-unresolved */
 
 exports.up = async knex => {

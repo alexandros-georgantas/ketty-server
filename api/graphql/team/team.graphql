@@ -1,28 +1,5 @@
-# type KetidaTeamMember {
-#   id: ID
-#   user: User
-# }
-# type KetidaTeam {
-#   id: ID!
-#   type: String!
-#   name: String!
-#   role: String!
-#   objectId: ID
-#   objectType: String
-#   members: [KetidaTeamMember!]
-#   global: Boolean
-# }
-
-# extend type Query {
-#   getBookTeams(bookId: ID!): [KetidaTeam]!
-#   getGlobalTeams: [KetidaTeam]!
-# }
-
 type TeamSub {
-  #   objectId: ID
-  #   id: ID!
   role: String
-  #   users: [User]!
   global: Boolean
 }
 
