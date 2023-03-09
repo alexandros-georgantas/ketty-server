@@ -37,16 +37,16 @@ const bookComponentContentCreator = async (
                 if (contentItem.type === 'contentOpenerImage') {
                   container('body').append(
                     `<div id="${
-                      contentItem.id
-                    }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                      contentItem.type
+                    }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                       contentItem.type,
                     )}"></div>`,
                   )
                 } else if (contentItem.type !== 'mainContent') {
                   container('body').append(
                     `<div id="${
-                      contentItem.id
-                    }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                      contentItem.type
+                    }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                       contentItem.type,
                     )}"><h2>${contentItem.displayName}</h2></div>`,
                   )
@@ -68,17 +68,17 @@ const bookComponentContentCreator = async (
                   contentItem => {
                     if (contentItem.type === 'contentOpenerImage') {
                       container(`#${level}-${outlineLevelTwoItem.id}`).append(
-                        `<div id="${level}-${
-                          contentItem.id
-                        }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                        `<div id="${
+                          contentItem.type
+                        }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                           contentItem.type,
                         )}"></div>`,
                       )
                     } else if (contentItem.type !== 'mainContent') {
                       container(`#${level}-${outlineLevelTwoItem.id}`).append(
-                        `<div id="${level}-${
-                          contentItem.id
-                        }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                        `<div id="${
+                          contentItem.type
+                        }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                           contentItem.type,
                         )}"><h3>${contentItem.displayName}</h3></div>`,
                       )
@@ -95,17 +95,17 @@ const bookComponentContentCreator = async (
                   contentItem.type === 'contentOpenerImage'
                 ) {
                   container('body').append(
-                    `<div id="${level + 2}-${
-                      contentItem.id
-                    }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                    `<div id="${
+                      contentItem.type
+                    }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                       contentItem.type,
                     )}"></div>`,
                   )
                 } else {
                   container('body').append(
-                    `<div id="${level + 2}-${
-                      contentItem.id
-                    }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                    `<div id="${
+                      contentItem.type
+                    }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                       contentItem.type,
                     )}"><h2>${contentItem.displayName}</h2></div>`,
                   )
@@ -118,17 +118,17 @@ const bookComponentContentCreator = async (
               contentItem => {
                 if (contentItem.type === 'contentOpenerImage') {
                   container('body').append(
-                    `<div id="${level}-${
-                      contentItem.id
-                    }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                    `<div id="${
+                      contentItem.type
+                    }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                       contentItem.type,
                     )}"></div>`,
                   )
                 } else if (contentItem.type !== 'mainContent') {
                   container('body').append(
-                    `<div id="${level}-${
-                      contentItem.id
-                    }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                    `<div id="${
+                      contentItem.type
+                    }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                       contentItem.type,
                     )}"><h2>${contentItem.displayName}</h2></div>`,
                   )
@@ -150,17 +150,17 @@ const bookComponentContentCreator = async (
                   contentItem => {
                     if (contentItem.type === 'contentOpenerImage') {
                       container(`#${level}-${outlineLevelTwoItem.id}`).append(
-                        `<div id="${level}-${
-                          contentItem.id
-                        }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                        `<div id="${
+                          contentItem.type
+                        }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                           contentItem.type,
                         )}"></div>`,
                       )
                     } else if (contentItem.type !== 'mainContent') {
                       container(`#${level}-${outlineLevelTwoItem.id}`).append(
-                        `<div id="${level}-${
-                          contentItem.id
-                        }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                        `<div id="${
+                          contentItem.type
+                        }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                           contentItem.type,
                         )}"><h3>${contentItem.displayName}</h3></div>`,
                       )
@@ -177,17 +177,17 @@ const bookComponentContentCreator = async (
                   contentItem.type === 'contentOpenerImage'
                 ) {
                   container('body').append(
-                    `<div id="${level + 2}-${
-                      contentItem.id
-                    }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                    `<div id="${
+                      contentItem.type
+                    }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                       contentItem.type,
                     )}"></div>`,
                   )
                 } else {
                   container('body').append(
-                    `<div id="${level + 2}-${
-                      contentItem.id
-                    }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                    `<div id="${
+                      contentItem.type
+                    }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                       contentItem.type,
                     )}"><h2>${contentItem.displayName}</h2></div>`,
                   )
@@ -208,17 +208,17 @@ const bookComponentContentCreator = async (
                 contentItem => {
                   if (contentItem.type === 'contentOpenerImage') {
                     container('body').append(
-                      `<div id="${level}-${
-                        contentItem.id
-                      }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                      `<div id="${
+                        contentItem.type
+                      }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                         contentItem.type,
                       )}"></div>`,
                     )
                   } else if (contentItem.type !== 'mainContent') {
                     container('body').append(
-                      `<div id="${level}-${
-                        contentItem.id
-                      }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                      `<div id="${
+                        contentItem.type
+                      }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                         contentItem.type,
                       )}"><h2>${contentItem.displayName}</h2></div>`,
                     )
@@ -232,17 +232,17 @@ const bookComponentContentCreator = async (
                 contentItem => {
                   if (contentItem.type === 'contentOpenerImage') {
                     container('body').append(
-                      `<div id="${level}-${
-                        contentItem.id
-                      }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                      `<div id="${
+                        contentItem.type
+                      }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                         contentItem.type,
                       )}"></div>`,
                     )
                   } else if (contentItem.type !== 'mainContent') {
                     container('body').append(
-                      `<div id="${level}-${
-                        contentItem.id
-                      }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                      `<div id="${
+                        contentItem.type
+                      }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                         contentItem.type,
                       )}"><h2>${contentItem.displayName}</h2></div>`,
                     )
@@ -265,17 +265,17 @@ const bookComponentContentCreator = async (
                   contentItem => {
                     if (contentItem.type === 'contentOpenerImage') {
                       container(`#${level}-${outlineLevelThreeItem.id}`).append(
-                        `<div id="${level}-${
-                          contentItem.id
-                        }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                        `<div id="${
+                          contentItem.type
+                        }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                           contentItem.type,
                         )}"></div>`,
                       )
                     } else if (contentItem.type !== 'mainContent') {
                       container(`#${level}-${outlineLevelThreeItem.id}`).append(
-                        `<div id="${level}-${
-                          contentItem.id
-                        }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                        `<div id="${
+                          contentItem.type
+                        }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                           contentItem.type,
                         )}"><h3>${contentItem.displayName}</h3></div>`,
                       )
@@ -293,17 +293,17 @@ const bookComponentContentCreator = async (
                       contentItem.type === 'contentOpenerImage'
                     ) {
                       container('body').append(
-                        `<div id="${level + 2}-${
-                          contentItem.id
-                        }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                        `<div id="${
+                          contentItem.type
+                        }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                           contentItem.type,
                         )}"></div>`,
                       )
                     } else {
                       container('body').append(
-                        `<div id="${level + 2}-${
-                          contentItem.id
-                        }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                        `<div id="${
+                          contentItem.type
+                        }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                           contentItem.type,
                         )}"><h2>${contentItem.displayName}</h2></div>`,
                       )
@@ -319,17 +319,17 @@ const bookComponentContentCreator = async (
                 contentItem => {
                   if (contentItem.type === 'contentOpenerImage') {
                     container('body').append(
-                      `<div id="${level}-${
-                        contentItem.id
-                      }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                      `<div id="${
+                        contentItem.type
+                      }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                         contentItem.type,
                       )}"></div>`,
                     )
                   } else if (contentItem.type !== 'mainContent') {
                     container('body').append(
-                      `<div id="${level}-${
-                        contentItem.id
-                      }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                      `<div id="${
+                        contentItem.type
+                      }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                         contentItem.type,
                       )}"><h2>${contentItem.displayName}</h2></div>`,
                     )
@@ -343,17 +343,17 @@ const bookComponentContentCreator = async (
                 contentItem => {
                   if (contentItem.type === 'contentOpenerImage') {
                     container('body').append(
-                      `<div id="${level}-${
-                        contentItem.id
-                      }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                      `<div id="${
+                        contentItem.type
+                      }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                         contentItem.type,
                       )}"></div>`,
                     )
                   } else if (contentItem.type !== 'mainContent') {
                     container('body').append(
-                      `<div id="${level}-${
-                        contentItem.id
-                      }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                      `<div id="${
+                        contentItem.type
+                      }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                         contentItem.type,
                       )}"><h2>${contentItem.displayName}</h2></div>`,
                     )
@@ -373,17 +373,17 @@ const bookComponentContentCreator = async (
                 contentItem => {
                   if (contentItem.type === 'contentOpenerImage') {
                     container(`#${level}-${levelThreeItemId}`).append(
-                      `<div id="${level}-${
-                        contentItem.id
-                      }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                      `<div id="${
+                        contentItem.type
+                      }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                         contentItem.type,
                       )}"></div>`,
                     )
                   } else if (contentItem.type !== 'mainContent') {
                     container(`#${level}-${levelThreeItemId}`).append(
-                      `<div id="${level}-${
-                        contentItem.id
-                      }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                      `<div id="${
+                        contentItem.type
+                      }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                         contentItem.type,
                       )}"><h3>${contentItem.displayName}</h3></div>`,
                     )
@@ -400,17 +400,17 @@ const bookComponentContentCreator = async (
                       contentItem.type === 'contentOpenerImage'
                     ) {
                       container('body').append(
-                        `<div id="${level + 2}-${
-                          contentItem.id
-                        }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                        `<div id="${
+                          contentItem.type
+                        }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                           contentItem.type,
                         )}"></div>`,
                       )
                     } else {
                       container('body').append(
-                        `<div id="${level + 2}-${
-                          contentItem.id
-                        }" data-type="content_structure_element" class="${camelCaseToKebabCase(
+                        `<div id="${
+                          contentItem.type
+                        }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                           contentItem.type,
                         )}"><h2>${contentItem.displayName}</h2></div>`,
                       )
