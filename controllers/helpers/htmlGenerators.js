@@ -1,4 +1,5 @@
 const cheerio = require('cheerio')
+const config = require('config')
 
 const paginationExtractor = pagination => {
   const both = pagination.left && pagination.right
@@ -13,6 +14,21 @@ const paginationExtractor = pagination => {
 
   if (pagination.right) {
     return 'start-right'
+  }
+
+  return ''
+}
+
+const featureBookStructureEnabled =
+  config.has('featureBookStructure') &&
+  ((config.get('featureBookStructure') &&
+    JSON.parse(config.get('featureBookStructure'))) ||
+    false)
+
+const runningHeadersGenerator = (runningHeadersLeft, runningHeadersRight) => {
+  if (!featureBookStructureEnabled) {
+    return `<div class="running-left">${runningHeadersLeft || '&#xA0;'}</div>
+        <div class="running-right">${runningHeadersRight || '&#xA0;'}</div>`
   }
 
   return ''
@@ -39,20 +55,19 @@ const generateContainer = (
 
   if (componentType === 'toc') {
     output = cheerio.load(
-      `<section id="comp-number-${id}"  class="component-${division} ${componentType} ${paginationExtractor(
-        pagination,
-      )}"><div class="running-left">${runningHeadersLeft || '&#xA0;'}</div>
-      <div class="running-right">${
-        runningHeadersRight || '&#xA0;'
-      }</div><header><h1 class="component-title">${title}</h1></header><nav>
+      `<section id="comp-number-${id}"  class="component-${division} ${componentType} ${
+        !featureBookStructureEnabled ? paginationExtractor(pagination) : ''
+      }">${runningHeadersGenerator(
+        runningHeadersLeft,
+        runningHeadersRight,
+      )}<header><h1 class="component-title">${title}</h1></header><nav>
       <ol></ol></nav></section>`,
     )
   } else if (componentType === 'endnotes') {
     output = cheerio.load(
-      `<section id="comp-number-${id}"  class="$component-${division} ${componentType} ${paginationExtractor(
-        pagination,
-      )}"><div class="running-left">${runningHeadersLeft || '&#xA0;'}</div>
-      <div class="running-right">${runningHeadersRight || '&#xA0;'}</div>
+      `<section id="comp-number-${id}"  class="$component-${division} ${componentType} ${
+        !featureBookStructureEnabled ? paginationExtractor(pagination) : ''
+      }">${runningHeadersGenerator(runningHeadersLeft, runningHeadersRight)}
       <header><h1 class="component-title">${title}</h1></header></section>`,
     )
   } else {
@@ -65,12 +80,14 @@ const generateContainer = (
     output = cheerio.load(
       `<section id="comp-number-${id}"  class="component-${division} ${
         levelClass || ''
-      } ${componentType} ${paginationExtractor(pagination)}">${
+      } ${componentType} ${
+        !featureBookStructureEnabled ? paginationExtractor(pagination) : ''
+      }">${
         firstInBody ? '<span class="restart-numbering"></span>' : ''
-      }<div class="running-left">${runningHeadersLeft || '&#xA0;'}</div>
-      <div class="running-right">${
-        runningHeadersRight || '&#xA0;'
-      }</div><header>${componentNumber || ''}</header></section>`,
+      }${runningHeadersGenerator(
+        runningHeadersLeft,
+        runningHeadersRight,
+      )}<header>${componentNumber || ''}</header></section>`,
     )
   }
 
