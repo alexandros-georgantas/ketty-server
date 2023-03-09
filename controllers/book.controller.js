@@ -1,5 +1,4 @@
 const { useTransaction, logger } = require('@coko/server')
-const keys = require('lodash/keys')
 const map = require('lodash/map')
 const find = require('lodash/find')
 const findIndex = require('lodash/findIndex')
@@ -8,6 +7,11 @@ const omitBy = require('lodash/omitBy')
 const isNil = require('lodash/isNil')
 const config = require('config')
 const BPromise = require('bluebird')
+
+const {
+  getObjectTeams,
+} = require('@coko/server/src/models/team/team.controller')
+
 const exporter = require('./helpers/exporter')
 const bookComponentCreator = require('./helpers/createBookComponent')
 const bookComponentContentCreator = require('./helpers/bookComponentContentCreator')
@@ -19,7 +23,6 @@ const {
   BookComponent,
   Division,
   BookComponentTranslation,
-  User,
   Team,
   TeamMember,
 } = require('../models').models
@@ -29,7 +32,10 @@ const {
 } = require('./applicationParameter.controller')
 
 const { createDivision } = require('./division.controller')
-const { createTeam, getEntityTeams, deleteTeam } = require('./team.controller')
+
+const { createTeam, getObjectTeam, deleteTeam } = require('./team.controller')
+
+const { isAdmin } = require('./user.controller')
 
 const toCamelCase = string =>
   string
@@ -107,22 +113,30 @@ const getBooks = async (collectionId, archived, userId, options = {}) => {
     logger.info(`>>> fetching books for collection with id ${collectionId}`)
     return useTransaction(
       async tr => {
-        const user = await User.query(tr).findById(userId)
+        const globalProductionEditorsTeam = await Team.findGlobalTeamByRole(
+          'productionEditor',
+          { trx: tr },
+        )
+        // query(tr).where({
+        //   global: true,
+        //   role: 'productionEditor',
+        // })
 
-        const globalProductionEditorsTeam = await Team.query(tr).where({
-          global: true,
-          role: 'productionEditor',
-        })
-
-        const teamMembers = await TeamMember.query(tr).where({
-          teamId: globalProductionEditorsTeam[0].id,
-          deleted: false,
-        })
+        const { result: teamMembers } = await TeamMember.find(
+          {
+            teamId: globalProductionEditorsTeam.id,
+          },
+          { trx: tr },
+        )
+        // query(tr).where({
+        //   teamId: globalProductionEditorsTeam[0].id,
+        //   deleted: false,
+        // })
 
         const isGlobalProductionEditor = find(teamMembers, { userId })
-        const isAdmin = user.admin
+        const isUserAdmin = await isAdmin(userId)
 
-        if (isAdmin || isGlobalProductionEditor) {
+        if (isUserAdmin || isGlobalProductionEditor) {
           if (!archived) {
             const { result } = await Book.find(
               {
@@ -263,23 +277,50 @@ const createBook = async (collectionId, title, options = {}) => {
 
         logger.info(`>>> book with id ${bookId} patched with the new divisions`)
 
-        logger.info(`>>> creating teams for book with id ${bookId}`)
+        if (!config.has('teams.nonGlobal')) {
+          logger.info(`You haven't declared any teams  in config`)
+        } else {
+          logger.info(`>>> creating teams for book with id ${bookId}`)
+          const configNonGlobalTeams = config.get('teams.nonGlobal')
 
-        const roles = keys(config.authsome.teams)
-        await Promise.all(
-          map(roles, async role =>
-            createTeam(
-              config.authsome.teams[role].name,
-              bookId,
-              'book',
-              role,
-              false,
-              {
+          await Promise.all(
+            Object.keys(configNonGlobalTeams).map(async k => {
+              const teamData = configNonGlobalTeams[k]
+
+              // const exists = await getEntityTeam(
+              //   bookId,
+              //   'book',
+              //   teamData.role,
+              //   false,
+              //   { trx: tr },
+              // )
+              const exists = await getObjectTeam(teamData.role, bookId, false, {
                 trx: tr,
-              },
-            ),
-          ),
-        )
+              })
+
+              if (exists) {
+                logger.info(
+                  `Team "${teamData.role}" already exists for book with id ${bookId}`,
+                )
+                return
+              }
+
+              await createTeam(
+                teamData.displayName,
+                bookId,
+                'book',
+                teamData.role,
+                false,
+                {
+                  trx: tr,
+                },
+              )
+              logger.info(
+                `Added team "${teamData.role}" for book with id ${bookId}`,
+              )
+            }),
+          )
+        }
 
         logger.info(`>>> creating TOC component for the book with id ${bookId}`)
 
@@ -479,9 +520,13 @@ const deleteBook = async (bookId, options = {}) => {
           }),
         )
 
-        const associatedTeams = await getEntityTeams(bookId, 'book', false, {
-          trx: tr,
-        })
+        const { result: associatedTeams } = await getObjectTeams(
+          bookId,
+          'book',
+          {
+            trx: tr,
+          },
+        )
 
         if (associatedTeams.length > 0) {
           await Promise.all(

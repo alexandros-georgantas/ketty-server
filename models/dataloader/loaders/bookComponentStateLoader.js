@@ -1,11 +1,9 @@
 const Loader = require('../loader')
-const { model } = require('../../bookComponentState')
+const BookComponentState = require('../../bookComponentState/bookComponentState.model')
 
 const BookComponentStateLoader = {
-  state: new Loader(
-    async bookComponentId =>
-      // eslint-disable-next-line no-return-await
-      await model.query().where('bookComponentId', bookComponentId),
+  state: new Loader(async bookComponentId =>
+    BookComponentState.findOne({ bookComponentId }),
   ),
 }
 

@@ -6,7 +6,7 @@ const find = require('lodash/find')
 const { BookCollectionTranslation, BookTranslation } =
   require('../../../models').models
 
-const { getEntityTeam } = require('../../../controllers/team.controller')
+const { getObjectTeam } = require('../../../controllers/team.controller')
 
 const {
   getBookCollection,
@@ -95,17 +95,12 @@ module.exports = {
 
           const { title } = translation
 
-          const authorsTeam = await getEntityTeam(
-            book.id,
-            'book',
-            'author',
-            true,
-          )
+          const authorsTeam = await getObjectTeam('author', book.id, true)
 
           let auth = 'z'
 
-          if (authorsTeam && authorsTeam.members.length > 0) {
-            auth = authorsTeam.members[0].surname
+          if (authorsTeam && authorsTeam.users.length > 0) {
+            auth = authorsTeam.users[0].surname
           }
 
           let status = 0

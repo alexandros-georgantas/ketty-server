@@ -64,6 +64,7 @@ const {
 const { getContentFiles } = require('../../../controllers/file.controller')
 
 const { getBook } = require('../../../controllers/book.controller')
+const { isAdmin } = require('../../../controllers/user.controller')
 
 const getBookComponentHandler = async (_, { id }, ctx) => {
   const bookComponent = await getBookComponent(id)
@@ -693,13 +694,15 @@ module.exports = {
 
       if (lock) {
         const user = await User.findById(lock.userId)
+        const adminUser = await isAdmin(user.id)
+
         locked = {
           created: lock.created,
           tabId: lock.tabId,
           username: user.username,
-          givenName: user.givenName,
+          givenNames: user.givenNames,
           surname: user.surname,
-          isAdmin: user.admin,
+          isAdmin: adminUser,
           userId: lock.userId,
           foreignId: bookComponent.id,
           id: lock.id,
@@ -729,14 +732,14 @@ module.exports = {
       )
     },
     async uploading(bookComponent, _, ctx) {
-      ctx.connectors.BookComponentStateLoader.model.state.clear()
+      await ctx.connectors.BookComponentStateLoader.model.state.clear()
 
       const bookComponentState =
         await ctx.connectors.BookComponentStateLoader.model.state.load(
           bookComponent.id,
         )
 
-      return bookComponentState[0].uploading
+      return bookComponentState.uploading
     },
     async pagination(bookComponent, _, ctx) {
       return bookComponent.pagination
@@ -749,7 +752,7 @@ module.exports = {
           bookComponent.id,
         )
 
-      return bookComponentState[0].workflowStages || null
+      return bookComponentState.workflowStages || null
     },
 
     async includeInToc(bookComponent, _, ctx) {

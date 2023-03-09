@@ -6,16 +6,11 @@ module.exports = {
   tempDirectoryCRONJobOffset: 'TEMP_DIRECTORY_CRON_JOB_OFFSET',
   serverIdentifier: 'SERVER_IDENTIFIER',
   flavour: 'KETIDA_FLAVOUR',
-  'pubsweet-client': {
-    protocol: 'CLIENT_PROTOCOL',
-    host: 'CLIENT_HOST',
-    port: 'CLIENT_PORT',
-  },
   'pubsweet-server': {
     admin: {
       username: 'ADMIN_USERNAME',
       password: 'ADMIN_PASSWORD',
-      givenName: 'ADMIN_GIVEN_NAME',
+      givenNames: 'ADMIN_GIVEN_NAME',
       surname: 'ADMIN_SURNAME',
       email: 'ADMIN_EMAIL',
     },
@@ -38,34 +33,25 @@ module.exports = {
   },
   clientUrl: 'CLIENT_URL',
   services: {
-    'epub-checker': {
+    epubChecker: {
       clientId: 'SERVICE_EPUB_CHECKER_CLIENT_ID',
       clientSecret: 'SERVICE_EPUB_CHECKER_SECRET',
-      protocol: 'SERVICE_EPUB_CHECKER_PROTOCOL',
-      host: 'SERVICE_EPUB_CHECKER_HOST',
-      port: 'SERVICE_EPUB_CHECKER_PORT',
+      url: 'SERVICE_EPUB_CHECKER_URL',
     },
     icml: {
       clientId: 'SERVICE_ICML_CLIENT_ID',
       clientSecret: 'SERVICE_ICML_SECRET',
-      protocol: 'SERVICE_ICML_PROTOCOL',
-      host: 'SERVICE_ICML_HOST',
-      port: 'SERVICE_ICML_PORT',
+      url: 'SERVICE_ICML_URL',
     },
     pagedjs: {
       clientId: 'SERVICE_PAGEDJS_CLIENT_ID',
       clientSecret: 'SERVICE_PAGEDJS_SECRET',
-      protocol: 'SERVICE_PAGEDJS_PROTOCOL',
-      host: 'SERVICE_PAGEDJS_HOST',
-      port: 'SERVICE_PAGEDJS_PORT',
-      externalUrl: 'PAGEDJS_PUBLIC_URL',
+      url: 'SERVICE_PAGEDJS_URL',
     },
     xsweet: {
       clientId: 'SERVICE_XSWEET_CLIENT_ID',
       clientSecret: 'SERVICE_XSWEET_SECRET',
-      protocol: 'SERVICE_XSWEET_PROTOCOL',
-      host: 'SERVICE_XSWEET_HOST',
-      port: 'SERVICE_XSWEET_PORT',
+      url: 'SERVICE_XSWEET_URL',
     },
   },
   'file-server': {
@@ -78,7 +64,7 @@ module.exports = {
     minioConsolePort: 'MINIO_CONSOLE_PORT',
   },
   'password-reset': {
-    path: 'PASSWORD_RESET_PATH',
+    pathToPage: 'PASSWORD_RESET_PATH_TO_PAGE',
   },
   mailer: {
     from: 'MAILER_SENDER',

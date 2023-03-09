@@ -1,4 +1,4 @@
-const { callMicroservice } = require('@coko/server')
+const { callMicroservice, logger } = require('@coko/server')
 const fs = require('fs-extra')
 const config = require('config')
 const path = require('path')
@@ -23,14 +23,14 @@ const {
 } = require('../utilities/filesystem')
 
 // CONSTANTS
-const EPUBCHECKER = 'epub-checker'
+const EPUBCHECKER = 'epubChecker'
 const ICML = 'icml'
 const PAGEDJS = 'pagedjs'
 const XSWEET = 'xsweet'
 
 const services = config.get('services')
 
-const getServerURL = which => {
+const getServiceURL = which => {
   if (!services) {
     throw new Error('services are undefined')
   }
@@ -41,125 +41,150 @@ const getServerURL = which => {
     throw new Error(`service ${which} configuration is undefined `)
   }
 
-  const { port, protocol, host } = service
-  const serverUrl = `${protocol}://${host}${port ? `:${port}` : ''}`
-  return serverUrl
+  const { url } = service
+
+  if (!url) {
+    throw new Error(`service ${which} url is undefined `)
+  }
+
+  return url
 }
 
 const epubcheckerHandler = async epubPath => {
-  const deconstruct = epubPath.split('/')
-  const epubName = deconstruct[deconstruct.length - 1]
+  try {
+    const deconstruct = epubPath.split('/')
+    const epubName = deconstruct[deconstruct.length - 1]
 
-  const { original } = await uploadFile(
-    fs.createReadStream(epubPath),
-    epubName,
-    'application/epub+zip',
-  )
+    const { original } = await uploadFile(
+      fs.createReadStream(epubPath),
+      epubName,
+      'application/epub+zip',
+    )
 
-  const EPUBPath = await signURL('getObject', original.key)
+    const EPUBPath = await signURL('getObject', original.key)
 
-  return new Promise((resolve, reject) => {
-    callMicroservice(EPUBCHECKER, {
-      method: 'post',
-      url: `${getServerURL(EPUBCHECKER)}/api/epubchecker/link`,
-      data: { EPUBPath },
+    return new Promise((resolve, reject) => {
+      callMicroservice(EPUBCHECKER, {
+        method: 'post',
+        url: `${getServiceURL(EPUBCHECKER)}/api/epubchecker/link`,
+        data: { EPUBPath },
+      })
+        .then(async ({ data }) => {
+          await deleteFiles([original.key])
+          resolve(data)
+        })
+        .catch(async err => {
+          await deleteFiles([original.key])
+          const { response } = err
+
+          if (!response) {
+            return reject(new Error(`Request failed with message: ${err.code}`))
+          }
+
+          const { status, data } = response
+          const { msg } = data
+
+          return reject(
+            new Error(
+              `Request failed with status ${status} and message: ${msg}`,
+            ),
+          )
+        })
     })
-      .then(async ({ data }) => {
-        await deleteFiles([original.key])
-        resolve(data)
-      })
-      .catch(async err => {
-        await deleteFiles([original.key])
-        const { response } = err
-
-        if (!response) {
-          return reject(new Error(`Request failed with message: ${err.code}`))
-        }
-
-        const { status, data } = response
-        const { msg } = data
-
-        return reject(
-          new Error(`Request failed with status ${status} and message: ${msg}`),
-        )
-      })
-  })
+  } catch (e) {
+    logger.error(e.message)
+    throw new Error(e.message)
+  }
 }
 
 const icmlHandler = async icmlTempPath => {
-  const form = new FormData()
-  form.append('html', fs.createReadStream(`${icmlTempPath}/index.html`))
+  try {
+    const form = new FormData()
+    form.append('html', fs.createReadStream(`${icmlTempPath}/index.html`))
 
-  return new Promise((resolve, reject) => {
-    callMicroservice(ICML, {
-      method: 'post',
-      url: `${getServerURL(ICML)}/api/htmlToICML`,
-      headers: {
-        ...form.getHeaders(),
-      },
-      data: form,
+    return new Promise((resolve, reject) => {
+      callMicroservice(ICML, {
+        method: 'post',
+        url: `${getServiceURL(ICML)}/api/htmlToICML`,
+        headers: {
+          ...form.getHeaders(),
+        },
+        data: form,
+      })
+        .then(async res => {
+          await saveDataLocally(icmlTempPath, 'index.icml', res.data, 'utf-8')
+          resolve()
+        })
+        .catch(async err => {
+          const { response } = err
+
+          if (!response) {
+            return reject(new Error(`Request failed with message: ${err.code}`))
+          }
+
+          const { status, data } = response
+          const { msg } = data
+
+          return reject(
+            new Error(
+              `Request failed with status ${status} and message: ${msg}`,
+            ),
+          )
+        })
     })
-      .then(async res => {
-        await saveDataLocally(icmlTempPath, 'index.icml', res.data, 'utf-8')
-        resolve()
-      })
-      .catch(async err => {
-        const { response } = err
-
-        if (!response) {
-          return reject(new Error(`Request failed with message: ${err.code}`))
-        }
-
-        const { status, data } = response
-        const { msg } = data
-
-        return reject(
-          new Error(`Request failed with status ${status} and message: ${msg}`),
-        )
-      })
-  })
+  } catch (e) {
+    logger.error(e.message)
+    throw new Error(e.message)
+  }
 }
 
 const pdfHandler = async (zipPath, outputPath, PDFFilename) => {
-  const form = new FormData()
-  form.append('zip', fs.createReadStream(`${zipPath}`))
-  form.append('onlySourceStylesheet', 'true')
+  try {
+    const form = new FormData()
+    form.append('zip', fs.createReadStream(`${zipPath}`))
+    form.append('onlySourceStylesheet', 'true')
 
-  return new Promise((resolve, reject) => {
-    callMicroservice(PAGEDJS, {
-      method: 'post',
-      url: `${getServerURL(PAGEDJS)}/api/htmlToPDF`,
-      headers: {
-        ...form.getHeaders(),
-      },
-      responseType: 'stream',
-      data: form,
+    return new Promise((resolve, reject) => {
+      callMicroservice(PAGEDJS, {
+        method: 'post',
+        url: `${getServiceURL(PAGEDJS)}/api/htmlToPDF`,
+        headers: {
+          ...form.getHeaders(),
+        },
+        responseType: 'stream',
+        data: form,
+      })
+        .then(async res => {
+          await fs.ensureDir(outputPath)
+          await writeLocallyFromReadStream(
+            outputPath,
+            PDFFilename,
+            res.data,
+            'binary',
+          )
+          resolve()
+        })
+        .catch(async err => {
+          const { response } = err
+
+          if (!response) {
+            return reject(new Error(`Request failed with message: ${err.code}`))
+          }
+
+          const { status, data } = response
+          const { msg } = data
+
+          return reject(
+            new Error(
+              `Request failed with status ${status} and message: ${msg}`,
+            ),
+          )
+        })
     })
-      .then(async res => {
-        await fs.ensureDir(outputPath)
-        await writeLocallyFromReadStream(
-          outputPath,
-          PDFFilename,
-          res.data,
-          'binary',
-        )
-        resolve()
-      })
-      .catch(async err => {
-        const { response } = err
-
-        if (!response) {
-          return reject(new Error(`Request failed with message: ${err.code}`))
-        }
-
-        const { status, data } = response
-        const { msg } = data
-
-        return reject(
-          new Error(`Request failed with status ${status} and message: ${msg}`),
-        )
-      })
-  })
+  } catch (e) {
+    logger.error(e.message)
+    throw new Error(e.message)
+  }
 }
 
 const xsweetHandler = async (bookComponentId, filePath) => {
@@ -183,7 +208,7 @@ const xsweetHandler = async (bookComponentId, filePath) => {
     return new Promise((resolve, reject) => {
       callMicroservice(XSWEET, {
         method: 'post',
-        url: `${getServerURL(XSWEET)}/api/v1/async/DOCXToHTML`,
+        url: `${getServiceURL(XSWEET)}/api/v1/async/DOCXToHTML`,
         headers: {
           ...form.getHeaders(),
         },
@@ -218,41 +243,48 @@ const xsweetHandler = async (bookComponentId, filePath) => {
 }
 
 const pagedPreviewerLink = async dirPath => {
-  const zipPath = await zipper(
-    path.join(`${process.cwd()}`, uploadsDir, 'temp', 'previewer', dirPath),
-  )
+  try {
+    const zipPath = await zipper(
+      path.join(`${process.cwd()}`, uploadsDir, 'temp', 'previewer', dirPath),
+    )
 
-  const form = new FormData()
-  form.append('zip', fs.createReadStream(`${zipPath}`))
+    const form = new FormData()
+    form.append('zip', fs.createReadStream(`${zipPath}`))
 
-  return new Promise((resolve, reject) => {
-    callMicroservice(PAGEDJS, {
-      method: 'post',
-      url: `${getServerURL(PAGEDJS)}/api/getPreviewerLink`,
-      headers: {
-        ...form.getHeaders(),
-      },
-      data: form,
+    return new Promise((resolve, reject) => {
+      callMicroservice(PAGEDJS, {
+        method: 'post',
+        url: `${getServiceURL(PAGEDJS)}/api/getPreviewerLink`,
+        headers: {
+          ...form.getHeaders(),
+        },
+        data: form,
+      })
+        .then(async ({ data }) => {
+          await fs.remove(zipPath)
+          resolve(data)
+        })
+        .catch(async err => {
+          const { response } = err
+
+          if (!response) {
+            return reject(new Error(`Request failed with message: ${err.code}`))
+          }
+
+          const { status, data } = response
+          const { msg } = data
+
+          return reject(
+            new Error(
+              `Request failed with status ${status} and message: ${msg}`,
+            ),
+          )
+        })
     })
-      .then(async ({ data }) => {
-        await fs.remove(zipPath)
-        resolve(data)
-      })
-      .catch(async err => {
-        const { response } = err
-
-        if (!response) {
-          return reject(new Error(`Request failed with message: ${err.code}`))
-        }
-
-        const { status, data } = response
-        const { msg } = data
-
-        return reject(
-          new Error(`Request failed with status ${status} and message: ${msg}`),
-        )
-      })
-  })
+  } catch (e) {
+    logger.error(e.message)
+    throw new Error(e.message)
+  }
 }
 
 module.exports = {

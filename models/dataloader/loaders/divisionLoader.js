@@ -1,17 +1,17 @@
 const map = require('lodash/map')
 const find = require('lodash/find')
+const pullAll = require('lodash/pullAll')
 const Loader = require('../loader')
-const { model } = require('../../bookComponent')
-const { model: divisionModel } = require('../../division')
+const BookComponent = require('../../bookComponent/bookComponent.model')
+const Division = require('../../division/division.model')
 
 const DivisionLoader = {
   bookComponents: new Loader(async divisionId => {
     // eslint-disable-next-line no-return-await
-    const division = await divisionModel.findById(divisionId)
+    const division = await Division.findById(divisionId)
     const bookComponentsOrder = division.bookComponents
 
-    const bookComponents = await model
-      .query()
+    const bookComponents = await BookComponent.query()
       .select('book_component.*', 'book_component_translation.title')
       .innerJoin(
         'book_component_translation',
@@ -26,7 +26,7 @@ const DivisionLoader = {
       return find(bookComponents, { id: bookComponentId })
     })
 
-    return ordered
+    return pullAll(ordered, [undefined])
   }),
 }
 

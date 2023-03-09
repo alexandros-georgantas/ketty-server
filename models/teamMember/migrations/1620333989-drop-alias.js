@@ -1,1 +1,2 @@
-exports.up = async knex => knex.schema.dropTable('aliases')
+exports.up = async knex => {}
+// knex.schema.dropTable('aliases')

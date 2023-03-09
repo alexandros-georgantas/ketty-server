@@ -47,7 +47,8 @@ module.exports = {
   },
   Division: {
     async bookComponents(divisionId, _, ctx) {
-      ctx.connectors.DivisionLoader.model.bookComponents.clear()
+      await ctx.connectors.DivisionLoader.model.bookComponents.clear()
+
       return ctx.connectors.DivisionLoader.model.bookComponents.load(divisionId)
     },
     async label(divisionId, _, ctx) {
