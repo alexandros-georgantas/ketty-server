@@ -1,6 +1,10 @@
 const { logger, useTransaction } = require('@coko/server')
 const ApplicationParameter = require('../models/applicationParameter/applicationParameter.model')
 
+const {
+  labels: { APPLICATION_PARAMETERS_CONTROLLER },
+} = require('./constants')
+
 const getApplicationParameters = async (context, area, options = {}) => {
   try {
     const { trx } = options
@@ -8,7 +12,7 @@ const getApplicationParameters = async (context, area, options = {}) => {
       async tr => {
         if (context && area) {
           logger.info(
-            `>>> fetching application parameters for ${context} - ${area}`,
+            `${APPLICATION_PARAMETERS_CONTROLLER} getApplicationParameters: fetching application parameters for ${context} - ${area}`,
           )
 
           const ap = await ApplicationParameter.query(tr)
@@ -18,7 +22,10 @@ const getApplicationParameters = async (context, area, options = {}) => {
           return ap[0]
         }
 
-        logger.info(`>>> fetching application parameters`)
+        logger.info(
+          `${APPLICATION_PARAMETERS_CONTROLLER} getApplicationParameters: fetching application parameters`,
+        )
+
         return ApplicationParameter.query(tr)
           .skipUndefined()
           .where({ context, area })
@@ -26,6 +33,9 @@ const getApplicationParameters = async (context, area, options = {}) => {
       { trx, passedTrxOnly: true },
     )
   } catch (e) {
+    logger.error(
+      `${APPLICATION_PARAMETERS_CONTROLLER} getApplicationParameters: ${e.message}`,
+    )
     throw new Error(e)
   }
 }
@@ -41,7 +51,7 @@ const updateApplicationParameters = async (
     return useTransaction(
       async tr => {
         logger.info(
-          `>>> updating application parameters for ${context} - ${area}`,
+          `${APPLICATION_PARAMETERS_CONTROLLER} updateApplicationParameters: updating application parameters for ${context} - ${area}`,
         )
 
         const { result: applicationParameters } =
@@ -72,6 +82,9 @@ const updateApplicationParameters = async (
       { trx },
     )
   } catch (e) {
+    logger.error(
+      `${APPLICATION_PARAMETERS_CONTROLLER} updateApplicationParameters: ${e.message}`,
+    )
     throw new Error(e)
   }
 }
