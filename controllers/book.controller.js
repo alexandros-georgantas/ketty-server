@@ -12,6 +12,10 @@ const {
   getObjectTeams,
 } = require('@coko/server/src/models/team/team.controller')
 
+const {
+  labels: { BOOK_CONTROLLER },
+} = require('./constants')
+
 const exporter = require('./helpers/exporter')
 const bookComponentCreator = require('./helpers/createBookComponent')
 const bookComponentContentCreator = require('./helpers/bookComponentContentCreator')
@@ -74,22 +78,15 @@ const defaultLevelCloserItem = {
 }
 
 const defaultBookStructure = {
-  // levels: [defaultLevelTwoItem, defaultLevelThreeItem, defaultLevelCloserItem],
   levels: [],
-  outline: [
-    // {
-    //   title: undefined,
-    //   type: 'chapter',
-    //   children: [{ title: undefined, type: 'section', children: [] }],
-    // },
-  ],
+  outline: [],
   finalized: false,
 }
 
 const getBook = async (id, options = {}) => {
   try {
     const { trx } = options
-    logger.info(`>>> fetching book with id ${id}`)
+    logger.info(`${BOOK_CONTROLLER} getBook: fetching book with id ${id}`)
 
     const book = await useTransaction(
       async tr => Book.findOne({ id, deleted: false }, { trx: tr }),
@@ -102,6 +99,7 @@ const getBook = async (id, options = {}) => {
 
     return book
   } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} getBook: ${e.message}`)
     throw new Error(e)
   }
 }
@@ -109,18 +107,15 @@ const getBook = async (id, options = {}) => {
 const getBooks = async (collectionId, archived, userId, options = {}) => {
   try {
     const { trx } = options
-
-    logger.info(`>>> fetching books for collection with id ${collectionId}`)
+    logger.info(
+      `${BOOK_CONTROLLER} getBooks: fetching books for collection with id ${collectionId}`,
+    )
     return useTransaction(
       async tr => {
         const globalProductionEditorsTeam = await Team.findGlobalTeamByRole(
           'productionEditor',
           { trx: tr },
         )
-        // query(tr).where({
-        //   global: true,
-        //   role: 'productionEditor',
-        // })
 
         const { result: teamMembers } = await TeamMember.find(
           {
@@ -128,10 +123,6 @@ const getBooks = async (collectionId, archived, userId, options = {}) => {
           },
           { trx: tr },
         )
-        // query(tr).where({
-        //   teamId: globalProductionEditorsTeam[0].id,
-        //   deleted: false,
-        // })
 
         const isGlobalProductionEditor = find(teamMembers, { userId })
         const isUserAdmin = await isAdmin(userId)
@@ -190,6 +181,7 @@ const getBooks = async (collectionId, archived, userId, options = {}) => {
       { trx, passedTrxOnly: true },
     )
   } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} getBooks: ${e.message}`)
     throw new Error(e)
   }
 }
@@ -207,7 +199,9 @@ const createBook = async (collectionId, title, options = {}) => {
             JSON.parse(config.get('featureBookStructure'))) ||
             false)
         ) {
-          logger.info(`>>> creating default book structure for the new book`)
+          logger.info(
+            `${BOOK_CONTROLLER} createBook: creating default book structure for the new book`,
+          )
 
           newBookData.bookStructure = defaultBookStructure
         }
@@ -216,7 +210,9 @@ const createBook = async (collectionId, title, options = {}) => {
 
         const { id: bookId } = newBook
 
-        logger.info(`>>> new book created with id ${bookId}`)
+        logger.info(
+          `${BOOK_CONTROLLER} createBook: new book created with id ${bookId}`,
+        )
 
         await BookTranslation.insert(
           {
@@ -228,7 +224,7 @@ const createBook = async (collectionId, title, options = {}) => {
         )
 
         logger.info(
-          `>>> new book translation (title: ${title}) created for the book with id ${bookId}`,
+          `${BOOK_CONTROLLER} createBook: new book translation (title: ${title}) created for the book with id ${bookId}`,
         )
 
         const { config: divisions } = await getApplicationParameters(
@@ -275,32 +271,31 @@ const createBook = async (collectionId, title, options = {}) => {
           .patch({ divisions: createdDivisionIds })
           .where({ id: bookId })
 
-        logger.info(`>>> book with id ${bookId} patched with the new divisions`)
+        logger.info(
+          `${BOOK_CONTROLLER} createBook: book with id ${bookId} patched with the new divisions`,
+        )
 
         if (!config.has('teams.nonGlobal')) {
-          logger.info(`You haven't declared any teams  in config`)
+          logger.info(
+            `${BOOK_CONTROLLER} createBook: You haven't declared any teams  in config`,
+          )
         } else {
-          logger.info(`>>> creating teams for book with id ${bookId}`)
+          logger.info(
+            `${BOOK_CONTROLLER} createBook: creating teams for book with id ${bookId}`,
+          )
           const configNonGlobalTeams = config.get('teams.nonGlobal')
 
           await Promise.all(
             Object.keys(configNonGlobalTeams).map(async k => {
               const teamData = configNonGlobalTeams[k]
 
-              // const exists = await getEntityTeam(
-              //   bookId,
-              //   'book',
-              //   teamData.role,
-              //   false,
-              //   { trx: tr },
-              // )
               const exists = await getObjectTeam(teamData.role, bookId, false, {
                 trx: tr,
               })
 
               if (exists) {
                 logger.info(
-                  `Team "${teamData.role}" already exists for book with id ${bookId}`,
+                  `${BOOK_CONTROLLER} createBook: Team "${teamData.role}" already exists for book with id ${bookId}`,
                 )
                 return
               }
@@ -316,13 +311,15 @@ const createBook = async (collectionId, title, options = {}) => {
                 },
               )
               logger.info(
-                `Added team "${teamData.role}" for book with id ${bookId}`,
+                `${BOOK_CONTROLLER} createBook: Added team "${teamData.role}" for book with id ${bookId}`,
               )
             }),
           )
         }
 
-        logger.info(`>>> creating TOC component for the book with id ${bookId}`)
+        logger.info(
+          `${BOOK_CONTROLLER} createBook: creating TOC component for the book with id ${bookId}`,
+        )
 
         const workflowConfig = await getApplicationParameters(
           'bookBuilder',
@@ -342,7 +339,7 @@ const createBook = async (collectionId, title, options = {}) => {
         )
 
         logger.info(
-          `>>> division which will hold the TOC found with id ${division.id}`,
+          `${BOOK_CONTROLLER} createBook: division which will hold the TOC found with id ${division.id}`,
         )
 
         const newBookComponent = {
@@ -363,7 +360,7 @@ const createBook = async (collectionId, title, options = {}) => {
         )
 
         logger.info(
-          `>>> new book component (TOC) created with id ${createdBookComponent.id}`,
+          `${BOOK_CONTROLLER} createBook: new book component (TOC) created with id ${createdBookComponent.id}`,
         )
 
         const translation = await BookComponentTranslation.insert(
@@ -376,7 +373,7 @@ const createBook = async (collectionId, title, options = {}) => {
         )
 
         logger.info(
-          `>>> new book component translation for TOC created with id ${translation.id}`,
+          `${BOOK_CONTROLLER} createBook: new book component translation for TOC created with id ${translation.id}`,
         )
 
         const newBookComponents = division.bookComponents
@@ -392,7 +389,7 @@ const createBook = async (collectionId, title, options = {}) => {
         )
 
         logger.info(
-          `>>> book component TOC pushed to the array of division's book components [${updatedDivision.bookComponents}]`,
+          `${BOOK_CONTROLLER} createBook: book component TOC pushed to the array of division's book components [${updatedDivision.bookComponents}]`,
         )
 
         if (workflowStages) {
@@ -424,6 +421,7 @@ const createBook = async (collectionId, title, options = {}) => {
       { trx },
     )
   } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} createBook: ${e.message}`)
     throw new Error(e)
   }
 }
@@ -442,7 +440,9 @@ const renameBook = async (bookId, title, options = {}) => {
           .patch({ title })
           .where({ id: bookTranslation.id })
 
-        logger.info(`>>> title updated for book with id ${bookId}`)
+        logger.info(
+          `${BOOK_CONTROLLER} renameBook: title updated for book with id ${bookId}`,
+        )
 
         const book = await Book.findOne(
           { id: bookId, deleted: false },
@@ -454,6 +454,7 @@ const renameBook = async (bookId, title, options = {}) => {
       { trx },
     )
   } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} renameBook: ${e.message}`)
     throw new Error(e)
   }
 }
@@ -471,7 +472,9 @@ const deleteBook = async (bookId, options = {}) => {
           { trx: tr },
         )
 
-        logger.info(`>>> book with id ${bookId} deleted`)
+        logger.info(
+          `${BOOK_CONTROLLER} deleteBook: book with id ${bookId} deleted`,
+        )
 
         const { result: associatedBookComponents } = await BookComponent.find(
           { bookId },
@@ -488,8 +491,9 @@ const deleteBook = async (bookId, options = {}) => {
                 },
                 { trx: tr },
               )
+
               logger.info(
-                `>>> associated book component with id ${bookComponent.id} deleted`,
+                `${BOOK_CONTROLLER} deleteBook: associated book component with id ${bookComponent.id} deleted`,
               )
             }),
           )
@@ -512,10 +516,11 @@ const deleteBook = async (bookId, options = {}) => {
             )
 
             logger.info(
-              `>>> associated division with id ${division.id} deleted`,
+              `${BOOK_CONTROLLER} deleteBook: associated division with id ${division.id} deleted`,
             )
+
             logger.info(
-              `>>> corresponding division's book components [${updatedDivision.bookComponents}] cleaned`,
+              `${BOOK_CONTROLLER} deleteBook: corresponding division's book components [${updatedDivision.bookComponents}] cleaned`,
             )
           }),
         )
@@ -541,6 +546,7 @@ const deleteBook = async (bookId, options = {}) => {
       { trx },
     )
   } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} deleteBook: ${e.message}`)
     throw new Error(e)
   }
 }
@@ -558,7 +564,9 @@ const archiveBook = async (bookId, archive, options = {}) => {
           { trx: tr },
         )
 
-        logger.info(`>>> book with id ${archivedBook.id} archived`)
+        logger.info(
+          `${BOOK_CONTROLLER} archiveBook: book with id ${archivedBook.id} archived`,
+        )
 
         const { result: associatedBookComponents } = await BookComponent.find(
           { bookId },
@@ -576,7 +584,7 @@ const archiveBook = async (bookId, archive, options = {}) => {
                 { trx: tr },
               )
               logger.info(
-                `>>> associated book component with id ${bookComponent.id} archived`,
+                `${BOOK_CONTROLLER} archiveBook: associated book component with id ${bookComponent.id} archived`,
               )
             }),
           )
@@ -587,6 +595,7 @@ const archiveBook = async (bookId, archive, options = {}) => {
       { trx },
     )
   } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} archiveBook: ${e.message}`)
     throw new Error(e)
   }
 }
@@ -608,13 +617,16 @@ const updateMetadata = async (metadata, options = {}) => {
           { trx: tr },
         )
 
-        logger.info(`>>> book with id ${updatedBook.id} has new metadata`)
+        logger.info(
+          `${BOOK_CONTROLLER} updateMetadata: book with id ${updatedBook.id} has new metadata`,
+        )
 
         return updatedBook
       },
       { trx },
     )
   } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} updateMetadata: ${e.message}`)
     throw new Error(e)
   }
 }
@@ -636,6 +648,7 @@ const exportBook = async (
       { trx, passedTrxOnly: true },
     )
   } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} exportBook: ${e.message}`)
     throw new Error(e)
   }
 }
@@ -664,13 +677,16 @@ const updateRunningHeaders = async (bookComponents, bookId, options = {}) => {
           }),
         )
 
-        logger.info(`>>> running headers updated for book with id ${bookId}`)
+        logger.info(
+          `${BOOK_CONTROLLER} updateRunningHeaders: running headers updated for book with id ${bookId}`,
+        )
 
         return Book.findOne({ id: bookId, deleted: false }, { trx: tr })
       },
       { trx },
     )
   } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} updateRunningHeaders: ${e.message}`)
     throw new Error(e)
   }
 }
@@ -730,13 +746,16 @@ const changeLevelLabel = async (bookId, levelId, label, options = {}) => {
           { trx: tr },
         )
 
-        logger.info(`>>> level label changed for book with id ${bookId}`)
+        logger.info(
+          `${BOOK_CONTROLLER} changeLevelLabel: level label changed for book with id ${bookId}`,
+        )
 
         return clonedBookStructure.levels[levelIndex]
       },
       { trx },
     )
   } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} changeLevelLabel: ${e.message}`)
     throw new Error(e)
   }
 }
@@ -810,12 +829,16 @@ const changeNumberOfLevels = async (bookId, levelsNumber, options = {}) => {
           { trx: tr },
         )
 
-        logger.info(`>>> number of levels changed for book with id ${bookId}`)
+        logger.info(
+          `${BOOK_CONTROLLER} changeNumberOfLevels: number of levels changed for book with id ${bookId}`,
+        )
+
         return clonedBookStructure.levels
       },
       { trx },
     )
   } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} changeNumberOfLevels: ${e.message}`)
     throw new Error(e)
   }
 }
@@ -841,13 +864,16 @@ const updateBookOutline = async (bookId, outline, options = {}) => {
           { trx: tr },
         )
 
-        logger.info(`>>> outline changed for book with id ${bookId}`)
+        logger.info(
+          `${BOOK_CONTROLLER} updateBookOutline: outline changed for book with id ${bookId}`,
+        )
 
         return updatedBook.bookStructure
       },
       { trx },
     )
   } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} updateBookOutline: ${e.message}`)
     throw new Error(e)
   }
 }
@@ -873,13 +899,16 @@ const updateLevelContentStructure = async (bookId, levels, options = {}) => {
           { trx: tr },
         )
 
-        logger.info(`>>> level changed for book with id ${bookId}`)
+        logger.info(
+          `${BOOK_CONTROLLER} updateLevelContentStructure: level changed for book with id ${bookId}`,
+        )
 
         return updatedBook.bookStructure.levels
       },
       { trx },
     )
   } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} updateLevelContentStructure: ${e.message}`)
     throw new Error(e)
   }
 }
@@ -1014,13 +1043,16 @@ const finalizeBookStructure = async (bookId, options = {}) => {
           { trx: tr },
         )
 
-        logger.info(`>>> book structure finalized  for book with id ${bookId}`)
+        logger.info(
+          `${BOOK_CONTROLLER} finalizeBookStructure: book structure finalized  for book with id ${bookId}`,
+        )
 
         return updatedBook
       },
       { trx },
     )
   } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} finalizeBookStructure: ${e.message}`)
     throw new Error(e)
   }
 }
@@ -1047,7 +1079,7 @@ const updateShowWelcome = async (bookId, options = {}) => {
         )
 
         logger.info(
-          `>>> book structure initialized and set show welcome to false for book with id ${bookId}`,
+          `${BOOK_CONTROLLER} updateShowWelcome: book structure initialized and set show welcome to false for book with id ${bookId}`,
         )
 
         return updatedBook
@@ -1055,6 +1087,7 @@ const updateShowWelcome = async (bookId, options = {}) => {
       { trx },
     )
   } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} updateShowWelcome: ${e.message}`)
     throw new Error(e)
   }
 }
