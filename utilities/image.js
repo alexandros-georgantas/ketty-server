@@ -77,9 +77,9 @@ const replaceImageSource = async (content, filesFetcher) => {
       const correspondingFile = find(files, { id: fileId })
 
       if (correspondingFile) {
-        const { source, alt } = correspondingFile
+        const { url, alt } = correspondingFile
 
-        $elem.attr('src', source)
+        $elem.attr('src', url)
 
         if (alt) {
           $elem.attr('alt', alt)

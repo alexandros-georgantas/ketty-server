@@ -68,6 +68,7 @@ module.exports = {
     db: {},
     useGraphQLServer: true,
     useJobQueue: false,
+    useFileStorage: true,
     serveClient: false,
     graphiql: true,
     tokenExpiresIn: '360 days',
@@ -115,16 +116,7 @@ module.exports = {
       },
     },
   },
-
-  'file-server': {
-    accessKeyId: 'S3_ACCESS_KEY_ID_USER',
-    secretAccessKey: 'S3_SECRET_ACCESS_KEY_USER',
-    bucket: 'S3_BUCKET',
-    protocol: 'S3_PROTOCOL',
-    host: 'S3_HOST',
-    port: 'S3_PORT',
-    minioConsolePort: 'MINIO_CONSOLE_PORT',
-  },
+  fileStorage: {},
   services: {},
   templates: ['Atla'],
   export: {

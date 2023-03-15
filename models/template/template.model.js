@@ -12,7 +12,7 @@ class Template extends Base {
   }
 
   static get tableName() {
-    return 'Template'
+    return 'template'
   }
 
   static get schema() {
@@ -43,16 +43,16 @@ class Template extends Base {
         relation: Model.HasManyRelation,
         modelClass: File,
         join: {
-          from: 'File.templateId',
-          to: 'Template.id',
+          from: 'template.id',
+          to: 'files.object_id',
         },
       },
       thumbnail: {
         relation: Model.BelongsToOneRelation,
         modelClass: File,
         join: {
-          from: 'Template.thumbnailId',
-          to: 'File.id',
+          from: 'template.thumbnail_id',
+          to: 'files.id',
         },
       },
     }

@@ -1,13 +1,10 @@
-const { logger } = require('@coko/server')
+const { logger, fileStorage } = require('@coko/server')
 const { pubsubManager } = require('@coko/server')
 const map = require('lodash/map')
 
-const { FileTranslation, BookComponent } = require('../../../models').models
+const { BookComponent } = require('../../../models').models
 
-const {
-  uploadFile,
-  signURL,
-} = require('../../../controllers/objectStorage.controller')
+const { getURL } = fileStorage
 
 const {
   updateFile,
@@ -25,8 +22,8 @@ const { FILES_UPLOADED, FILE_UPDATED, FILES_DELETED } = require('./constants')
 
 const getEntityFilesHandler = async (_, { input }, ctx) => {
   try {
-    const { entityId, entityType, sortingParams, includeInUse = false } = input
-    const files = await getEntityFiles(entityId, entityType, sortingParams)
+    const { entityId, sortingParams, includeInUse = false } = input
+    const files = await getEntityFiles(entityId, sortingParams)
 
     if (includeInUse) {
       const bookComponentsOfBook = await BookComponent.query()
@@ -91,29 +88,16 @@ const getFileHandler = async (_, { id }, ctx) => {
   }
 }
 
-const uploadFilesHandler = async (_, { files, entityType, entityId }, ctx) => {
+const uploadFilesHandler = async (_, { files, entityId }, ctx) => {
   try {
     const pubsub = await pubsubManager.getPubsub()
 
     const uploadedFiles = await Promise.all(
       map(files, async file => {
-        const { createReadStream, filename, mimetype, encoding } = await file
+        const { createReadStream, filename } = await file
         const fileStream = createReadStream()
 
-        const { original } = await uploadFile(
-          fileStream,
-          filename,
-          mimetype,
-          encoding,
-        )
-
-        const { key, location, metadata, size, extension } = original
-        return createFile(
-          { name: filename, size, mimetype, metadata, extension },
-          { location, key },
-          entityType,
-          entityId,
-        )
+        return createFile(fileStream, filename, null, null, [], entityId)
       }),
     )
 
@@ -176,42 +160,16 @@ module.exports = {
     deleteFiles: deleteFilesHandler,
   },
   File: {
-    async alt({ id }, _, ctx) {
-      const translation = await FileTranslation.findOne({
-        fileId: id,
-        languageIso: 'en',
-      })
-
-      return translation ? translation.alt : null
+    async url(file, { size }, ctx) {
+      return getURL(file.getStoredObjectBasedOnType(size).key)
     },
-    async source({ objectKey, mimetype }, { size }, ctx) {
-      if (mimetype.match(/^image\//)) {
-        if (size && size !== 'original' && mimetype !== 'image/svg+xml') {
-          const deconstructedKey = objectKey.split('.')
-          return signURL('getObject', `${deconstructedKey[0]}_${size}.png`)
-        }
+    // async mimetype(file, { target }, ctx) {
+    //   if (target && target === 'editor') {
+    //     return file.getStoredObjectBasedOnType('medium').mimetype
+    //   }
 
-        if (size && size !== 'original' && mimetype === 'image/svg+xml') {
-          const deconstructedKey = objectKey.split('.')
-          return signURL('getObject', `${deconstructedKey[0]}_${size}.svg`)
-        }
-      }
-
-      return signURL('getObject', objectKey)
-    },
-    async mimetype({ mimetype }, { target }, ctx) {
-      if (mimetype.match(/^image\//)) {
-        if (target && target === 'editor' && mimetype !== 'image/svg+xml') {
-          return 'image/png'
-        }
-
-        if (target && target === 'editor' && mimetype === 'image/svg+xml') {
-          return 'image/svg+xml'
-        }
-      }
-
-      return mimetype
-    },
+    //   return file.getStoredObjectBasedOnType('original').mimetype
+    // },
     // ## for now in use will be computed in the parent query
     // ## as a workaround of the connection pool timeouts
     // ## this is not permanent

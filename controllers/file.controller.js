@@ -1,52 +1,18 @@
-const { logger, useTransaction } = require('@coko/server')
-const path = require('path')
-const pickBy = require('lodash/pickBy')
+const { logger, useTransaction, fileStorage } = require('@coko/server')
+
+const {
+  createFile,
+  deleteFiles,
+} = require('@coko/server/src/models/file/file.controller')
+
 const map = require('lodash/map')
 const forEach = require('lodash/forEach')
 
-const { File, FileTranslation, BookComponent } = require('../models').models
+const { File, BookComponent } = require('../models').models
 
-const {
-  deleteFiles: deleteRemoteFiles,
-  signURL,
-} = require('./objectStorage.controller')
+const { getURL } = fileStorage
 
 const { imageFinder } = require('../utilities/image')
-
-const createFile = async (
-  { name, size, mimetype, tags, metadata, extension },
-  { location, key },
-  entityType,
-  entityId,
-  options = {},
-) => {
-  try {
-    const tempFile = {
-      name: path.parse(name).name,
-      source: location,
-      objectKey: key,
-      size,
-      metadata,
-      extension,
-      tags,
-      mimetype,
-      bookId: entityType === 'book' ? entityId : undefined,
-      templateId: entityType === 'template' ? entityId : undefined,
-      bookComponentId: entityType === 'bookComponent' ? entityId : undefined,
-    }
-
-    const cleanedObject = pickBy(tempFile, v => v !== undefined)
-    const { trx } = options
-    logger.info(
-      `>>> creating file representation for the file with name ${cleanedObject.name}`,
-    )
-    return useTransaction(async tr => File.insert(cleanedObject, { trx: tr }), {
-      trx,
-    })
-  } catch (e) {
-    throw new Error(e)
-  }
-}
 
 const updateFile = async (id, data, options = {}) => {
   try {
@@ -57,34 +23,7 @@ const updateFile = async (id, data, options = {}) => {
         logger.info(`>>> updating file with id ${id}`)
 
         if (alt) {
-          const fileTranslation = await FileTranslation.findOne(
-            {
-              fileId: id,
-              languageIso: 'en',
-            },
-            { trx: tr },
-          )
-
-          if (fileTranslation) {
-            await FileTranslation.patchAndFetchById(
-              fileTranslation.id,
-              {
-                alt,
-              },
-              { trx: tr },
-            )
-          } else {
-            await FileTranslation.insert(
-              {
-                fileId: id,
-                languageIso: 'en',
-                alt,
-              },
-              { trx: tr },
-            )
-          }
-
-          return File.findById(id, { trx: tr })
+          return File.patchAndFetchById(id, { alt }, { trx: tr })
         }
 
         return File.patchAndFetchById(id, { name }, { trx: tr })
@@ -111,128 +50,14 @@ const updateFiles = async (ids, data, options = {}) => {
   }
 }
 
-const deleteFile = async (id, remoteToo = false, options = {}) => {
-  try {
-    const { trx } = options
-    return useTransaction(
-      async tr => {
-        logger.info(
-          `>>> deleting file representation from db with file id ${id}`,
-        )
-
-        const deletedFile = await File.patchAndFetchById(
-          id,
-          {
-            deleted: true,
-          },
-          { trx: tr },
-        )
-
-        const { id: deletedId, mimetype, objectKey } = deletedFile
-
-        if (remoteToo) {
-          const keys = []
-          keys.push(objectKey)
-
-          if (mimetype.match(/^image\//) && mimetype !== 'image/svg+xml') {
-            const keyDeconstructed = objectKey.split('.')[0]
-            logger.info(
-              `>>> deleting actual file from file server with object key ${keyDeconstructed}`,
-            )
-            keys.push(
-              `${keyDeconstructed}_small.png`,
-              `${keyDeconstructed}_medium.png`,
-            )
-          }
-
-          if (mimetype.match(/^image\//) && mimetype === 'image/svg+xml') {
-            const keyDeconstructed = objectKey.split('.')[0]
-            logger.info(
-              `>>> deleting actual file from file server with object key ${keyDeconstructed}`,
-            )
-            keys.push(
-              `${keyDeconstructed}_small.svg`,
-              `${keyDeconstructed}_medium.svg`,
-            )
-          }
-
-          await deleteRemoteFiles(keys)
-        }
-
-        return deletedId
-      },
-      { trx },
-    )
-  } catch (e) {
-    throw new Error(e)
-  }
-}
-
-const deleteFiles = async (ids, remoteToo = false, options = {}) => {
-  try {
-    const { trx } = options
-    logger.info(
-      `>>> deleting file representations from db with file ids ${ids}`,
-    )
-    return useTransaction(
-      async tr => {
-        await File.query(tr).patch({ deleted: true }).whereIn('id', ids)
-        const deletedFiles = await File.findByIds(ids, { trx: tr })
-
-        if (remoteToo) {
-          await Promise.all(
-            map(deletedFiles, async deletedFile => {
-              const { mimetype, objectKey } = deletedFile
-              const keys = []
-              keys.push(objectKey)
-
-              if (mimetype.match(/^image\//) && mimetype !== 'image/svg+xml') {
-                const keyDeconstructed = objectKey.split('.')[0]
-                logger.info(
-                  `>>> deleting actual file from file server with object key ${keyDeconstructed}`,
-                )
-                keys.push(
-                  `${keyDeconstructed}_small.png`,
-                  `${keyDeconstructed}_medium.png`,
-                )
-              }
-
-              if (mimetype.match(/^image\//) && mimetype === 'image/svg+xml') {
-                const keyDeconstructed = objectKey.split('.')[0]
-                logger.info(
-                  `>>> deleting actual file from file server with object key ${keyDeconstructed}`,
-                )
-                keys.push(
-                  `${keyDeconstructed}_small.svg`,
-                  `${keyDeconstructed}_medium.svg`,
-                )
-              }
-
-              await deleteRemoteFiles(keys)
-            }),
-          )
-        }
-
-        return map(deletedFiles, file => file.id)
-      },
-      { trx },
-    )
-  } catch (e) {
-    throw new Error(e)
-  }
-}
-
 const getEntityFiles = async (
   entityId,
-  entityType,
   orderParams = undefined,
   options = {},
 ) => {
   try {
     const { trx } = options
-    logger.info(
-      `>>> fetching files for entity ${entityType} with  id ${entityId}`,
-    )
+    logger.info(`>>> fetching files for entity with  id ${entityId}`)
     return useTransaction(
       async tr => {
         if (orderParams) {
@@ -244,21 +69,14 @@ const getEntityFiles = async (
           logger.info(`>>> constructing orderBy params: ${orderByParams}`)
 
           const { result } = await File.find(
-            { [`${entityType}Id`]: entityId, deleted: false },
+            { objectId: entityId },
             { trx: tr, orderBy: orderByParams },
           )
 
           return result
-          // return File.query(tr)
-          //   .where({ [`${entityType}Id`]: entityId })
-          //   .andWhere({ deleted: false })
-          //   .orderBy(orderByParams)
         }
 
-        const { result } = File.find(
-          { [`${entityType}Id`]: entityId, deleted: false },
-          { trx: tr },
-        )
+        const { result } = File.find({ objectId: entityId }, { trx: tr })
 
         return result
       },
@@ -275,7 +93,7 @@ const getFiles = async (options = {}) => {
     logger.info(`>>> fetching all files`)
     return useTransaction(
       async tr => {
-        const { result } = await File.find({ deleted: false }, { trx: tr })
+        const { result } = await File.find({}, { trx: tr })
         return result
       },
       { trx, passedTrxOnly: true },
@@ -289,11 +107,10 @@ const getSpecificFiles = async (ids, options = {}) => {
   try {
     const { trx } = options
     logger.info(`>>> fetching the files with ids ${ids}`)
-    return useTransaction(
-      async tr =>
-        File.query(tr).whereIn('id', ids).andWhere({ deleted: false }),
-      { trx, passedTrxOnly: true },
-    )
+    return useTransaction(async tr => File.query(tr).whereIn('id', ids), {
+      trx,
+      passedTrxOnly: true,
+    })
   } catch (e) {
     throw new Error(e)
   }
@@ -305,15 +122,7 @@ const getFile = async (id, options = {}) => {
     logger.info(`>>> fetching the file with id ${id}`)
 
     const file = await useTransaction(
-      async tr => {
-        const item = await File.findById(id, { trx: tr })
-
-        if (item.deleted) {
-          throw new Error('this file is deleted')
-        }
-
-        return item
-      },
+      async tr => File.findById(id, { trx: tr }),
       { trx, passedTrxOnly: true },
     )
 
@@ -323,40 +132,20 @@ const getFile = async (id, options = {}) => {
   }
 }
 
-const getFileURL = async (id, size = undefined, options = {}) => {
+const getFileURL = async (id, type = 'original', options = {}) => {
   try {
     const { trx } = options
     logger.info(`>>> fetching the file with id ${id}`)
 
     const file = await useTransaction(
-      async tr => {
-        const item = await File.findById(id, { trx: tr })
-
-        if (item.deleted) {
-          throw new Error('this file is deleted')
-        }
-
-        return item
-      },
+      async tr => File.findById(id, { trx: tr }),
       { trx, passedTrxOnly: true },
     )
 
     logger.info(`>>> signing url `)
-    const { mimetype, objectKey } = file
+    const { key } = file.getStoredObjectBasedOnType(type)
 
-    if (mimetype.match(/^image\//)) {
-      if (size && size !== 'original' && mimetype !== 'image/svg+xml') {
-        const deconstructedKey = objectKey.split('.')
-        return signURL('getObject', `${deconstructedKey[0]}_${size}.png`)
-      }
-
-      if (size && size !== 'original' && mimetype === 'image/svg+xml') {
-        const deconstructedKey = objectKey.split('.')
-        return signURL('getObject', `${deconstructedKey[0]}_${size}.svg`)
-      }
-    }
-
-    return signURL('getObject', objectKey)
+    return getURL(key)
   } catch (e) {
     throw new Error(e)
   }
@@ -369,41 +158,20 @@ const getContentFiles = async (fileIds, options = {}) => {
     return useTransaction(
       async tr => {
         const files = await getSpecificFiles(fileIds, { trx })
+        /* eslint-disable no-param-reassign */
         return Promise.all(
           map(files, async file => {
-            const { id, mimetype, objectKey } = file
+            const { key: keyMedium, mimetype } =
+              file.getStoredObjectBasedOnType('medium')
 
-            const translation = await FileTranslation.findOne(
-              {
-                fileId: id,
-                languageIso: 'en',
-              },
-              { trx: tr },
-            )
-
-            /* eslint-disable no-param-reassign */
-            file.alt = translation ? translation.alt : null
+            const { key } = file.getStoredObjectBasedOnType('original')
 
             if (mimetype.match(/^image\//)) {
-              if (mimetype !== 'image/svg+xml') {
-                file.mimetype = 'image/png'
-                const deconstructedKey = objectKey.split('.')
-                file.source = await signURL(
-                  'getObject',
-                  `${deconstructedKey[0]}_medium.png`,
-                )
-              } else {
-                const deconstructedKey = objectKey.split('.')
-                file.source = await signURL(
-                  'getObject',
-                  `${deconstructedKey[0]}_medium.svg`,
-                )
-              }
-
+              file.url = await getURL(keyMedium)
               return file
             }
 
-            file.source = await signURL('getObject', objectKey)
+            file.url = await getURL(key)
             /* eslint-enable no-param-reassign */
 
             return file
@@ -461,7 +229,6 @@ module.exports = {
   createFile,
   updateFile,
   updateFiles,
-  deleteFile,
   deleteFiles,
   getEntityFiles,
   getFiles,

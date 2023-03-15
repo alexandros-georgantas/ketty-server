@@ -2,14 +2,12 @@ const { logger, useTransaction } = require('@coko/server')
 const { exec } = require('child_process')
 const fs = require('fs-extra')
 const path = require('path')
-const mime = require('mime-types')
 
 const map = require('lodash/map')
 
 const Template = require('../../models/template/template.model')
 
 const { createFile } = require('../../controllers/file.controller')
-const { uploadFile } = require('../../controllers/objectStorage.controller')
 
 const { dirContents } = require('../../utilities/filesystem')
 
@@ -71,12 +69,15 @@ const createTemplate = async (sourceRoot, data, cssFile, notes) => {
     const transactionWrapper = async trx => {
       logger.info('About to create a new template')
 
-      const newTemplate = await Template.query(trx).insert({
-        name: `${name} (${notes})`,
-        author,
-        target,
-        notes,
-      })
+      const newTemplate = await Template.insert(
+        {
+          name: `${name} (${notes})`,
+          author,
+          target,
+          notes,
+        },
+        { trx },
+      )
 
       logger.info(`New template created with id ${newTemplate.id}`)
 
@@ -87,25 +88,18 @@ const createTemplate = async (sourceRoot, data, cssFile, notes) => {
         await Promise.all(
           contents.map(async font => {
             const absoluteFontPath = path.join(fontsPath, font)
-            const mimetype = mime.lookup(font)
 
-            const { original } = await uploadFile(
+            return createFile(
               fs.createReadStream(absoluteFontPath),
               font,
-              mimetype,
-              undefined,
-              `templates/${newTemplate.id}/${font}`,
-            )
-
-            const { key, location, metadata, size, extension } = original
-            const options = {}
-            options.trx = trx
-            return createFile(
-              { name: font, size, mimetype, metadata, extension },
-              { location, key },
-              'template',
+              null,
+              null,
+              [],
               newTemplate.id,
-              options,
+              {
+                trx,
+                forceObjectKeyValue: `templates/${newTemplate.id}/${font}`,
+              },
             )
           }),
         )
@@ -115,25 +109,18 @@ const createTemplate = async (sourceRoot, data, cssFile, notes) => {
 
       if (fs.existsSync(path.join(assetsRoot, 'css'))) {
         const absoluteCSSPath = path.join(cssPath, cssFile)
-        const mimetype = mime.lookup(cssFile)
 
-        const { original } = await uploadFile(
+        return createFile(
           fs.createReadStream(absoluteCSSPath),
           cssFile,
-          mimetype,
-          undefined,
-          `templates/${newTemplate.id}/${cssFile}`,
-        )
-
-        const { key, location, metadata, size, extension } = original
-        const options = {}
-        options.trx = trx
-        return createFile(
-          { name: cssFile, size, mimetype, metadata, extension },
-          { location, key },
-          'template',
+          null,
+          null,
+          [],
           newTemplate.id,
-          options,
+          {
+            trx,
+            forceObjectKeyValue: `templates/${newTemplate.id}/${cssFile}`,
+          },
         )
       }
 
@@ -165,9 +152,17 @@ const createTemplate = async (sourceRoot, data, cssFile, notes) => {
   }
 }
 
+const cleanTemplatesFolder = async () => {
+  try {
+    await execute(`rm -rf ${path.join(__dirname, '..', '..', 'templates')}`)
+  } catch (e) {
+    throw new Error(e.message)
+  }
+}
+
 const getTemplates = async () => {
   try {
-    // await cleanTemplatesFolder()
+    await cleanTemplatesFolder()
     await execute(`. ${path.join(__dirname, 'fetchTemplates.sh')}`)
   } catch (e) {
     throw new Error(e)

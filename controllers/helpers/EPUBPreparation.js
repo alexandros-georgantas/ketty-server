@@ -1,3 +1,4 @@
+const { fileStorage } = require('@coko/server')
 const cheerio = require('cheerio')
 const path = require('path')
 const builder = require('xmlbuilder')
@@ -8,7 +9,7 @@ const map = require('lodash/map')
 const filter = require('lodash/filter')
 const beautify = require('js-beautify').html
 
-const { locallyDownloadFile, signURL } = require('../objectStorage.controller')
+const { download, getURL } = fileStorage
 
 const { epubDecorator, fixFontFaceUrls } = require('./converters')
 const { writeFile, readFile } = require('../../utilities/filesystem')
@@ -87,15 +88,23 @@ const createContainer = async metaInfPath => {
 
 const gatherAssets = async (book, templateFiles, epubFolder) => {
   for (let i = 0; i < templateFiles.length; i += 1) {
-    const { id: dbId, objectKey, mimetype, extension, name } = templateFiles[i]
-    const originalFilename = `${name}.${extension}`
+    // const { id: dbId, objectKey, mimetype, extension, name } = templateFiles[i]
+    // const originalFilename = `${name}.${extension}`
 
-    if (templateFiles[i].mimetype === 'text/css') {
+    const { id: dbId, name } = templateFiles[i]
+
+    const storedObject = templateFiles[i].getStoredObjectBasedOnType('original')
+
+    const { key, mimetype, extension } = storedObject
+
+    const originalFilename = name
+
+    if (mimetype === 'text/css') {
       const target = `${epubFolder.styles}/${originalFilename}`
       const id = `stylesheet-${dbId}-${i}`
       stylesheets.push({
         id,
-        objectKey,
+        key,
         target,
         mimetype,
         originalFilename,
@@ -106,7 +115,7 @@ const gatherAssets = async (book, templateFiles, epubFolder) => {
       const id = `font-${dbId}-${i}`
       fonts.push({
         id,
-        objectKey,
+        key,
         target,
         mimetype,
         originalFilename,
@@ -127,10 +136,7 @@ const gatherAssets = async (book, templateFiles, epubFolder) => {
   await Promise.all(
     map(gatheredImages, async image => {
       const { currentObjectKey } = image
-      freshImageLinkMapper[currentObjectKey] = await signURL(
-        'getObject',
-        currentObjectKey,
-      )
+      freshImageLinkMapper[currentObjectKey] = await getURL(currentObjectKey)
       return true
     }),
   )
@@ -180,19 +186,19 @@ const transferAssets = async (imagesParam, stylesheetsParam, fontsParam) => {
     await Promise.all(
       map(imagesParam, async image => {
         const { objectKey, target } = image
-        return locallyDownloadFile(objectKey, target)
+        return download(objectKey, target)
       }),
     )
     await Promise.all(
       map(stylesheetsParam, async stylesheet => {
-        const { objectKey, target } = stylesheet
-        return locallyDownloadFile(objectKey, target)
+        const { key, target } = stylesheet
+        return download(key, target)
       }),
     )
     await Promise.all(
       map(fontsParam, async font => {
-        const { objectKey, target } = font
-        return locallyDownloadFile(objectKey, target)
+        const { key, target } = font
+        return download(key, target)
       }),
     )
     const stylesheetContent = await readFile(stylesheets[0].target)

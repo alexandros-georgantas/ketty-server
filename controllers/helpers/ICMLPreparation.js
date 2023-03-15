@@ -1,3 +1,4 @@
+const { fileStorage } = require('@coko/server')
 const cheerio = require('cheerio')
 const fs = require('fs-extra')
 const path = require('path')
@@ -5,7 +6,8 @@ const mime = require('mime-types')
 const map = require('lodash/map')
 
 const { getFile } = require('../file.controller')
-const { locallyDownloadFile } = require('../objectStorage.controller')
+
+const { download } = fileStorage
 
 const { generatePagedjsContainer } = require('./htmlGenerators')
 const { writeFile } = require('../../utilities/filesystem')
@@ -23,8 +25,8 @@ const ICMLPreparation = async (book, tempFolderPath) => {
       map(gatheredImages, async image => {
         const { currentObjectKey, fileId } = image
         const file = await getFile(fileId)
-        const { objectKey } = file
-        originalImageLinkMapper[currentObjectKey] = objectKey
+        const { key } = file.getStoredObjectBasedOnType('original')
+        originalImageLinkMapper[currentObjectKey] = key
         return true
       }),
     )
@@ -70,7 +72,7 @@ const ICMLPreparation = async (book, tempFolderPath) => {
     await Promise.all(
       map(images, async image => {
         const { objectKey, target } = image
-        return locallyDownloadFile(objectKey, target)
+        return download(objectKey, target)
       }),
     )
     const output = cheerio.load(generatePagedjsContainer(book.title))

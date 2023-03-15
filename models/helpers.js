@@ -262,7 +262,6 @@ const schema = {
       'contributor',
       'division',
       'file',
-      'fileTranslation',
       'language',
       'lock',
       'sponsor',
