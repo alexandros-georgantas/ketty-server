@@ -60,7 +60,9 @@ const bookComponentContentCreator = async (
                     outlineLevelTwoItem.id
                   }" data-type="content_structure_element" class="${sectionLevelClassCreator(
                     bookStructure.levels.length,
-                  )} ${camelCaseToKebabCase(outlineLevelTwoItem.type)}"></section>`,
+                  )} ${camelCaseToKebabCase(outlineLevelTwoItem.type)}"><h2>${
+                    outlineLevelTwoItem.title
+                  }</h2></section>`,
                 )
                 bookStructure.levels[level + 1].contentStructure.forEach(
                   contentItem => {
@@ -140,7 +142,9 @@ const bookComponentContentCreator = async (
                     outlineLevelTwoItem.id
                   }" data-type="content_structure_element" class="${sectionLevelClassCreator(
                     bookStructure.levels.length,
-                  )} ${camelCaseToKebabCase(outlineLevelTwoItem.type)}"></section>`,
+                  )} ${camelCaseToKebabCase(outlineLevelTwoItem.type)}"><h2>${
+                    outlineLevelTwoItem.title
+                  }</h2></section>`,
                 )
                 bookStructure.levels[level + 1].contentStructure.forEach(
                   contentItem => {
@@ -253,7 +257,9 @@ const bookComponentContentCreator = async (
                     outlineLevelThreeItem.id
                   }" data-type="content_structure_element" class="${sectionLevelClassCreator(
                     bookStructure.levels.length,
-                  )} ${camelCaseToKebabCase(outlineLevelThreeItem.type)}"></section>`,
+                  )} ${camelCaseToKebabCase(outlineLevelThreeItem.type)}"><h2>${
+                    outlineLevelThreeItem.title
+                  }</h2></section>`,
                 )
                 bookStructure.levels[level + 1].contentStructure.forEach(
                   contentItem => {
