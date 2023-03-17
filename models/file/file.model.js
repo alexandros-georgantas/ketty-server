@@ -1,5 +1,4 @@
 const FileBase = require('@coko/server/src/models/file/file.model')
-const find = require('lodash/find')
 const { Model } = require('objection')
 
 class File extends FileBase {

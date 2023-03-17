@@ -1,37 +1,23 @@
 const cheerio = require('cheerio')
 const find = require('lodash/find')
 
-const objectKeyExtractor = url => {
-  const stage1 = url.split('?')
-  const stage2 = stage1[0].split('/')
-  const objectKey = stage2[stage2.length - 1]
-
-  return objectKey
-}
-
-const imageGatherer = book => {
+const fileStorageImageGatherer = book => {
   const images = []
-  book.divisions.forEach((division, divisionId) => {
-    division.bookComponents.forEach((bookComponent, bookComponentId) => {
+  book.divisions.forEach(division => {
+    division.bookComponents.forEach(bookComponent => {
       const { content } = bookComponent
       const $ = cheerio.load(content)
 
-      $('img[src]').each((index, node) => {
+      $('img').each((_, node) => {
         const $node = $(node)
 
-        const url = $node.attr('src')
-
-        if (!url.includes('data:image')) {
-          if ($node.attr('data-fileid')) {
-            images.push({
-              currentObjectKey: objectKeyExtractor(url),
-              fileId: $node.attr('data-fileid'),
-            })
-          }
+        if ($node.attr('data-fileid')) {
+          images.push($node.attr('data-fileid'))
         }
       })
     })
   })
+
   return images
 }
 
@@ -95,8 +81,7 @@ const replaceImageSource = async (content, filesFetcher) => {
 }
 
 module.exports = {
-  objectKeyExtractor,
-  imageGatherer,
+  fileStorageImageGatherer,
   imageFinder,
   replaceImageSource,
 }

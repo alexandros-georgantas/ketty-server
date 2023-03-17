@@ -1,4 +1,5 @@
 const { logger } = require('@coko/server')
+const path = require('path')
 
 /* eslint-disable import/no-unresolved */
 const File = require('../models/file/file.model')
@@ -28,6 +29,9 @@ exports.up = async knex => {
           return file.patch({
             storedObjects,
             alt: translation ? translation.alt : '',
+            name: `${file.name}.${file.extension}`,
+            objectId:
+              file.bookId || file.bookComponentId || file.templateId || null,
           })
         }
 
@@ -51,8 +55,8 @@ exports.up = async knex => {
           type: 'medium',
           key:
             file.mimetype !== 'image/svg+xml'
-              ? `${file.objectKey}_medium.png`
-              : `${file.objectKey}_medium.svg`,
+              ? `${path.parse(file.objectKey).name}_medium.png`
+              : `${path.parse(file.objectKey).name}_medium.svg`,
           mimetype:
             file.mimetype !== 'image/svg+xml' ? 'image/png' : 'image/svg+xml',
           extension: file.mimetype !== 'image/svg+xml' ? 'png' : 'svg',
@@ -70,8 +74,8 @@ exports.up = async knex => {
           type: 'small',
           key:
             file.mimetype !== 'image/svg+xml'
-              ? `${file.objectKey}_small.png`
-              : `${file.objectKey}_small.svg`,
+              ? `${path.parse(file.objectKey).name}_small.png`
+              : `${path.parse(file.objectKey).name}_small.svg`,
           mimetype:
             file.mimetype !== 'image/svg+xml' ? 'image/png' : 'image/svg+xml',
           extension: file.mimetype !== 'image/svg+xml' ? 'png' : 'svg',
@@ -91,6 +95,9 @@ exports.up = async knex => {
         return file.patch({
           storedObjects,
           alt: translation ? translation.alt : '',
+          name: `${file.name}.${file.extension}`,
+          objectId:
+            file.bookId || file.bookComponentId || file.templateId || null,
         })
       }),
     )

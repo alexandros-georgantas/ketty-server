@@ -151,13 +151,32 @@ const getFileURL = async (id, type = 'original', options = {}) => {
   }
 }
 
+const getObjectKey = async (id, type = 'original', options = {}) => {
+  try {
+    const { trx } = options
+    logger.info(`>>> fetching the file with id ${id}`)
+
+    const file = await useTransaction(
+      async tr => File.findById(id, { trx: tr }),
+      { trx, passedTrxOnly: true },
+    )
+
+    logger.info(`>>> signing url `)
+    const { key } = file.getStoredObjectBasedOnType(type)
+
+    return key
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
 const getContentFiles = async (fileIds, options = {}) => {
   try {
     const { trx } = options
     logger.info(`>>> gathering image files with ids ${fileIds} from content`)
     return useTransaction(
       async tr => {
-        const files = await getSpecificFiles(fileIds, { trx })
+        const files = await getSpecificFiles(fileIds, { trx: tr })
         /* eslint-disable no-param-reassign */
         return Promise.all(
           map(files, async file => {
@@ -168,10 +187,12 @@ const getContentFiles = async (fileIds, options = {}) => {
 
             if (mimetype.match(/^image\//)) {
               file.url = await getURL(keyMedium)
+              // console.log('fileIm', file)
               return file
             }
 
             file.url = await getURL(key)
+            // console.log('file', file)
             /* eslint-enable no-param-reassign */
 
             return file
@@ -235,6 +256,7 @@ module.exports = {
   getSpecificFiles,
   getFile,
   getFileURL,
+  getObjectKey,
   getContentFiles,
   isFileInUse,
 }

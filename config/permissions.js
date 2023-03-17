@@ -1,4 +1,19 @@
-const { isAuthenticated } = require('@coko/server/authorization')
+const { rule } = require('@coko/server/authorization')
+
+const isAuthenticated = rule()(async (parent, args, ctx, info) => {
+  /* eslint-disable global-require */
+  const User = require('../models/user/user.model')
+  /* eslint-enable global-require */
+  let user
+
+  if (ctx.user) {
+    user = await User.findById(ctx.user, {
+      related: 'defaultIdentity',
+    })
+  }
+
+  return user && user.isActive && user.defaultIdentity.isVerified
+})
 
 const permissions = {
   Query: {
@@ -7,6 +22,8 @@ const permissions = {
     users: isAuthenticated,
     team: isAuthenticated,
     teams: isAuthenticated,
+    getGlobalTeams: isAuthenticated,
+    getObjectTeams: isAuthenticated,
     getWaxRules: isAuthenticated,
     getDashBoardRules: isAuthenticated,
     getBookBuilderRules: isAuthenticated,
@@ -23,18 +40,14 @@ const permissions = {
     getSignedURL: isAuthenticated,
     getEntityFiles: isAuthenticated,
     getSpecificFiles: isAuthenticated,
-    // getBookTeams: isAuthenticated,
-    // getGlobalTeams: isAuthenticated,
     getTemplates: isAuthenticated,
     getTemplate: isAuthenticated,
   },
   Mutation: {
     upload: isAuthenticated,
-    // deleteUser: isAuthenticated,
-    // updateUser: isAuthenticated,
-    // createTeam: isAuthenticated,
-    // deleteTeam: isAuthenticated,
-    // updateTeam: isAuthenticated,
+    deleteUser: isAuthenticated,
+    updateUser: isAuthenticated,
+    updatePassword: isAuthenticated,
     updateApplicationParameters: isAuthenticated,
     archiveBook: isAuthenticated,
     createBook: isAuthenticated,
@@ -63,12 +76,10 @@ const permissions = {
     uploadFiles: isAuthenticated,
     updateFile: isAuthenticated,
     deleteFiles: isAuthenticated,
-    // updateTeamMembers: isAuthenticated,
-    // searchForUsers: isAuthenticated,
-    // updateKetidaUser: isAuthenticated,
-    // updatePassword: isAuthenticated,
-    // updatePersonalInformation: isAuthenticated,
-    // updateUsername: isAuthenticated,
+    updateTeamMembership: isAuthenticated,
+    searchForUsers: isAuthenticated,
+    addTeamMember: isAuthenticated,
+    removeTeamMember: isAuthenticated,
     createTemplate: isAuthenticated,
     cloneTemplate: isAuthenticated,
     updateTemplate: isAuthenticated,

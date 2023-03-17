@@ -110,8 +110,6 @@ services:
       - S3_PROTOCOL=${S3_PROTOCOL:-http}
       - S3_HOST=${S3_HOST:-s3}
       - S3_PORT=${S3_PORT:-9000}
-      - S3_ACCESS_KEY_ID_ADMIN=${S3_ACCESS_KEY_ID_ADMIN:-admin}
-      - S3_SECRET_ACCESS_KEY_ADMIN=${S3_SECRET_ACCESS_KEY_ADMIN:-superSecretAdminPassword}
       - S3_ACCESS_KEY_ID_USER=${S3_ACCESS_KEY_ID_USER:-ketida}
       - S3_SECRET_ACCESS_KEY_USER=${S3_SECRET_ACCESS_KEY_USER:-superSecretUserPassword}
       - S3_BUCKET=${S3_BUCKET:-uploads}
