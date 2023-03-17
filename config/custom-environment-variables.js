@@ -54,7 +54,7 @@ module.exports = {
       url: 'SERVICE_XSWEET_URL',
     },
   },
-  'file-server': {
+  fileStorage: {
     accessKeyId: 'S3_ACCESS_KEY_ID_USER',
     secretAccessKey: 'S3_SECRET_ACCESS_KEY_USER',
     bucket: 'S3_BUCKET',
@@ -62,6 +62,8 @@ module.exports = {
     host: 'S3_HOST',
     port: 'S3_PORT',
     minioConsolePort: 'MINIO_CONSOLE_PORT',
+    maximumWidthForSmallImages: 'MAXIMUM_WIDTH_FOR_SMALL_IMAGES',
+    maximumWidthForMediumImages: 'MAXIMUM_WIDTH_FOR_MEDIUM_IMAGES',
   },
   'password-reset': {
     pathToPage: 'PASSWORD_RESET_PATH_TO_PAGE',

@@ -14,6 +14,7 @@ const createTemplates = async () => {
     await getTemplates()
     const whichTemplates = config.get('templates')
     const templatesFolder = path.join(__dirname, '..', '..', 'templates')
+
     const noteTypes = ['footnotes', 'endnotes', 'chapterEnd']
 
     if (isNil(whichTemplates) || isEmpty(whichTemplates)) {

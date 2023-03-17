@@ -1,5 +1,6 @@
 const { startServer, logger } = require('@coko/server')
 const config = require('config')
+const createTemplates = require('./scripts/seeds/createTemplates')
 
 const scripts = config.get('export.scripts')
 
@@ -54,6 +55,8 @@ const init = async () => {
         throw new Error(errors)
       }
     }
+
+    await createTemplates()
   } catch (e) {
     throw new Error(e)
   }

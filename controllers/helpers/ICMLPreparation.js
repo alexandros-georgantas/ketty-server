@@ -1,30 +1,28 @@
+const { fileStorage } = require('@coko/server')
 const cheerio = require('cheerio')
 const fs = require('fs-extra')
-const path = require('path')
 const mime = require('mime-types')
 const map = require('lodash/map')
 
-const { getFile } = require('../file.controller')
-const { locallyDownloadFile } = require('../objectStorage.controller')
+const { getObjectKey } = require('../file.controller')
+
+const { download } = fileStorage
 
 const { generatePagedjsContainer } = require('./htmlGenerators')
 const { writeFile } = require('../../utilities/filesystem')
-const { imageGatherer, objectKeyExtractor } = require('../../utilities/image')
+const { fileStorageImageGatherer } = require('../../utilities/image')
 
 const ICMLPreparation = async (book, tempFolderPath) => {
   try {
     const images = []
 
     await fs.ensureDir(tempFolderPath)
-    const gatheredImages = imageGatherer(book)
-    const originalImageLinkMapper = {}
+    const gatheredImages = fileStorageImageGatherer(book)
+    const objectKeyMapper = {}
 
     await Promise.all(
-      map(gatheredImages, async image => {
-        const { currentObjectKey, fileId } = image
-        const file = await getFile(fileId)
-        const { objectKey } = file
-        originalImageLinkMapper[currentObjectKey] = objectKey
+      map(gatheredImages, async fileId => {
+        objectKeyMapper[fileId] = await getObjectKey(fileId)
         return true
       }),
     )
@@ -33,27 +31,26 @@ const ICMLPreparation = async (book, tempFolderPath) => {
         const { content, id } = bookComponent
         const $ = cheerio.load(content)
 
-        $('img[src]').each((index, node) => {
+        $('img').each((index, node) => {
           const $node = $(node)
           const constructedId = `image-${id}-${index}`
+          const dataFileId = $node.attr('data-fileid')
 
-          const url = $node.attr('src')
-          const objectKey = objectKeyExtractor(url)
-          const extension = path.extname(objectKey)
-          const mimetype = mime.lookup(objectKey)
-          const target = `${tempFolderPath}/${originalImageLinkMapper[objectKey]}`
+          if (dataFileId) {
+            const key = objectKeyMapper[dataFileId]
+            const mimetype = mime.lookup(key)
+            const target = `${tempFolderPath}/${key}`
 
-          images.push({
-            id: constructedId,
-            objectKey: originalImageLinkMapper[objectKey],
-            target,
-            mimetype,
-            extension,
-          })
-
-          $node.attr('src', `./${originalImageLinkMapper[objectKey]}`)
+            images.push({
+              id: constructedId,
+              key,
+              target,
+              mimetype,
+            })
+            $node.attr('src', `./${key}`)
+          }
         })
-        $('figure').each((index, node) => {
+        $('figure').each((_, node) => {
           const $node = $(node)
           const srcExists = $node.attr('src')
 
@@ -69,8 +66,8 @@ const ICMLPreparation = async (book, tempFolderPath) => {
 
     await Promise.all(
       map(images, async image => {
-        const { objectKey, target } = image
-        return locallyDownloadFile(objectKey, target)
+        const { key, target } = image
+        return download(key, target)
       }),
     )
     const output = cheerio.load(generatePagedjsContainer(book.title))

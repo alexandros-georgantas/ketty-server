@@ -1,3 +1,4 @@
+const { fileStorage } = require('@coko/server')
 const cheerio = require('cheerio')
 const path = require('path')
 const builder = require('xmlbuilder')
@@ -8,11 +9,14 @@ const map = require('lodash/map')
 const filter = require('lodash/filter')
 const beautify = require('js-beautify').html
 
-const { locallyDownloadFile, signURL } = require('../objectStorage.controller')
+const { download } = fileStorage
 
 const { epubDecorator, fixFontFaceUrls } = require('./converters')
 const { writeFile, readFile } = require('../../utilities/filesystem')
-const { imageGatherer, objectKeyExtractor } = require('../../utilities/image')
+
+const { fileStorageImageGatherer } = require('../../utilities/image')
+
+const { getObjectKey } = require('../file.controller')
 
 let images = []
 let stylesheets = []
@@ -87,30 +91,30 @@ const createContainer = async metaInfPath => {
 
 const gatherAssets = async (book, templateFiles, epubFolder) => {
   for (let i = 0; i < templateFiles.length; i += 1) {
-    const { id: dbId, objectKey, mimetype, extension, name } = templateFiles[i]
-    const originalFilename = `${name}.${extension}`
+    const { id: dbId, name } = templateFiles[i]
+    const storedObject = templateFiles[i].getStoredObjectBasedOnType('original')
+    const { key, mimetype } = storedObject
+    const originalFilename = name
 
-    if (templateFiles[i].mimetype === 'text/css') {
+    if (mimetype === 'text/css') {
       const target = `${epubFolder.styles}/${originalFilename}`
       const id = `stylesheet-${dbId}-${i}`
       stylesheets.push({
         id,
-        objectKey,
+        key,
         target,
         mimetype,
         originalFilename,
-        extension,
       })
     } else {
       const target = `${epubFolder.fonts}/${originalFilename}`
       const id = `font-${dbId}-${i}`
       fonts.push({
         id,
-        objectKey,
+        key,
         target,
         mimetype,
         originalFilename,
-        extension,
       })
     }
   }
@@ -121,46 +125,45 @@ const gatherAssets = async (book, templateFiles, epubFolder) => {
     )
   }
 
-  const gatheredImages = imageGatherer(book)
-  const freshImageLinkMapper = {}
+  const gatheredImages = fileStorageImageGatherer(book)
+  // const freshImageLinkMapper = {}
+  const objectKeyMapper = {}
 
   await Promise.all(
-    map(gatheredImages, async image => {
-      const { currentObjectKey } = image
-      freshImageLinkMapper[currentObjectKey] = await signURL(
-        'getObject',
-        currentObjectKey,
-      )
+    map(gatheredImages, async fileId => {
+      // freshImageLinkMapper[fileId] = await getFileURL(fileId, 'medium')
+      objectKeyMapper[fileId] = await getObjectKey(fileId, 'medium')
       return true
     }),
   )
 
-  book.divisions.forEach((division, divisionId) => {
-    division.bookComponents.forEach((bookComponent, bookComponentId) => {
+  book.divisions.forEach(division => {
+    division.bookComponents.forEach(bookComponent => {
       const { content, id } = bookComponent
       const $ = cheerio.load(content)
 
-      $('img[src]').each((index, node) => {
+      $('img').each((index, node) => {
         const $node = $(node)
         const constructedId = `image-${id}-${index}`
-        const url = $node.attr('src')
-        const objectKey = objectKeyExtractor(url)
-        const extension = path.extname(objectKey)
-        const mimetype = mime.lookup(objectKey)
-        const target = `${epubFolder.images}/${objectKey}`
+        const dataFileId = $node.attr('data-fileid')
 
-        images.push({
-          id: constructedId,
-          objectKey,
-          target,
-          mimetype,
-          extension,
-        })
+        if (dataFileId) {
+          const key = objectKeyMapper[dataFileId]
+          const mimetype = mime.lookup(key)
+          const target = `${epubFolder.images}/${key}`
 
-        $node.attr('src', `../Images/${objectKey}`)
+          images.push({
+            id: constructedId,
+            key,
+            target,
+            mimetype,
+          })
+
+          $node.attr('src', `../Images/${key}`)
+        }
       })
 
-      $('figure').each((index, node) => {
+      $('figure').each((_, node) => {
         const $node = $(node)
         const srcExists = $node.attr('src')
 
@@ -179,20 +182,20 @@ const transferAssets = async (imagesParam, stylesheetsParam, fontsParam) => {
   try {
     await Promise.all(
       map(imagesParam, async image => {
-        const { objectKey, target } = image
-        return locallyDownloadFile(objectKey, target)
+        const { key, target } = image
+        return download(key, target)
       }),
     )
     await Promise.all(
       map(stylesheetsParam, async stylesheet => {
-        const { objectKey, target } = stylesheet
-        return locallyDownloadFile(objectKey, target)
+        const { key, target } = stylesheet
+        return download(key, target)
       }),
     )
     await Promise.all(
       map(fontsParam, async font => {
-        const { objectKey, target } = font
-        return locallyDownloadFile(objectKey, target)
+        const { key, target } = font
+        return download(key, target)
       }),
     )
     const stylesheetContent = await readFile(stylesheets[0].target)
@@ -217,8 +220,8 @@ const decorateText = async (book, hasEndnotes) => {
     }
   }
 
-  book.divisions.forEach((division, divisionId) => {
-    division.bookComponents.forEach((bookComponent, bookComponentId) => {
+  book.divisions.forEach(division => {
+    division.bookComponents.forEach(bookComponent => {
       /* eslint-disable no-param-reassign */
       bookComponent.content = epubDecorator(
         bookComponent,
@@ -239,8 +242,8 @@ const generateTOCNCX = async (book, epubFolder) => {
 
   const identifier = isbn || issn || issnL
   let counter = 0
-  book.divisions.forEach((division, divisionId) => {
-    division.bookComponents.forEach((bookComponent, bookComponentId) => {
+  book.divisions.forEach(division => {
+    division.bookComponents.forEach(bookComponent => {
       const { id, includeInTOC, title, componentType } = bookComponent
 
       if (includeInTOC) {
@@ -340,8 +343,8 @@ const generateContentOPF = async (book, epubFolder) => {
     '#text': updated.toISOString().replace(/\.\d+Z$/, 'Z'),
   })
 
-  book.divisions.forEach((division, divisionId) => {
-    division.bookComponents.forEach((bookComponent, bookComponentId) => {
+  book.divisions.forEach(division => {
+    division.bookComponents.forEach(bookComponent => {
       const { id, componentType, hasMath } = bookComponent
       spineData.push({
         '@idref': `comp-number-${id}`,
@@ -367,7 +370,7 @@ const generateContentOPF = async (book, epubFolder) => {
 
   for (let i = 0; i < images.length; i += 1) {
     manifestData.push({
-      '@href': `Images/${images[i].objectKey}`,
+      '@href': `Images/${images[i].key}`,
       '@id': `${images[i].id}`,
       '@media-type': `${images[i].mimetype}`,
     })
@@ -496,12 +499,11 @@ const convertToXML = async content => {
 
 const gatherTexts = async (book, epubFolder) => {
   try {
-    book.divisions.forEach((division, divisionId) => {
-      division.bookComponents.forEach((bookComponent, bookComponentId) => {
+    book.divisions.forEach(division => {
+      division.bookComponents.forEach(bookComponent => {
         const { content: dbContent, id, componentType } = bookComponent
         const constructedId = `comp-number-${id}`
         const source = undefined
-        const extension = '.xhtml'
         const basename = `${constructedId}.xhtml`
         const filename = `${constructedId}`
         const mimetype = 'application/xhtml+xml'
@@ -516,7 +518,6 @@ const gatherTexts = async (book, epubFolder) => {
           mimetype,
           basename,
           filename,
-          extension,
           componentType,
           content,
         })

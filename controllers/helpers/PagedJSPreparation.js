@@ -1,15 +1,17 @@
+const { fileStorage } = require('@coko/server')
 const cheerio = require('cheerio')
 const fs = require('fs-extra')
 const config = require('config')
 const find = require('lodash/find')
 const map = require('lodash/map')
 
-const { locallyDownloadFile, signURL } = require('../objectStorage.controller')
+const { download } = fileStorage
+const { getFileURL } = require('../file.controller')
 
 const { generatePagedjsContainer } = require('./htmlGenerators')
 const { fixFontFaceUrls } = require('./converters')
 const { writeFile, readFile } = require('../../utilities/filesystem')
-const { imageGatherer, objectKeyExtractor } = require('../../utilities/image')
+const { fileStorageImageGatherer } = require('../../utilities/image')
 
 const PagedJSPreparation = async (
   book,
@@ -26,33 +28,32 @@ const PagedJSPreparation = async (
     await fs.ensureDir(pagedJStempFolderAssetsPath)
 
     for (let i = 0; i < templateFiles.length; i += 1) {
-      const {
-        id: dbId,
-        objectKey,
-        mimetype,
-        extension,
-        name,
-      } = templateFiles[i]
+      const { id: dbId, name } = templateFiles[i]
 
-      const originalFilename = `${name}.${extension}`
+      const storedObject =
+        templateFiles[i].getStoredObjectBasedOnType('original')
 
-      if (templateFiles[i].mimetype === 'text/css') {
+      const { key, mimetype, extension } = storedObject
+
+      const originalFilename = name
+
+      if (mimetype === 'text/css') {
         const target = `${pagedJStempFolderAssetsPath}/${originalFilename}`
         const id = `stylesheet-${dbId}-${i}`
         stylesheets.push({
           id,
-          objectKey,
+          key,
           target,
           mimetype,
           originalFilename,
           extension,
         })
       } else {
-        const target = `${pagedJStempFolderAssetsPath}/${originalFilename}`
+        const target = `${pagedJStempFolderAssetsPath}/${name}`
         const id = `font-${dbId}-${i}`
         fonts.push({
           id,
-          objectKey,
+          key,
           target,
           mimetype,
           originalFilename,
@@ -67,16 +68,12 @@ const PagedJSPreparation = async (
       )
     }
 
-    const gatheredImages = imageGatherer(book)
+    const gatheredImages = fileStorageImageGatherer(book)
     const freshImageLinkMapper = {}
 
     await Promise.all(
-      map(gatheredImages, async image => {
-        const { currentObjectKey } = image
-        freshImageLinkMapper[currentObjectKey] = await signURL(
-          'getObject',
-          currentObjectKey,
-        )
+      map(gatheredImages, async fileId => {
+        freshImageLinkMapper[fileId] = await getFileURL(fileId, 'medium')
         return true
       }),
     )
@@ -85,11 +82,13 @@ const PagedJSPreparation = async (
         const { content } = bookComponent
         const $ = cheerio.load(content)
 
-        $('img[src]').each((index, node) => {
+        $('img').each((_, node) => {
           const $node = $(node)
-          const url = $node.attr('src')
-          const objectKey = objectKeyExtractor(url)
-          $node.attr('src', freshImageLinkMapper[objectKey])
+          const dataFileId = $node.attr('data-fileid')
+
+          if (dataFileId) {
+            $node.attr('src', freshImageLinkMapper[dataFileId])
+          }
         })
         $('figure').each((_, node) => {
           const $node = $(node)
@@ -107,14 +106,14 @@ const PagedJSPreparation = async (
 
     await Promise.all(
       map(stylesheets, async stylesheet => {
-        const { objectKey, target } = stylesheet
-        return locallyDownloadFile(objectKey, target)
+        const { key, target } = stylesheet
+        return download(key, target)
       }),
     )
     await Promise.all(
       map(fonts, async font => {
-        const { objectKey, target } = font
-        return locallyDownloadFile(objectKey, target)
+        const { key, target } = font
+        return download(key, target)
       }),
     )
 

@@ -1,31 +1,11 @@
+const FileBase = require('@coko/server/src/models/file/file.model')
 const { Model } = require('objection')
 
-const Base = require('../ketidaBase')
-
-const {
-  arrayOfStringsNotEmpty,
-  id,
-  integerPositive,
-  mimetype,
-  stringNotEmpty,
-  uri,
-} = require('../helpers').schema
-
-class File extends Base {
-  constructor(properties) {
-    super(properties)
-    this.type = 'file'
-  }
-
-  static get tableName() {
-    return 'File'
-  }
-
+class File extends FileBase {
   static get relationMappings() {
     /* eslint-disable global-require */
     const Book = require('../book/book.model')
     const BookComponent = require('../bookComponent/bookComponent.model')
-    const FileTranslation = require('../fileTranslation/fileTranslation.model')
     const Template = require('../template/template.model')
     /* eslint-enable global-require */
 
@@ -34,15 +14,15 @@ class File extends Base {
         relation: Model.BelongsToOneRelation,
         modelClass: Book,
         join: {
-          from: 'File.bookId',
-          to: 'Book.id',
+          from: 'files.object_id',
+          to: 'book.id',
         },
       },
       bookComponent: {
         relation: Model.BelongsToOneRelation,
         modelClass: BookComponent,
         join: {
-          from: 'File.bookComponentId',
+          from: 'files.object_id',
           to: 'BookComponent.id',
         },
       },
@@ -50,46 +30,9 @@ class File extends Base {
         relation: Model.BelongsToOneRelation,
         modelClass: Template,
         join: {
-          from: 'File.templateId',
+          from: 'files.object_id',
           to: 'Template.id',
         },
-      },
-      fileTranslations: {
-        relation: Model.HasManyRelation,
-        modelClass: FileTranslation,
-        join: {
-          from: 'File.id',
-          to: 'FileTranslation.fileId',
-        },
-      },
-    }
-  }
-
-  static get schema() {
-    return {
-      type: 'object',
-      required: ['name', 'objectKey'],
-      properties: {
-        name: stringNotEmpty,
-        bookId: id,
-        extension: stringNotEmpty,
-        bookComponentId: id,
-        templateId: id,
-        mimetype,
-        referenceId: id,
-        size: integerPositive,
-        source: uri,
-        objectKey: stringNotEmpty,
-        metadata: {
-          type: 'object',
-          properties: {
-            width: integerPositive,
-            height: integerPositive,
-            density: integerPositive,
-            space: stringNotEmpty,
-          },
-        },
-        tags: arrayOfStringsNotEmpty,
       },
     }
   }
@@ -100,10 +43,6 @@ class File extends Base {
 
   getBookComponent() {
     return this.$relatedQuery('bookComponent')
-  }
-
-  getFileTranslations() {
-    return this.$relatedQuery('fileTranslations')
   }
 
   getTemplate() {

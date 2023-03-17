@@ -1,34 +1,10 @@
-type File {
-  id: ID!
-  name: String!
-  alt: String
-  objectKey: String!
-  updated: Date
-  created: Date
-  source(size: ImageSize): String
-  mimetype(target: ImageTarget): String!
-  metadata: Metadata
-  extension: String!
+extend type File {
   inUse: Boolean!
-  size: Int
-}
-
-type Metadata {
-  width: Int
-  height: Int
-  space: String
-  density: Int
 }
 
 enum Order {
   asc
   desc
-}
-
-enum ImageSize {
-  original
-  medium
-  small
 }
 
 enum ImageTarget {
@@ -44,19 +20,8 @@ input SortingParams {
   order: Order!
 }
 
-input UpdateFileInput {
-  id: ID!
-  name: String
-  alt: String
-}
-
-type SignedURLPayload {
-  url: String!
-}
-
 input EntityFilesInput {
   entityId: ID!
-  entityType: String!
   sortingParams: [SortingParams]
   includeInUse: Boolean
 }

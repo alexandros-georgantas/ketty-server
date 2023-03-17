@@ -7,7 +7,6 @@ const bookComponentState = require('./bookComponentState')
 const bookComponentTranslation = require('./bookComponentTranslation')
 const bookTranslation = require('./bookTranslation')
 const file = require('./file')
-const fileTranslation = require('./fileTranslation')
 const template = require('./template')
 const customTag = require('./customTag')
 const division = require('./division')
@@ -35,7 +34,6 @@ module.exports = {
   bookTranslation,
   division,
   file,
-  fileTranslation,
   lock,
   loader,
   template,
@@ -52,7 +50,6 @@ module.exports = {
     CustomTag: customTag.model,
     Division: division.model,
     File: file.model,
-    FileTranslation: fileTranslation.model,
     Team: team.model,
     TeamMember: teamMember.model,
     Template: template.model,

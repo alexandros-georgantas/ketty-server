@@ -1,4 +1,4 @@
-const { callMicroservice, logger } = require('@coko/server')
+const { callMicroservice, logger, fileStorage } = require('@coko/server')
 const fs = require('fs-extra')
 const config = require('config')
 const path = require('path')
@@ -10,11 +10,7 @@ const uploadsDir = get(config, ['pubsweet-server', 'uploads'], 'uploads')
 
 const ServiceCallbackToken = require('../models/serviceCallbackToken/serviceCallbackToken.model')
 
-const {
-  uploadFile,
-  signURL,
-  deleteFiles,
-} = require('./objectStorage.controller')
+const { getURL, upload, deleteFiles: fileStorageDeleteFiles } = fileStorage
 
 const {
   zipper,
@@ -55,13 +51,9 @@ const epubcheckerHandler = async epubPath => {
     const deconstruct = epubPath.split('/')
     const epubName = deconstruct[deconstruct.length - 1]
 
-    const { original } = await uploadFile(
-      fs.createReadStream(epubPath),
-      epubName,
-      'application/epub+zip',
-    )
+    const storedObjects = await upload(fs.createReadStream(epubPath), epubName)
 
-    const EPUBPath = await signURL('getObject', original.key)
+    const EPUBPath = await getURL(storedObjects[0].key)
 
     return new Promise((resolve, reject) => {
       callMicroservice(EPUBCHECKER, {
@@ -70,11 +62,11 @@ const epubcheckerHandler = async epubPath => {
         data: { EPUBPath },
       })
         .then(async ({ data }) => {
-          await deleteFiles([original.key])
+          await fileStorageDeleteFiles([storedObjects[0].key])
           resolve(data)
         })
         .catch(async err => {
-          await deleteFiles([original.key])
+          await fileStorageDeleteFiles([storedObjects[0].key])
           const { response } = err
 
           if (!response) {

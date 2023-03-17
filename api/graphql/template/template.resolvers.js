@@ -140,6 +140,7 @@ const updateTemplateCSSFileHandler = async (_, { input }, ctx) => {
   try {
     logger.info('template resolver: use case updateTemplateCSSFile')
     const { id, data, hashed, bookId } = input
+
     const pubsub = await pubsubManager.getPubsub()
     const currentTemplate = await updateTemplateCSSFile(id, data, hashed)
 
