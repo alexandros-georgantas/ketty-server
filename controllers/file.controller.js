@@ -187,12 +187,10 @@ const getContentFiles = async (fileIds, options = {}) => {
 
             if (mimetype.match(/^image\//)) {
               file.url = await getURL(keyMedium)
-              // console.log('fileIm', file)
               return file
             }
 
             file.url = await getURL(key)
-            // console.log('file', file)
             /* eslint-enable no-param-reassign */
 
             return file
