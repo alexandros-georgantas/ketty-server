@@ -6,21 +6,24 @@ const get = require('lodash/get')
 
 const uploadsDir = get(config, ['pubsweet-server', 'uploads'], 'uploads')
 const { readFile } = require('../../utilities/filesystem')
+const { xsweetImagesHandler } = require('../../utilities/image')
 
 const { BookComponent, ServiceCallbackToken } = require('../../models').models
 
 const {
   BOOK_COMPONENT_UPLOADING_UPDATED,
+  BOOK_COMPONENT_DELETED,
 } = require('../graphql/bookComponent/constants')
 
 const {
   updateContent,
   updateUploading,
   deleteBookComponent,
+  getBookComponent,
 } = require('../../controllers/bookComponent.controller')
 
 const RESTEndpoints = app => {
-  app.use('/api/xsweet', async (req, res, next) => {
+  app.use('/api/xsweet', async (req, res) => {
     try {
       const pubsub = await pubsubManager.getPubsub()
       const { body } = req
@@ -55,8 +58,13 @@ const RESTEndpoints = app => {
         throw new Error('unknown service token or conflict')
       }
 
+      const contentWithImagesHandled = await xsweetImagesHandler(
+        convertedContent,
+        bookComponentId,
+      )
+
       const uploading = false
-      await updateContent(bookComponentId, convertedContent, 'en')
+      await updateContent(bookComponentId, contentWithImagesHandled, 'en')
 
       await updateUploading(bookComponentId, uploading)
       const updatedBookComponent = await BookComponent.findById(bookComponentId)
@@ -71,8 +79,18 @@ const RESTEndpoints = app => {
       })
     } catch (error) {
       // the service will not care if something went wrong in Ketida
+      const pubsub = await pubsubManager.getPubsub()
+      const { body } = req
+
+      const { objectId: bookComponentId } = body
       res.status(200).json({
         msg: 'ok',
+      })
+      const bookComp = await getBookComponent(bookComponentId)
+
+      await deleteBookComponent(bookComp)
+      await pubsub.publish(BOOK_COMPONENT_DELETED, {
+        bookComponentDeleted: { id: bookComponentId },
       })
       // throw something which will only be displayed in server's logs
       throw new Error(error)

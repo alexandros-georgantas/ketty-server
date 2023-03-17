@@ -12,7 +12,8 @@
   "scripts": {
     "cz": "git-cz",
     "lint": "eslint '**/*.js'",
-    "test": "jest"
+    "test": "jest",
+    "create:admin": "node ./scripts/createAdmin.js"
   },
   "config": {
     "commitizen": {
