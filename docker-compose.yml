@@ -71,8 +71,6 @@ services:
         'controllers',
         '--watch',
         'scripts',
-        '--watch',
-        'bin',
         'startServer.js',
         'startWebSocketServer.js',
         'app.js',
