@@ -17,11 +17,10 @@ const bookComponentContentCreator = async (
   options = {},
 ) => {
   const { trx, languageIso } = options
-  let container = cheerio.load(`<html><body></body></html>`)
 
-  if (title) {
-    container = cheerio.load(`<html><body><h1>${title}</h1></body></html>`)
-  }
+  title = title || (bookComponent.componentType === 'part' ? `Part Title` : bookComponent.componentType === 'chapter' ? `Chapter Title`: '');
+
+  const container = cheerio.load(`<html><body><h1>${title}</h1></body></html>`);
 
   try {
     return useTransaction(
@@ -61,7 +60,7 @@ const bookComponentContentCreator = async (
                   }" data-type="content_structure_element" class="${sectionLevelClassCreator(
                     bookStructure.levels.length,
                   )} ${camelCaseToKebabCase(outlineLevelTwoItem.type)}"><h2>${
-                    outlineLevelTwoItem.title
+                    getTitleOrDefault(outlineLevelTwoItem.title)
                   }</h2></section>`,
                 )
                 bookStructure.levels[level + 1].contentStructure.forEach(
@@ -113,7 +112,7 @@ const bookComponentContentCreator = async (
               },
             )
             content = container('body').html()
-          } else if (level === 0) {
+          } else {
             bookStructure.levels[level].contentStructure.forEach(
               contentItem => {
                 if (contentItem.type === 'contentOpenerImage') {
@@ -143,7 +142,7 @@ const bookComponentContentCreator = async (
                   }" data-type="content_structure_element" class="${sectionLevelClassCreator(
                     bookStructure.levels.length,
                   )} ${camelCaseToKebabCase(outlineLevelTwoItem.type)}"><h2>${
-                    outlineLevelTwoItem.title
+                    getTitleOrDefault()
                   }</h2></section>`,
                 )
                 bookStructure.levels[level + 1].contentStructure.forEach(
@@ -258,7 +257,7 @@ const bookComponentContentCreator = async (
                   }" data-type="content_structure_element" class="${sectionLevelClassCreator(
                     bookStructure.levels.length,
                   )} ${camelCaseToKebabCase(outlineLevelThreeItem.type)}"><h2>${
-                    outlineLevelThreeItem.title
+                    getTitleOrDefault(outlineLevelThreeItem.title)
                   }</h2></section>`,
                 )
                 bookStructure.levels[level + 1].contentStructure.forEach(
@@ -366,7 +365,9 @@ const bookComponentContentCreator = async (
                   bookStructure.levels.length,
                 )} ${camelCaseToKebabCase(
                   bookStructure.levels[level + 1].type,
-                )}"></section>`,
+                )}"><h2>${
+                  getTitleOrDefault(bookStructure.levels[level + 1].title)
+                }</h2></section>`,
               )
 
               bookStructure.levels[level + 1].contentStructure.forEach(
@@ -442,6 +443,13 @@ const bookComponentContentCreator = async (
   } catch (e) {
     throw new Error(e)
   }
+}
+
+const getTitleOrDefault = (title) => {
+  if (typeof title === 'string' && title.trim() !== '' && title !== 'Undefined') {
+    return title;
+  }
+  return 'Section Title';
 }
 
 module.exports = bookComponentContentCreator
