@@ -8,6 +8,26 @@ const BookComponentTranslation = require('../../models/bookComponentTranslation/
 const sectionLevelClassCreator = totalNumberOfLevels =>
   totalNumberOfLevels === 4 ? 'level-three' : 'level-two'
 
+const getTitleOrDefault = (title = undefined) => {
+  if (!title) {
+    return 'Section Title'
+  }
+
+  if (title.trim() === '' && title === 'Undefined') {
+    return 'Section Title'
+  }
+
+  return title
+}
+
+const getH1TitleOrDefault = (title, componentType) => {
+  if (!title || title.trim() === '') {
+    return componentType === 'part' ? 'Part Title' : 'Chapter Title'
+  }
+
+  return title
+}
+
 const bookComponentContentCreator = async (
   bookComponent,
   title,
@@ -17,11 +37,12 @@ const bookComponentContentCreator = async (
   options = {},
 ) => {
   const { trx, languageIso } = options
-  let container = cheerio.load(`<html><body></body></html>`)
 
-  if (title) {
-    container = cheerio.load(`<html><body><h1>${title}</h1></body></html>`)
-  }
+  const h1Title = getH1TitleOrDefault(title, bookComponent.componentType)
+
+  const container = cheerio.load(
+    `<html><body><h1>${h1Title}</h1></body></html>`,
+  )
 
   try {
     return useTransaction(
@@ -60,9 +81,11 @@ const bookComponentContentCreator = async (
                     outlineLevelTwoItem.id
                   }" data-type="content_structure_element" class="${sectionLevelClassCreator(
                     bookStructure.levels.length,
-                  )} ${camelCaseToKebabCase(outlineLevelTwoItem.type)}"><h2>${
-                    outlineLevelTwoItem.title
-                  }</h2></section>`,
+                  )} ${camelCaseToKebabCase(
+                    outlineLevelTwoItem.type,
+                  )}"><h2>${getTitleOrDefault(
+                    outlineLevelTwoItem.title,
+                  )}</h2></section>`,
                 )
                 bookStructure.levels[level + 1].contentStructure.forEach(
                   contentItem => {
@@ -113,7 +136,7 @@ const bookComponentContentCreator = async (
               },
             )
             content = container('body').html()
-          } else if (level === 0) {
+          } else {
             bookStructure.levels[level].contentStructure.forEach(
               contentItem => {
                 if (contentItem.type === 'contentOpenerImage') {
@@ -142,9 +165,9 @@ const bookComponentContentCreator = async (
                     outlineLevelTwoItem.id
                   }" data-type="content_structure_element" class="${sectionLevelClassCreator(
                     bookStructure.levels.length,
-                  )} ${camelCaseToKebabCase(outlineLevelTwoItem.type)}"><h2>${
-                    outlineLevelTwoItem.title
-                  }</h2></section>`,
+                  )} ${camelCaseToKebabCase(
+                    outlineLevelTwoItem.type,
+                  )}"><h2>${getTitleOrDefault()}</h2></section>`,
                 )
                 bookStructure.levels[level + 1].contentStructure.forEach(
                   contentItem => {
@@ -257,9 +280,11 @@ const bookComponentContentCreator = async (
                     outlineLevelThreeItem.id
                   }" data-type="content_structure_element" class="${sectionLevelClassCreator(
                     bookStructure.levels.length,
-                  )} ${camelCaseToKebabCase(outlineLevelThreeItem.type)}"><h2>${
-                    outlineLevelThreeItem.title
-                  }</h2></section>`,
+                  )} ${camelCaseToKebabCase(
+                    outlineLevelThreeItem.type,
+                  )}"><h2>${getTitleOrDefault(
+                    outlineLevelThreeItem.title,
+                  )}</h2></section>`,
                 )
                 bookStructure.levels[level + 1].contentStructure.forEach(
                   contentItem => {
@@ -366,7 +391,7 @@ const bookComponentContentCreator = async (
                   bookStructure.levels.length,
                 )} ${camelCaseToKebabCase(
                   bookStructure.levels[level + 1].type,
-                )}"></section>`,
+                )}"><h2>${getTitleOrDefault()}</h2></section>`,
               )
 
               bookStructure.levels[level + 1].contentStructure.forEach(
