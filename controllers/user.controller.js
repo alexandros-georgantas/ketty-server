@@ -1,8 +1,21 @@
 const { logger, useTransaction } = require('@coko/server')
+
+const {
+  identityVerification,
+} = require('@coko/server/src/models/_helpers/emailTemplates')
+
+const {
+  notify,
+  notificationTypes: { EMAIL },
+} = require('@coko/server/src//services')
+
+const { login } = require('@coko/server/src/models/user/user.controller')
 const includes = require('lodash/includes')
 const get = require('lodash/get')
 const startsWith = require('lodash/startsWith')
+const crypto = require('crypto')
 
+const Identity = require('@coko/server/src/models/identity/identity.model')
 const User = require('../models/user/user.model')
 
 const isValidUser = ({ surname, givenNames }) => surname && givenNames
@@ -11,6 +24,103 @@ const isAdmin = async userId => {
   try {
     return User.hasGlobalRole(userId, 'admin')
   } catch (e) {
+    throw new Error(e)
+  }
+}
+
+const ketidaLogin = async input => {
+  try {
+    const { username, email } = input
+    let verified
+    let active
+    let responseCode
+
+    if (!username) {
+      const identity = await Identity.findOne({ email })
+      if (!identity) throw new Error('Wrong username or password.')
+      verified = identity.isVerified
+      const user = await User.findById(identity.userId)
+      active = user.isActive
+    } else {
+      const user = await User.findOne({ username })
+      if (!user) throw new Error('Wrong username or password.')
+      active = user.isActive
+
+      const identity = await Identity.findOne({
+        userId: user.id,
+        isDefault: true,
+      })
+
+      if (!identity) throw new Error('Something went wrong with provided info')
+
+      verified = identity.isVerified
+    }
+
+    if (active && verified) {
+      return login(input)
+    }
+
+    if (!active && !verified) {
+      responseCode = 100
+    } else if (!active && verified) {
+      responseCode = 110
+    } else if (active && !verified) {
+      responseCode = 120
+    }
+
+    return { code: responseCode }
+  } catch (e) {
+    logger.error(`[USER CONTROLLER] - ketida login: ${e.message}`)
+    throw new Error(e.message)
+  }
+}
+
+const ketidaResendVerificationEmail = async (email, options = {}) => {
+  try {
+    const { trx } = options
+    logger.info(
+      `[USER CONTROLLER] - ketidaResendVerificationEmail: resending verification email to user`,
+    )
+    return useTransaction(
+      async tr => {
+        const identity = await Identity.findOne(
+          {
+            email,
+          },
+          { trx: tr },
+        )
+
+        if (!identity)
+          throw new Error(
+            `[USER CONTROLLER] - ketidaResendVerificationEmail: Token does not correspond to an identity`,
+          )
+
+        const verificationToken = crypto.randomBytes(64).toString('hex')
+        const verificationTokenTimestamp = new Date()
+
+        await identity.patch(
+          {
+            verificationToken,
+            verificationTokenTimestamp,
+          },
+          { trx: tr },
+        )
+
+        const emailData = identityVerification({
+          verificationToken,
+          email: identity.email,
+        })
+
+        notify(EMAIL, emailData)
+
+        return true
+      },
+      { trx, passedTrxOnly: true },
+    )
+  } catch (e) {
+    logger.error(
+      `[USER CONTROLLER] - ketidaResendVerificationEmail: ${e.message}`,
+    )
     throw new Error(e)
   }
 }
@@ -148,4 +258,6 @@ const searchForUsers = async (search, exclude, options = {}) => {
 module.exports = {
   searchForUsers,
   isAdmin,
+  ketidaLogin,
+  ketidaResendVerificationEmail,
 }
