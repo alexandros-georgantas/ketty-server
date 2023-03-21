@@ -48,7 +48,7 @@ const bookComponentContentCreator = async (
                       contentItem.type
                     }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                       contentItem.type,
-                    )}"><h2>${contentItem.displayName}</h2></div>`,
+                    )}"></div>`,
                   )
                 }
               },
@@ -80,7 +80,7 @@ const bookComponentContentCreator = async (
                           contentItem.type
                         }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                           contentItem.type,
-                        )}"><h3>${contentItem.displayName}</h3></div>`,
+                        )}"></div>`,
                       )
                     }
                   },
@@ -107,7 +107,7 @@ const bookComponentContentCreator = async (
                       contentItem.type
                     }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                       contentItem.type,
-                    )}"><h2>${contentItem.displayName}</h2></div>`,
+                    )}"></div>`,
                   )
                 }
               },
@@ -130,7 +130,7 @@ const bookComponentContentCreator = async (
                       contentItem.type
                     }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                       contentItem.type,
-                    )}"><h2>${contentItem.displayName}</h2></div>`,
+                    )}"></div>`,
                   )
                 }
               },
@@ -162,7 +162,7 @@ const bookComponentContentCreator = async (
                           contentItem.type
                         }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                           contentItem.type,
-                        )}"><h3>${contentItem.displayName}</h3></div>`,
+                        )}"></div>`,
                       )
                     }
                   },
@@ -189,7 +189,7 @@ const bookComponentContentCreator = async (
                       contentItem.type
                     }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                       contentItem.type,
-                    )}"><h2>${contentItem.displayName}</h2></div>`,
+                    )}"></div>`,
                   )
                 }
               },
@@ -220,7 +220,7 @@ const bookComponentContentCreator = async (
                         contentItem.type
                       }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                         contentItem.type,
-                      )}"><h2>${contentItem.displayName}</h2></div>`,
+                      )}"></div>`,
                     )
                   }
                 },
@@ -244,7 +244,7 @@ const bookComponentContentCreator = async (
                         contentItem.type
                       }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                         contentItem.type,
-                      )}"><h2>${contentItem.displayName}</h2></div>`,
+                      )}"></div>`,
                     )
                   }
                 },
@@ -277,7 +277,7 @@ const bookComponentContentCreator = async (
                           contentItem.type
                         }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                           contentItem.type,
-                        )}"><h3>${contentItem.displayName}</h3></div>`,
+                        )}"></div>`,
                       )
                     }
                   },
@@ -305,7 +305,7 @@ const bookComponentContentCreator = async (
                           contentItem.type
                         }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                           contentItem.type,
-                        )}"><h2>${contentItem.displayName}</h2></div>`,
+                        )}"></div>`,
                       )
                     }
                   },
@@ -331,7 +331,7 @@ const bookComponentContentCreator = async (
                         contentItem.type
                       }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                         contentItem.type,
-                      )}"><h2>${contentItem.displayName}</h2></div>`,
+                      )}"></div>`,
                     )
                   }
                 },
@@ -355,7 +355,7 @@ const bookComponentContentCreator = async (
                         contentItem.type
                       }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                         contentItem.type,
-                      )}"><h2>${contentItem.displayName}</h2></div>`,
+                      )}"></div>`,
                     )
                   }
                 },
@@ -385,7 +385,7 @@ const bookComponentContentCreator = async (
                         contentItem.type
                       }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                         contentItem.type,
-                      )}"><h3>${contentItem.displayName}</h3></div>`,
+                      )}"></div>`,
                     )
                   }
                 },
@@ -412,7 +412,7 @@ const bookComponentContentCreator = async (
                           contentItem.type
                         }-${uuid()}" data-type="content_structure_element" class="${camelCaseToKebabCase(
                           contentItem.type,
-                        )}"><h2>${contentItem.displayName}</h2></div>`,
+                        )}"></div>`,
                       )
                     }
                   },
