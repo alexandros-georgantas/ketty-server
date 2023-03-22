@@ -14,15 +14,36 @@ const includes = require('lodash/includes')
 const get = require('lodash/get')
 const startsWith = require('lodash/startsWith')
 const crypto = require('crypto')
+const config = require('config')
 
 const Identity = require('@coko/server/src/models/identity/identity.model')
 const User = require('../models/user/user.model')
+
+const globalTeam = config.get('teams.global')
 
 const isValidUser = ({ surname, givenNames }) => surname && givenNames
 
 const isAdmin = async userId => {
   try {
     return User.hasGlobalRole(userId, 'admin')
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
+const isGlobal = async userId => {
+  try {
+    const globalTeamsWithoutAdmin = Object.keys(globalTeam).filter(
+      team => team !== 'admin',
+    )
+
+    const isGlobalList = await Promise.all(
+      globalTeamsWithoutAdmin.map(async team =>
+        User.hasGlobalRole(userId, team.role),
+      ),
+    )
+
+    return isGlobalList.some(global => global)
   } catch (e) {
     throw new Error(e)
   }
@@ -260,4 +281,5 @@ module.exports = {
   isAdmin,
   ketidaLogin,
   ketidaResendVerificationEmail,
+  isGlobal,
 }
