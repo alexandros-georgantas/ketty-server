@@ -21,7 +21,7 @@ const User = require('../models/user/user.model')
 
 const isValidUser = ({ surname, givenNames }) => surname && givenNames
 
-const globalTeam = config.get('teams.global')
+const globalTeams = config.get('teams.global')
 
 const isAdmin = async userId => {
   try {
@@ -33,13 +33,13 @@ const isAdmin = async userId => {
 
 const isGlobal = async userId => {
   try {
-    const globalTeamsWithoutAdmin = Object.keys(globalTeam).filter(
+    const globalTeamsWithoutAdmin = Object.keys(globalTeams).filter(
       team => team !== 'admin',
     )
 
     const isGlobalList = await Promise.all(
       globalTeamsWithoutAdmin.map(async team =>
-        User.hasGlobalRole(userId, team.role),
+        User.hasGlobalRole(userId, globalTeams[team].role),
       ),
     )
 
