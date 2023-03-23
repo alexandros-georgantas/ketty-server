@@ -19,9 +19,9 @@ const config = require('config')
 const Identity = require('@coko/server/src/models/identity/identity.model')
 const User = require('../models/user/user.model')
 
-const globalTeam = config.get('teams.global')
-
 const isValidUser = ({ surname, givenNames }) => surname && givenNames
+
+const globalTeam = config.get('teams.global')
 
 const isAdmin = async userId => {
   try {
