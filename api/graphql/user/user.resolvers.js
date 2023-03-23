@@ -5,6 +5,7 @@ const {
   isAdmin,
   ketidaLogin,
   ketidaResendVerificationEmail,
+  isGlobal,
 } = require('../../../controllers/user.controller')
 
 const searchForUsersHandler = async (_, { search, exclude }, ctx, info) => {
@@ -46,6 +47,10 @@ module.exports = {
     async admin(user, input, ctx, info) {
       logger.info('in custom resolver')
       return isAdmin(user.id)
+    },
+    async isGlobal(user, _, ctx, info) {
+      logger.info('isGlobal resolver')
+      return isGlobal(user.id)
     },
   },
 }
