@@ -1,6 +1,7 @@
 type TeamSub {
   role: String
   global: Boolean
+  objectId: String
 }
 
 extend type Mutation {
