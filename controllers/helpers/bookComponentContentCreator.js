@@ -1,6 +1,5 @@
-const { useTransaction } = require('@coko/server')
+const { useTransaction, uuid } = require('@coko/server')
 const cheerio = require('cheerio')
-const uuid = require('uuid/v4')
 
 const { camelCaseToKebabCase } = require('../../utilities/generic')
 const BookComponentTranslation = require('../../models/bookComponentTranslation/bookComponentTranslation.model')

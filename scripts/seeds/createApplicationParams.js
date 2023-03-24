@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const { logger, useTransaction } = require('@coko/server')
-const db = require('@pubsweet/db-manager/src/db')
+const { db } = require('@coko/server')
 
 const ApplicationParameter = require('../../models/applicationParameter/applicationParameter.model')
 

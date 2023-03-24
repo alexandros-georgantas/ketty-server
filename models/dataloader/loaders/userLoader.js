@@ -1,4 +1,3 @@
-// const { model } = require('@pubsweet/model-user')
 const User = require('../../user/user.model')
 const Loader = require('../loader')
 
