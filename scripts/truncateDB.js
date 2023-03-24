@@ -1,4 +1,4 @@
-const db = require('@pubsweet/db-manager/src/db')
+const { db } = require('@coko/server')
 
 const truncateDB = async () => {
   const { rows } = await db.raw(`
