@@ -26,7 +26,6 @@
     }
   },
   "resolutions": {
-    "@pubsweet/base-model": "^4.0.8",
     "objection": "^2.2.15",
     "pg": "8"
   },
