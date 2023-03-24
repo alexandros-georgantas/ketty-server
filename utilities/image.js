@@ -2,7 +2,8 @@ const cheerio = require('cheerio')
 const crypto = require('crypto')
 const find = require('lodash/find')
 const fs = require('fs-extra')
-const uuid = require('uuid/v4')
+
+const { uuid } = require('@coko/server')
 
 const { createFile } = require('@coko/server/src/models/file/file.controller')
 

@@ -1,5 +1,6 @@
 const { Model } = require('objection')
-const uuid = require('uuid/v4')
+
+const { uuid } = require('@coko/server')
 
 const Base = require('../ketidaBase')
 
