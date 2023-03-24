@@ -1,28 +1,28 @@
 {
   "name": "server",
   "version": "1.2.3",
-  "private": false,
+  "private": true,
   "description": "Ketida's Platform common server",
   "repository": {
     "type": "git",
-    "url": "git@gitlab.coko.foundation:ketida/server.git"
+    "url": "https://gitlab.coko.foundation/ketida/server.git"
   },
   "license": "MIT",
   "author": "Yannis Barlas, Alexandros Georgantas",
   "scripts": {
+    "create:admin": "node ./scripts/createAdmin.js",
     "cz": "git-cz",
     "lint": "eslint '**/*.js'",
-    "test": "jest",
-    "create:admin": "node ./scripts/createAdmin.js"
-  },
-  "config": {
-    "commitizen": {
-      "path": "cz-customizable"
-    }
+    "test": "jest"
   },
   "husky": {
     "hooks": {
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS && lint-staged"
+    }
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-customizable"
     }
   },
   "resolutions": {
@@ -58,8 +58,12 @@
   },
   "devDependencies": {
     "@coko/lint": "^2.0.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/gitlab": "^9.5.1",
     "jest": "^28.1.3",
     "node-wait-for-it": "^0.2.0",
-    "nodemon": "^1.19.1"
+    "nodemon": "^1.19.1",
+    "semantic-release": "^19.0.5"
   }
 }
