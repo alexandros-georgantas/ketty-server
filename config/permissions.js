@@ -42,6 +42,7 @@ const permissions = {
     getSpecificFiles: isAuthenticated,
     getTemplates: isAuthenticated,
     getTemplate: isAuthenticated,
+    chatGPT: isAuthenticated,
   },
   Mutation: {
     upload: isAuthenticated,
