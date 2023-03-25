@@ -1,6 +1,6 @@
-const model = require("./bookCollection.model");
+const model = require('./bookCollection.model')
 
 module.exports = {
   model,
-  modelName: "BookCollection",
-};
+  modelName: 'BookCollection',
+}

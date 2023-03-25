@@ -1,6 +1,6 @@
-const model = require("./user.model");
+const model = require('./user.model')
 
 module.exports = {
   model,
-  modelName: "User",
-};
+  modelName: 'User',
+}
