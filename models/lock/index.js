@@ -1,6 +1,6 @@
-const model = require("./lock.model");
+const model = require('./lock.model')
 
 module.exports = {
   model,
-  modelName: "Lock",
-};
+  modelName: 'Lock',
+}

@@ -12,7 +12,6 @@ COPY yarn.lock .
 RUN chown -R node:node .
 USER node
 
-
 RUN yarn install
 # RUN yarn cache clean
 COPY --chown=node:node . .

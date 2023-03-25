@@ -1,28 +1,29 @@
 variables:
   IMAGE_ORG: cokoapps
-  IMAGE_NAME: ketida-server-develop
+  IMAGE_NAME_DEVELOP: ketida-server-develop
+  IMAGE_NAME_PRODUCTION: ketida-server
   WORKDIR: /home/node/server
 
 stages:
   - build
-  - lint
+  - test
 
 build:
-  image: docker:20.10.16
   stage: build
+  image: docker:23
   services:
-    - docker:20.10.16-dind
+    - docker:23-dind
   before_script:
-    - docker info
     - docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
   script:
     - if [ -z "$DOCKERHUB_USERNAME" ] || [ -z "$DOCKERHUB_PASSWORD" ]; then echo "Not pushing" && exit 0; fi
-    - docker build --tag $IMAGE_ORG/$IMAGE_NAME:$CI_COMMIT_SHA ./ -f Dockerfile-development
-    - docker push $IMAGE_ORG/$IMAGE_NAME:$CI_COMMIT_SHA
+    - docker build --tag $IMAGE_ORG/$IMAGE_NAME_DEVELOP:$CI_COMMIT_SHA ./ -f Dockerfile-development
+    - docker push $IMAGE_ORG/$IMAGE_NAME_DEVELOP:$CI_COMMIT_SHA
 
-lint js:
-  stage: lint
-  image: $IMAGE_ORG/$IMAGE_NAME:$CI_COMMIT_SHA
+lint:
+  stage: test
+  image: $IMAGE_ORG/$IMAGE_NAME_DEVELOP:$CI_COMMIT_SHA
   script:
     - cd $WORKDIR
     - yarn eslint .
+    - yarn prettier --check .

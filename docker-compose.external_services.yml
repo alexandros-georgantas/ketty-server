@@ -1,7 +1,6 @@
 version: '2'
 
 services:
-
   db-app:
     image: postgres:14.4-alpine
     ports:
@@ -12,7 +11,7 @@ services:
       - POSTGRES_PASSWORD=ketida_dev
     volumes:
       - ./scripts/init-pgboss.sql:/docker-entrypoint-initdb.d/init-pgboss.sql
-  
+
   db-epubchecker:
     image: postgres:14.4-alpine
     environment:
@@ -61,13 +60,7 @@ services:
       - MINIO_ROOT_PASSWORD=${S3_SECRET_ACCESS_KEY_ADMIN:-superSecretAdminPassword}
     command: server /data
     healthcheck:
-      test:
-        [
-          'CMD',
-          'curl',
-          '-f',
-          'http://localhost:9000/minio/health/live'
-        ]
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
       interval: 30s
       timeout: 20s
       retries: 10
@@ -101,9 +94,9 @@ services:
         'db-epubchecker:5432',
         '--',
         'sh',
-        'scripts/setupDevServer.sh'
+        'scripts/setupDevServer.sh',
       ]
-    command: [ 'node', 'server/startServer.js' ]
+    command: ['node', 'server/startServer.js']
 
   icml:
     depends_on:
@@ -127,9 +120,9 @@ services:
         'db-icml:5432',
         '--',
         'sh',
-        'scripts/setupDevServer.sh'
+        'scripts/setupDevServer.sh',
       ]
-    command: [ 'node', 'server/startServer.js' ]
+    command: ['node', 'server/startServer.js']
 
   pagedjs:
     depends_on:
@@ -158,9 +151,9 @@ services:
         'db-pagedjs:5432',
         '--',
         'sh',
-        'scripts/setupDevServer.sh'
+        'scripts/setupDevServer.sh',
       ]
-    command: [ 'node', 'server/startServer.js' ]
+    command: ['node', 'server/startServer.js']
 
   xsweet:
     depends_on:
@@ -184,8 +177,9 @@ services:
         'db-xsweet:5432',
         '--',
         'sh',
-        'scripts/setupDevServer.sh'
+        'scripts/setupDevServer.sh',
       ]
-    command: [ 'node', 'server/startServer.js' ]
+    command: ['node', 'server/startServer.js']
+
 volumes:
   minio_storage:

@@ -52,10 +52,10 @@ services:
         '60',
         '--',
         'sh',
-        'scripts/setupDevServer.sh'
+        'scripts/setupDevServer.sh',
       ]
     command:
-     [
+      [
         'node_modules/.bin/nodemon',
         '--watch',
         'config',
@@ -75,7 +75,7 @@ services:
         'startWebSocketServer.js',
         'app.js',
         '--ext',
-        'js,graphql'
+        'js,graphql',
       ]
     ports:
       - ${SERVER_PORT:-3000}:${SERVER_PORT:-3000}
@@ -132,7 +132,6 @@ services:
       - TEMP_DIRECTORY_CRON_JOB_SCHEDULE=${TEMP_DIRECTORY_CRON_JOB_TIMING:-0 * * * *}
       - TEMP_DIRECTORY_CRON_JOB_OFFSET=${TEMP_DIRECTORY_CRON_JOB_OFFSET:-1800000}
       - TEMP_DIRECTORY_CLEAN_UP=${TEMP_DIRECTORY_CLEAN_UP:-true}
-
     volumes:
       - ./config:/home/node/server/config
       - ./api:/home/node/server/api
@@ -144,7 +143,7 @@ services:
       - ./app.js:/home/node/server/app.js
       - ./startServer.js:/home/node/server/startServer.js
       - ./startWebSocketServer.js:/home/node/server/startWebSocketServer.js
-  
+
   epubchecker:
     depends_on:
       - db-epubchecker
@@ -166,9 +165,10 @@ services:
         'db-epubchecker:5432',
         '--',
         'sh',
-        'scripts/setupDevServer.sh'
+        'scripts/setupDevServer.sh',
       ]
-    command: [ 'node', 'server/startServer.js' ]
+    command: ['node', 'server/startServer.js']
+
   icml:
     depends_on:
       - db-icml
@@ -191,9 +191,9 @@ services:
         'db-icml:5432',
         '--',
         'sh',
-        'scripts/setupDevServer.sh'
+        'scripts/setupDevServer.sh',
       ]
-    command: [ 'node', 'server/startServer.js' ]
+    command: ['node', 'server/startServer.js']
 
   pagedjs:
     depends_on:
@@ -222,9 +222,9 @@ services:
         'db-pagedjs:5432',
         '--',
         'sh',
-        'scripts/setupDevServer.sh'
+        'scripts/setupDevServer.sh',
       ]
-    command: [ 'node', 'server/startServer.js' ]
+    command: ['node', 'server/startServer.js']
 
   xsweet:
     depends_on:
@@ -248,9 +248,9 @@ services:
         'db-xsweet:5432',
         '--',
         'sh',
-        'scripts/setupDevServer.sh'
+        'scripts/setupDevServer.sh',
       ]
-    command: [ 'node', 'server/startServer.js' ]
+    command: ['node', 'server/startServer.js']
 
   db:
     image: postgres:14.4-alpine
@@ -311,13 +311,7 @@ services:
       - MINIO_ROOT_PASSWORD=${S3_SECRET_ACCESS_KEY_ADMIN:-superSecretAdminPassword}
     command: server --console-address ":9001" /data
     healthcheck:
-      test:
-        [
-          'CMD',
-          'curl',
-          '-f',
-          'http://localhost:9000/minio/health/live'
-        ]
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
       interval: 30s
       timeout: 20s
       retries: 10
@@ -329,5 +323,6 @@ services:
         condition: service_healthy
     entrypoint: >
       /bin/sh -c " /usr/bin/mc config host add ketida ${S3_PROTOCOL:-http}://${S3_HOST:-s3}:${S3_PORT:-9000} ${S3_ACCESS_KEY_ID_ADMIN:-admin} ${S3_SECRET_ACCESS_KEY_ADMIN:-superSecretAdminPassword}; /usr/bin/mc admin user add ketida/ ${S3_ACCESS_KEY_ID_USER:-ketida} ${S3_SECRET_ACCESS_KEY_USER:-superSecretUserPassword}; /usr/bin/mc admin user enable ketida/ ${S3_ACCESS_KEY_ID_USER:-ketida}; /usr/bin/mc mb ketida/${S3_BUCKET:-uploads}; /usr/bin/mc admin policy set ketida/ readwrite user=${S3_ACCESS_KEY_ID_USER:-ketida}; exit 0; "
+
 volumes:
   minio_storage:

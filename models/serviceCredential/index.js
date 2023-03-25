@@ -1,6 +1,6 @@
-const model = require("./serviceCredential.model");
+const model = require('./serviceCredential.model')
 
 module.exports = {
   model,
-  modelName: "ServiceCredential",
-};
+  modelName: 'ServiceCredential',
+}
