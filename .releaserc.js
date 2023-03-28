@@ -25,6 +25,7 @@ module.exports = {
       {
         assets: [
           {
+            label: 'Dockerhub release',
             url: 'https://hub.docker.com/r/cokoapps/ketida-server/tags',
           },
         ],
