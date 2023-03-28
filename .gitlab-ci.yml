@@ -40,5 +40,7 @@ release:
   only:
     - main
   image: node:18-bullseye
+  before_script:
+    - npm i -g semantic-release @semantic-release/changelog @semantic-release/git @semantic-release/gitlab
   script:
-    - npx semantic-release --dry-run
+    - semantic-release --dry-run
