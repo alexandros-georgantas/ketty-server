@@ -39,6 +39,6 @@ release:
   stage: release
   only:
     - main
-  image: node:18-bullseye-slim
+  image: node:18-bullseye
   script:
     - npx semantic-release -- --dry-run
