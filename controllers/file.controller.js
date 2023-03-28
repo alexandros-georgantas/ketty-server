@@ -138,11 +138,14 @@ const getFileURL = async (id, type = 'original', options = {}) => {
     logger.info(`>>> fetching the file with id ${id}`)
 
     const file = await useTransaction(
-      async tr => File.findById(id, { trx: tr }),
+      async tr => File.findOne({ id }, { trx: tr }),
       { trx, passedTrxOnly: true },
     )
 
-    logger.info(`>>> signing url `)
+    if (!file) {
+      return ''
+    }
+
     const { key } = file.getStoredObjectBasedOnType(type)
 
     return getURL(key)
@@ -157,11 +160,14 @@ const getObjectKey = async (id, type = 'original', options = {}) => {
     logger.info(`>>> fetching the file with id ${id}`)
 
     const file = await useTransaction(
-      async tr => File.findById(id, { trx: tr }),
+      async tr => File.findOne({ id }, { trx: tr }),
       { trx, passedTrxOnly: true },
     )
 
-    logger.info(`>>> signing url `)
+    if (!file) {
+      return undefined
+    }
+
     const { key } = file.getStoredObjectBasedOnType(type)
 
     return key

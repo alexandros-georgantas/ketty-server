@@ -135,8 +135,14 @@ const gatherAssets = async (book, templateFiles, epubFolder) => {
   await Promise.all(
     map(gatheredImages, async fileId => {
       // freshImageLinkMapper[fileId] = await getFileURL(fileId, 'medium')
-      objectKeyMapper[fileId] = await getObjectKey(fileId, 'medium')
-      return true
+      const retrievedObjectKey = await getObjectKey(fileId, 'medium')
+
+      if (retrievedObjectKey) {
+        objectKeyMapper[fileId] = retrievedObjectKey
+        return
+      }
+
+      delete objectKeyMapper[fileId]
     }),
   )
 
@@ -152,6 +158,11 @@ const gatherAssets = async (book, templateFiles, epubFolder) => {
 
         if (dataFileId) {
           const key = objectKeyMapper[dataFileId]
+
+          if (!key) {
+            return
+          }
+
           const mimetype = mime.lookup(key)
           const target = `${epubFolder.images}/${key}`
 
