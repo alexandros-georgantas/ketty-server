@@ -39,6 +39,6 @@ release:
   stage: release
   only:
     - main
-  image: $IMAGE_ORG/$IMAGE_NAME_DEVELOP:$CI_COMMIT_SHA
+  image: node:16-bullseye
   script:
-    - yarn semantic-release --dry-run
+    - npx semantic-release -- --dry-run
