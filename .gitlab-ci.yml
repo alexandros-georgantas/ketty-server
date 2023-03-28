@@ -43,4 +43,4 @@ release:
   before_script:
     - npm i -g semantic-release @semantic-release/changelog @semantic-release/git @semantic-release/gitlab
   script:
-    - semantic-release --dry-run
+    - semantic-release
