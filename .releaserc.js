@@ -20,6 +20,15 @@ module.exports = {
     '@semantic-release/changelog',
     '@semantic-release/npm',
     '@semantic-release/git',
-    '@semantic-release/gitlab',
+    [
+      '@semantic-release/gitlab',
+      {
+        assets: [
+          {
+            url: 'https://hub.docker.com/r/cokoapps/ketida-server/tags',
+          },
+        ],
+      },
+    ],
   ],
 }
