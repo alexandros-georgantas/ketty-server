@@ -7,7 +7,7 @@ const {
 
 const map = require('lodash/map')
 const forEach = require('lodash/forEach')
-
+const find = require('lodash/find')
 const { File, BookComponent } = require('../models').models
 
 const { getURL } = fileStorage
@@ -183,8 +183,9 @@ const getContentFiles = async (fileIds, options = {}) => {
     return useTransaction(
       async tr => {
         const files = await getSpecificFiles(fileIds, { trx: tr })
+
         /* eslint-disable no-param-reassign */
-        return Promise.all(
+        const result = await Promise.all(
           map(files, async file => {
             const { key: keyMedium, mimetype } =
               file.getStoredObjectBasedOnType('medium')
@@ -202,6 +203,15 @@ const getContentFiles = async (fileIds, options = {}) => {
             return file
           }),
         )
+
+        // case of orphan files
+        if (fileIds.length > files.length) {
+          fileIds.forEach(fileId => {
+            if (!find(files, { id: fileId })) {
+              result.push({ id: fileId, url: '', alt: '' })
+            }
+          })
+        }
       },
       { trx, passedTrxOnly: true },
     )
