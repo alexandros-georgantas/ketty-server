@@ -41,4 +41,4 @@ release:
     - main
   image: node:18-bullseye
   script:
-    - npx semantic-release -- --dry-run
+    - npx semantic-release --dry-run
