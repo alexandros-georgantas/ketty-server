@@ -7,6 +7,9 @@ const tidy = require('libtidy-updated')
 const mime = require('mime-types')
 const map = require('lodash/map')
 const filter = require('lodash/filter')
+const find = require('lodash/find')
+// const uniqBy = require('lodash/uniqBy')
+
 const beautify = require('js-beautify').html
 
 const { download } = fileStorage
@@ -152,12 +155,14 @@ const gatherAssets = async (book, templateFiles, epubFolder) => {
           const mimetype = mime.lookup(key)
           const target = `${epubFolder.images}/${key}`
 
-          images.push({
-            id: constructedId,
-            key,
-            target,
-            mimetype,
-          })
+          if (!find(images, { key })) {
+            images.push({
+              id: constructedId,
+              key,
+              target,
+              mimetype,
+            })
+          }
 
           $node.attr('src', `../Images/${key}`)
         }
@@ -562,6 +567,8 @@ const EPUBPreparation = async (book, template, EPUBtempFolderAssetsPath) => {
     await createMimetype(epubFolder.root)
     await createContainer(epubFolder.metaInf)
     await gatherAssets(book, templateFiles, epubFolder)
+    // const uniqueImages = uniqBy(images, 'key')
+    // images = uniqueImages
     await transferAssets(images, stylesheets, fonts)
     await decorateText(book, hasEndnotes)
     await gatherTexts(book, epubFolder)
