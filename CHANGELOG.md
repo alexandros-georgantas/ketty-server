@@ -1,3 +1,11 @@
+## [1.3.2](https://gitlab.coko.foundation/ketida/server/compare/v1.3.1...v1.3.2) (2023-03-29)
+
+
+### Bug Fixes
+
+* **controllers:** handle orphan files inside getContent ([0cb7865](https://gitlab.coko.foundation/ketida/server/commit/0cb7865d1d8b0ab7f225e9570de8b7fd1d93e604))
+* **controllers:** handle orphan images on export and in content ([b312787](https://gitlab.coko.foundation/ketida/server/commit/b3127873e7cf2620aeee990812afc93673526aa1))
+
 ## [1.3.1](https://gitlab.coko.foundation/ketida/server/compare/v1.3.0...v1.3.1) (2023-03-29)
 
 
