@@ -1,6 +1,6 @@
 FROM node:16.19.1-alpine3.16
 
-RUN apk add --no-cache git python3 make g++
+RUN apk add --no-cache git python3 make g++ imagemagick potrace
 
 WORKDIR /home/node/server
 
