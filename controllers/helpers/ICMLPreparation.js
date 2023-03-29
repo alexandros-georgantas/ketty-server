@@ -22,8 +22,17 @@ const ICMLPreparation = async (book, tempFolderPath) => {
 
     await Promise.all(
       map(gatheredImages, async fileId => {
-        objectKeyMapper[fileId] = await getObjectKey(fileId)
-        return true
+        const retrievedObjectKey = await getObjectKey(fileId)
+
+        if (retrievedObjectKey) {
+          objectKeyMapper[fileId] = retrievedObjectKey
+          return
+        }
+
+        delete objectKeyMapper[fileId]
+
+        // objectKeyMapper[fileId] = await getObjectKey(fileId)
+        // return true
       }),
     )
     book.divisions.forEach(division => {
@@ -38,6 +47,11 @@ const ICMLPreparation = async (book, tempFolderPath) => {
 
           if (dataFileId) {
             const key = objectKeyMapper[dataFileId]
+
+            if (!key) {
+              return
+            }
+
             const mimetype = mime.lookup(key)
             const target = `${tempFolderPath}/${key}`
 
