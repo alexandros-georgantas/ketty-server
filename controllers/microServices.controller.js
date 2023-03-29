@@ -70,6 +70,14 @@ const epubcheckerHandler = async epubPath => {
           const { response } = err
 
           if (!response) {
+            if (err.message === 'Error: Request failed with status code 401') {
+              return reject(
+                new Error(
+                  `Please contact your admin and inform her/him to check service credential of epub-checker microservice`,
+                ),
+              )
+            }
+
             return reject(new Error(`Request failed with message: ${err.code}`))
           }
 
@@ -111,6 +119,14 @@ const icmlHandler = async icmlTempPath => {
           const { response } = err
 
           if (!response) {
+            if (err.message === 'Error: Request failed with status code 401') {
+              return reject(
+                new Error(
+                  `Please contact your admin and inform her/him to check service credential of icml microservice`,
+                ),
+              )
+            }
+
             return reject(new Error(`Request failed with message: ${err.code}`))
           }
 
@@ -160,6 +176,14 @@ const pdfHandler = async (zipPath, outputPath, PDFFilename) => {
           const { response } = err
 
           if (!response) {
+            if (err.message === 'Error: Request failed with status code 401') {
+              return reject(
+                new Error(
+                  `Please contact your admin and inform her/him to check service credential of pagedjs microservice`,
+                ),
+              )
+            }
+
             return reject(new Error(`Request failed with message: ${err.code}`))
           }
 
@@ -216,6 +240,14 @@ const xsweetHandler = async (bookComponentId, filePath) => {
           await fs.remove(filePath)
 
           if (!response) {
+            if (err.message === 'Error: Request failed with status code 401') {
+              return reject(
+                new Error(
+                  `Please contact your admin and inform her/him to check service credential of xsweet microservice`,
+                ),
+              )
+            }
+
             return reject(new Error(`Request failed with message: ${err.code}`))
           }
 
@@ -260,6 +292,14 @@ const pagedPreviewerLink = async dirPath => {
           const { response } = err
 
           if (!response) {
+            if (err.message === 'Error: Request failed with status code 401') {
+              return reject(
+                new Error(
+                  `Please contact your admin and inform her/him to check service credential of pagedjs microservice`,
+                ),
+              )
+            }
+
             return reject(new Error(`Request failed with message: ${err.code}`))
           }
 
