@@ -1,5 +1,5 @@
 module.exports = {
-  instance: 'UCP',
+  instance: 'VANILLA',
   stages: [
     {
       title: 'Upload',

@@ -31,14 +31,18 @@ const isAdmin = async userId => {
   }
 }
 
-const isGlobal = async userId => {
+const isGlobal = async (userId, includeAdmin = false) => {
   try {
-    const globalTeamsWithoutAdmin = Object.keys(globalTeams).filter(
-      team => team !== 'admin',
-    )
+    let globalTeamsKeys = Object.keys(globalTeams)
+
+    if (!includeAdmin) {
+      globalTeamsKeys = Object.keys(globalTeams).filter(
+        team => team !== 'admin',
+      )
+    }
 
     const isGlobalList = await Promise.all(
-      globalTeamsWithoutAdmin.map(async team =>
+      globalTeamsKeys.map(async team =>
         User.hasGlobalRole(userId, globalTeams[team].role),
       ),
     )

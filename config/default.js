@@ -7,6 +7,9 @@ const bbVanilla = require('./modules/bookBuilderVanilla')
 const bbOEN = require('./modules/bookBuilderOEN')
 const bbBooksprints = require('./modules/bookBuilderBooksprints')
 const permissions = require('./permissions')
+const oenTeams = require('./modules/oenTeams')
+const vanillaTeams = require('./modules/vanillaTeams')
+const booksprintTeams = require('./modules/booksprintTeams')
 
 const flavour =
   process.env.KETIDA_FLAVOUR && process.env.KETIDA_FLAVOUR === 'BOOKSPRINTS'
@@ -28,6 +31,12 @@ if (!featureBookStructureEnabled) {
   }
 } else {
   bookBuilder = bbOEN
+}
+
+let flavorTeams = oenTeams
+
+if (!featureBookStructureEnabled) {
+  flavorTeams = flavour === 'BOOKSPRINTS' ? booksprintTeams : vanillaTeams
 }
 
 module.exports = {
@@ -59,7 +68,6 @@ module.exports = {
     navigation: 'app/components/Navigation/Navigation.jsx',
     routes: 'app/routes.jsx',
     theme: 'ThemeEditoria',
-    converter: 'ucp',
     port: 3000,
     protocol: 'http',
     host: 'localhost',
@@ -90,32 +98,7 @@ module.exports = {
       path: path.join(__dirname, '..', 'services', 'cron.service.js'),
     },
   },
-  teams: {
-    global: {
-      productionEditor: {
-        displayName: 'Production Editor',
-        role: 'productionEditor',
-      },
-      admin: {
-        displayName: 'Admin',
-        role: 'admin',
-      },
-    },
-    nonGlobal: {
-      productionEditor: {
-        displayName: 'Production Editor',
-        role: 'productionEditor',
-      },
-      copyEditor: {
-        displayName: 'Copy Editor',
-        role: 'copyEditor',
-      },
-      author: {
-        displayName: 'Author',
-        role: 'author',
-      },
-    },
-  },
+  teams: flavorTeams,
   fileStorage: {},
   services: {},
   templates: ['Atla'],

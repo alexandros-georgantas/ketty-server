@@ -1,6 +1,5 @@
 const { useTransaction, logger } = require('@coko/server')
 const map = require('lodash/map')
-const find = require('lodash/find')
 const findIndex = require('lodash/findIndex')
 const assign = require('lodash/assign')
 const omitBy = require('lodash/omitBy')
@@ -27,8 +26,6 @@ const {
   BookComponent,
   Division,
   BookComponentTranslation,
-  Team,
-  TeamMember,
 } = require('../models').models
 
 const {
@@ -39,7 +36,7 @@ const { createDivision } = require('./division.controller')
 
 const { createTeam, getObjectTeam, deleteTeam } = require('./team.controller')
 
-const { isAdmin } = require('./user.controller')
+const { isGlobal } = require('./user.controller')
 
 const toCamelCase = string =>
   string
@@ -112,22 +109,9 @@ const getBooks = async (collectionId, archived, userId, options = {}) => {
     )
     return useTransaction(
       async tr => {
-        const globalProductionEditorsTeam = await Team.findGlobalTeamByRole(
-          'productionEditor',
-          { trx: tr },
-        )
+        const isGlobalUser = await isGlobal(userId, true)
 
-        const { result: teamMembers } = await TeamMember.find(
-          {
-            teamId: globalProductionEditorsTeam.id,
-          },
-          { trx: tr },
-        )
-
-        const isGlobalProductionEditor = find(teamMembers, { userId })
-        const isUserAdmin = await isAdmin(userId)
-
-        if (isUserAdmin || isGlobalProductionEditor) {
+        if (isGlobalUser) {
           if (!archived) {
             const { result } = await Book.find(
               {
