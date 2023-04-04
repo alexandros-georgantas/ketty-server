@@ -132,10 +132,6 @@ class KetidaMode {
     return this.isTeamMember('productionEditor')
   }
 
-  async isGlobalAuthor() {
-    return this.isTeamMember('author')
-  }
-
   async findBookByObject(object) {
     let id
 
@@ -219,8 +215,7 @@ class KetidaMode {
   async canCreateTeam() {
     await this.getUser()
 
-    const condition =
-      (await this.isGlobalProductionEditor()) || (await this.isGlobalAuthor())
+    const condition = await this.isGlobalProductionEditor()
 
     return condition
   }
@@ -248,8 +243,7 @@ class KetidaMode {
   async canCreateBook() {
     await this.getUser()
 
-    const condition =
-      (await this.isGlobalProductionEditor()) || (await this.isGlobalAuthor())
+    const condition = await this.isGlobalProductionEditor()
 
     return condition
   }
@@ -482,6 +476,54 @@ class KetidaMode {
 
     return false
   }
+
+  async canEditFull() {
+    await this.getUser()
+    const bookComponent = this.object
+
+    const isCleanUpSate =
+      this.getStageType(bookComponent, 'clean_up').value === 0
+
+    const collection = { id: bookComponent.bookId }
+
+    if (await this.isAssignedProductionEditor(collection)) {
+      return true
+    }
+
+    if ((await this.isAuthor(collection)) && !isCleanUpSate) {
+      return true
+    }
+
+    return false
+  }
+
+  async canEditReview() {
+    await this.getUser()
+    const bookComponent = this.object
+
+    const isReviewingSate =
+      this.getStageType(bookComponent, 'review').value === 0
+
+    const collection = { id: bookComponent.bookId }
+
+    if (
+      !(await this.canEditFull()) &&
+      (await this.isAuthor(collection)) &&
+      isReviewingSate
+    ) {
+      return true
+    }
+
+    return false
+  }
+
+  async canEditSelection() {
+    if (!(await this.canEditFull()) && !(await this.canEditReview())) {
+      return true
+    }
+
+    return false
+  }
 }
 
 module.exports = {
@@ -494,7 +536,7 @@ module.exports = {
       const { teams } = user
 
       if (teams.length > 0) {
-        decision = findIndex(teams, { global: true, role: 'admin' }) !== -1
+        decision = findIndex(teams, { global: true }) !== -1
       }
     }
 
@@ -730,6 +772,18 @@ module.exports = {
   'can interact with editor': (userId, operation, object, context) => {
     const mode = new KetidaMode(userId, operation, object, context)
     return mode.canInteractWithEditor()
+  },
+  'can edit full': (userId, operation, object, context) => {
+    const mode = new KetidaMode(userId, operation, object, context)
+    return mode.canEditFull()
+  },
+  'can edit selection': (userId, operation, object, context) => {
+    const mode = new KetidaMode(userId, operation, object, context)
+    return mode.canEditSelection()
+  },
+  'can edit preview': (userId, operation, object, context) => {
+    const mode = new KetidaMode(userId, operation, object, context)
+    return mode.canEditReview()
   },
   // TODO: protect ink endpoint
 }
