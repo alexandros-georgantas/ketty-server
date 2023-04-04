@@ -8,7 +8,7 @@ const mime = require('mime-types')
 const map = require('lodash/map')
 const filter = require('lodash/filter')
 const find = require('lodash/find')
-// const uniqBy = require('lodash/uniqBy')
+const config = require('config')
 
 const beautify = require('js-beautify').html
 
@@ -25,6 +25,26 @@ let images = []
 let stylesheets = []
 let fonts = []
 let xhtmls = []
+
+const featureBookStructureEnabled =
+  config.has('featureBookStructure') &&
+  ((config.get('featureBookStructure') &&
+    JSON.parse(config.get('featureBookStructure'))) ||
+    false)
+
+const H2Aggregator = content => {
+  const $ = cheerio.load(content)
+  const result = []
+  $('h2').each((i, elem) => {
+    const $elem = $(elem)
+
+    if ($elem.text() !== '') {
+      const id = $elem.attr('id')
+      result.push({ text: $elem.text(), id })
+    }
+  })
+  return result
+}
 
 const createEPUBFolder = async EPUBtempFolderAssetsPath => {
   try {
@@ -263,17 +283,54 @@ const generateTOCNCX = async (book, epubFolder) => {
       const { id, includeInTOC, title, componentType } = bookComponent
 
       if (includeInTOC) {
-        navPoints.push({
-          '@id': `nav-${counter}`,
-          navLabel: {
-            text: {
-              '#text': title || componentType,
+        const nestedNavPoints = []
+
+        if (featureBookStructureEnabled) {
+          const res = H2Aggregator(bookComponent.content)
+          res.forEach((heading, index) => {
+            const { text, id: headingId } = heading
+            const nestedLink = headingId.split('_')
+            nestedNavPoints.push({
+              '@id': `nav-${counter}.${index}`,
+              navLabel: {
+                text: {
+                  '#text': text,
+                },
+              },
+              content: {
+                '@src': `Text/${nestedLink[0]}.xhtml#${headingId}`,
+              },
+            })
+          })
+        }
+
+        if (nestedNavPoints.length > 0) {
+          navPoints.push({
+            '@id': `nav-${counter}`,
+            navLabel: {
+              text: {
+                '#text': title || componentType,
+              },
             },
-          },
-          content: {
-            '@src': `Text/comp-number-${id}.xhtml`,
-          },
-        })
+            content: {
+              '@src': `Text/comp-number-${id}.xhtml`,
+            },
+            navPoint: nestedNavPoints,
+          })
+        } else {
+          navPoints.push({
+            '@id': `nav-${counter}`,
+            navLabel: {
+              text: {
+                '#text': title || componentType,
+              },
+            },
+            content: {
+              '@src': `Text/comp-number-${id}.xhtml`,
+            },
+          })
+        }
+
         counter += 1
       }
     })

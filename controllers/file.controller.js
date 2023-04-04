@@ -212,6 +212,8 @@ const getContentFiles = async (fileIds, options = {}) => {
             }
           })
         }
+
+        return result
       },
       { trx, passedTrxOnly: true },
     )

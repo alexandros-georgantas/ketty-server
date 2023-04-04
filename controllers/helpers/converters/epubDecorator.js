@@ -1,4 +1,5 @@
 const cheerio = require('cheerio')
+const config = require('config')
 
 const ketidaToEPUBPropertiesMapper = {
   front: 'frontmatter',
@@ -17,6 +18,12 @@ const ketidaExtra = {
   halftitle: 'halftitlepage',
   titlepage: 'titlepage',
 }
+
+const featureBookStructureEnabled =
+  config.has('featureBookStructure') &&
+  ((config.get('featureBookStructure') &&
+    JSON.parse(config.get('featureBookStructure'))) ||
+    false)
 
 module.exports = (
   bookComponent,
@@ -99,7 +106,14 @@ module.exports = (
       const $elem = $(elem)
       const link = $elem.attr('href')
       const clearedLink = link.substr(1)
-      $elem.attr('href', `../Text/${clearedLink}.xhtml`)
+      const nestedLink = clearedLink.split('_')
+
+      // Check if there is a structure that represents nested element link
+      if (nestedLink[1] && featureBookStructureEnabled) {
+        $elem.attr('href', `../Text/${nestedLink[0]}.xhtml${link}`)
+      } else {
+        $elem.attr('href', `../Text/${clearedLink}.xhtml`)
+      }
     })
   }
 

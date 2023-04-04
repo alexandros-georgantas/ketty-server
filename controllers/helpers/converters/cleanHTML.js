@@ -1,6 +1,8 @@
 const hljs = require('highlight.js')
 const cheerio = require('cheerio')
 const find = require('lodash/find')
+const { uuid } = require('@coko/server')
+const config = require('config')
 
 module.exports = (
   container,
@@ -17,19 +19,13 @@ module.exports = (
   const levelClass = level ? `toc-level-${level}` : undefined
   const toc = cheerio.load(tocComponent.content)
   let hasMath = false
+  const h2s = []
 
-  if (includeInTOC) {
-    const li = `<li class="toc-${division} ${
-      levelClass || ''
-    } toc-${componentType}"><a href="#comp-number-${id}"><span class="name">${
-      title || componentType
-    }</span></a></li>`
-
-    toc('ol').append(li)
-    /* eslint-disable no-param-reassign */
-    tocComponent.content = toc('body').html()
-    /* eslint-enable no-param-reassign */
-  }
+  const featureBookStructureEnabled =
+    config.has('featureBookStructure') &&
+    ((config.get('featureBookStructure') &&
+      JSON.parse(config.get('featureBookStructure'))) ||
+      false)
 
   if (!content) return { content: container, hasMath }
 
@@ -397,6 +393,10 @@ module.exports = (
 
     if ($elem.text() === '') {
       $elem.remove()
+    } else {
+      const headingId = `comp-number-${bookComponent.id}_${uuid()}`
+      $elem.attr('id', headingId)
+      h2s.push({ text: $elem.text(), id: headingId })
     }
   })
 
@@ -433,6 +433,32 @@ module.exports = (
       $elem.remove()
     }
   })
+
+  if (includeInTOC) {
+    let subitems
+
+    if (featureBookStructureEnabled) {
+      if (h2s.length > 0) {
+        let headings = ''
+        h2s.forEach(item => {
+          headings += `<li><a href="#${item.id}"><span class="name">${item.text}</span></a></li>`
+        })
+        subitems = `<ol>${headings}</ol>`
+      }
+    }
+
+    const li = `<li class="toc-${division} ${
+      levelClass || ''
+    } toc-${componentType}"><a href="#comp-number-${id}"><span class="name">${
+      title || componentType
+    }</span></a>${subitems || ''}</li>`
+
+    toc('#toc-ol').append(li)
+    /* eslint-disable no-param-reassign */
+    tocComponent.content = toc('body').html()
+    /* eslint-enable no-param-reassign */
+  }
+
   const bodyContent = $.html()
 
   outerContainer(`section.component-${division}`).append(bodyContent)
