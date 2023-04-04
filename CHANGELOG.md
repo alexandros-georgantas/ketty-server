@@ -1,3 +1,10 @@
+## [1.3.3](https://gitlab.coko.foundation/ketida/server/compare/v1.3.2...v1.3.3) (2023-04-04)
+
+
+### Bug Fixes
+
+* fixes in permissions ([1e9b9ce](https://gitlab.coko.foundation/ketida/server/commit/1e9b9cefc4d40060971bf11d80500732a27056fb))
+
 ## [1.3.2](https://gitlab.coko.foundation/ketida/server/compare/v1.3.1...v1.3.2) (2023-03-29)
 
 
