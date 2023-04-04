@@ -1,3 +1,10 @@
+# [1.4.0](https://gitlab.coko.foundation/ketida/server/compare/v1.3.3...v1.4.0) (2023-04-04)
+
+
+### Features
+
+* **controllers:** support of nested headings in toc ([4803076](https://gitlab.coko.foundation/ketida/server/commit/48030760af15cc82b8f8d8dd085264bf64c53c38))
+
 ## [1.3.3](https://gitlab.coko.foundation/ketida/server/compare/v1.3.2...v1.3.3) (2023-04-04)
 
 
