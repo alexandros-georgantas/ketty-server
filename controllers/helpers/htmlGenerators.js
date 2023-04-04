@@ -48,6 +48,7 @@ const generateContainer = (
     pagination,
     division,
     number,
+    includeInTOC,
   } = bookComponent
 
   let output
@@ -61,7 +62,7 @@ const generateContainer = (
         runningHeadersLeft,
         runningHeadersRight,
       )}<header><h1 class="component-title">${title}</h1></header><nav>
-      <ol></ol></nav></section>`,
+      <ol id="toc-ol"></ol></nav></section>`,
     )
   } else if (componentType === 'endnotes') {
     output = cheerio.load(
@@ -82,7 +83,7 @@ const generateContainer = (
         levelClass || ''
       } ${componentType} ${
         !featureBookStructureEnabled ? paginationExtractor(pagination) : ''
-      }">${
+      } ${!includeInTOC ? 'toc-ignore' : ''}">${
         firstInBody ? '<span class="restart-numbering"></span>' : ''
       }${runningHeadersGenerator(
         runningHeadersLeft,
