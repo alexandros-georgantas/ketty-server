@@ -10,7 +10,7 @@ We provide a pre-built image of Ketida's server for easier deployment and you ca
 
 ## Docker
 
-- The server is fully dockerized and plays nicely with Docker version 20.10.23 and Compose 2.15.1
+The server is fully dockerized and plays nicely with Docker version 20.10.23 and Compose 2.15.1
 
 - [Installing docker](https://docs.docker.com/engine/install)
 - [Docker without sudo](https://docs.docker.com/engine/install/linux-postinstall/)
