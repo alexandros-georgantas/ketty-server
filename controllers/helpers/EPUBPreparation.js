@@ -415,6 +415,31 @@ const generateContentOPF = async (book, epubFolder) => {
     '@property': 'dcterms:modified',
     '#text': updated.toISOString().replace(/\.\d+Z$/, 'Z'),
   })
+  metaTemp.push({
+    '@property': 'schema:accessMode',
+    '#text': 'textual',
+  })
+  metaTemp.push({
+    '@property': 'schema:accessMode',
+    '#text': 'visual',
+  })
+  metaTemp.push({
+    '@property': 'schema:accessibilityFeature',
+    '#text': 'alternativeText',
+  })
+  metaTemp.push({
+    '@property': 'schema:accessibilityHazard',
+    '#text': 'none',
+  })
+  metaTemp.push({
+    '@property': 'schema:accessibilitySummary',
+    '#text':
+      'In order to meet accessibility standards, alternative text is provided with every image included in this book',
+  })
+  metaTemp.push({
+    '@property': 'schema:accessModeSufficient',
+    '#text': 'textual,visual',
+  })
 
   book.divisions.forEach(division => {
     division.bookComponents.forEach(bookComponent => {
@@ -478,6 +503,7 @@ const generateContentOPF = async (book, epubFolder) => {
       '@xmlns': 'http://www.idpf.org/2007/opf',
       '@version': '3.0',
       '@unique-identifier': 'BookId',
+      '@xml:lang': 'en',
       metadata: {
         '@xmlns:opf': 'http://www.idpf.org/2007/opf',
         '@xmlns:dcterms': 'http://purl.org/dc/terms/',

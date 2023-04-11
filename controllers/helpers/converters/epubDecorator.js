@@ -75,6 +75,7 @@ module.exports = (
   $('.note-callout').each((i, elem) => {
     const $elem = $(elem)
     $elem.attr('epub:type', 'noteref')
+    $elem.attr('role', 'doc-noteref')
 
     if (hasEndnotes) {
       const link = $elem.attr('href')
