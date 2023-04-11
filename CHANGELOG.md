@@ -1,3 +1,12 @@
+## [1.4.1](https://gitlab.coko.foundation/ketida/server/compare/v1.4.0...v1.4.1) (2023-04-11)
+
+
+### Bug Fixes
+
+* **controllers:** improve epub accessibility ([5363d82](https://gitlab.coko.foundation/ketida/server/commit/5363d82d16af01f72863c2d8ad21dec5b448ced6))
+* **controllers:** more accessibility improvements ([df051bd](https://gitlab.coko.foundation/ketida/server/commit/df051bd82e58dcf1a456039c8551941cd0e2d5c7))
+* fix for corrupted svg files ([e8aedbd](https://gitlab.coko.foundation/ketida/server/commit/e8aedbd247b189e4b6d05c2eaff6a3a1486c2589))
+
 # [1.4.0](https://gitlab.coko.foundation/ketida/server/compare/v1.3.3...v1.4.0) (2023-04-04)
 
 
