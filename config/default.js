@@ -6,10 +6,13 @@ const authsomeBooksprints = require('./modules/authsomeBooksprints')
 const bbVanilla = require('./modules/bookBuilderVanilla')
 const bbOEN = require('./modules/bookBuilderOEN')
 const bbBooksprints = require('./modules/bookBuilderBooksprints')
-const permissions = require('./permissions')
+// const permissions = require('./permissions')
 const oenTeams = require('./modules/oenTeams')
 const vanillaTeams = require('./modules/vanillaTeams')
 const booksprintTeams = require('./modules/booksprintTeams')
+const vanillaPermissions = require('./permissions/vanilla.permissions')
+const booksprintPermissions = require('./permissions/booksprint.permissions')
+const oenPermissions = require('./permissions/oen.permissions')
 
 const flavour =
   process.env.KETIDA_FLAVOUR && process.env.KETIDA_FLAVOUR === 'BOOKSPRINTS'
@@ -22,14 +25,17 @@ const featureBookStructureEnabled =
   false
 
 let bookBuilder
+let permissions = vanillaPermissions
 
 if (!featureBookStructureEnabled) {
   if (flavour === 'BOOKSPRINTS') {
     bookBuilder = bbBooksprints
+    permissions = booksprintPermissions
   } else {
     bookBuilder = bbVanilla
   }
 } else {
+  permissions = oenPermissions
   bookBuilder = bbOEN
 }
 
