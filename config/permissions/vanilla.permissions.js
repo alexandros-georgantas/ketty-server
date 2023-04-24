@@ -1,13 +1,82 @@
 const { rule } = require('@coko/server/authorization')
-const { isAuthenticated, isAdmin } = require('./helpers/helpers')
+
+const {
+  isAuthenticated,
+  isAdmin,
+  isGlobalSpecific,
+} = require('./helpers/helpers')
+
+const isAuthor = async (userId, bookId) => {
+  /* eslint-disable global-require */
+  const User = require('../../models/user/user.model')
+  /* eslint-enable global-require */
+  return User.hasRoleOnObject(userId, 'author', bookId)
+}
+
+const isProductionEditor = async (userId, bookId) => {
+  /* eslint-disable global-require */
+  const User = require('../../models/user/user.model')
+  /* eslint-enable global-require */
+  return User.hasRoleOnObject(userId, 'productionEditor', bookId)
+}
+
+const isCopyEditor = async (userId, bookId) => {
+  /* eslint-disable global-require */
+  const User = require('../../models/user/user.model')
+  /* eslint-enable global-require */
+  return User.hasRoleOnObject(userId, 'copyEditor', bookId)
+}
 
 const isAuthenticatedRule = rule()(async (parent, args, ctx, info) => {
-  return isAuthenticated(ctx.user)
+  const { user: userId } = ctx
+  return isAuthenticated(userId)
 })
 
 const isAdminRule = rule()(async (parent, args, ctx, info) => {
-  return isAdmin(ctx.user)
+  const { user: userId } = ctx
+  const isAuthenticatedUser = await isAuthenticated(userId)
+  return isAuthenticatedUser && isAdmin(userId)
 })
+
+const createBookRule = rule()(async (parent, args, ctx, info) => {
+  const { user: userId } = ctx
+  const isAuthenticatedUser = await isAuthenticated(userId)
+
+  const belongsToAdminTeam = await isAdmin(userId)
+
+  const belongsToGlobalProductionEditorTeam = await isGlobalSpecific(
+    userId,
+    'productionEditor',
+  )
+
+  return (
+    isAuthenticatedUser &&
+    (belongsToAdminTeam || belongsToGlobalProductionEditorTeam)
+  )
+})
+
+const modifyBooksInDashboardRule = rule()(
+  async (parent, { id: bookId }, ctx, info) => {
+    const { user: userId } = ctx
+    const belongsToAdminTeam = await isAdmin(userId)
+
+    const belongsToGlobalProductionEditorTeam = await isGlobalSpecific(
+      userId,
+      'productionEditor',
+    )
+
+    const belongsToBookProductionEditorTeam = await isProductionEditor(
+      userId,
+      bookId,
+    )
+
+    return (
+      belongsToAdminTeam ||
+      belongsToGlobalProductionEditorTeam ||
+      belongsToBookProductionEditorTeam
+    )
+  },
+)
 
 const permissions = {
   Query: {
@@ -44,10 +113,10 @@ const permissions = {
     updateUser: isAuthenticatedRule,
     updatePassword: isAuthenticatedRule,
     updateApplicationParameters: isAuthenticatedRule,
-    archiveBook: isAuthenticatedRule,
-    createBook: isAuthenticatedRule,
-    renameBook: isAuthenticatedRule,
-    deleteBook: isAuthenticatedRule,
+    archiveBook: modifyBooksInDashboardRule,
+    createBook: createBookRule,
+    renameBook: modifyBooksInDashboardRule,
+    deleteBook: modifyBooksInDashboardRule,
     updateMetadata: isAuthenticatedRule,
     updateRunningHeaders: isAuthenticatedRule,
     exportBook: isAuthenticatedRule,

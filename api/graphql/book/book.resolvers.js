@@ -56,9 +56,6 @@ const createBookHandler = async (_, { input }, ctx) => {
     const { collectionId, title } = input
     const pubsub = await pubsubManager.getPubsub()
 
-    logger.info('book resolver: checking permissions for book creation')
-    await ctx.helpers.can(ctx.user, 'create', 'Book')
-
     const newBook = await createBook(collectionId, title)
 
     logger.info('book resolver: broadcasting new book to clients')
@@ -76,10 +73,6 @@ const renameBookHandler = async (_, { id, title }, ctx) => {
     logger.info('book resolver: executing renameBook use case')
 
     const pubsub = await pubsubManager.getPubsub()
-    const book = await getBook(id)
-
-    logger.info('book resolver: checking permissions for book renaming')
-    await ctx.helpers.can(ctx.user, 'update', book)
 
     const renamedBook = await renameBook(id, title)
 
@@ -103,10 +96,6 @@ const deleteBookHandler = async (_, args, ctx) => {
   try {
     logger.info('book resolver: executing deleteBook use case')
     const pubsub = await pubsubManager.getPubsub()
-    const book = await getBook(args.id)
-
-    logger.info('book resolver: checking permissions for book deletion')
-    await ctx.helpers.can(ctx.user, 'update', book)
 
     const deletedBook = await deleteBook(args.id)
 
