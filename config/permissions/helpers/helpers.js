@@ -54,7 +54,7 @@ const isGlobal = async (userId, includeAdmin = false) => {
 
     return isGlobalList.some(global => global)
   } catch (e) {
-    throw new Error(e)
+    throw new Error(e.message)
   }
 }
 
@@ -66,8 +66,22 @@ const isGlobalSpecific = async (userId, role) => {
 
     return User.hasGlobalRole(userId, role)
   } catch (e) {
-    throw new Error(e)
+    throw new Error(e.message)
   }
 }
 
-module.exports = { isAuthenticated, isAdmin, isGlobal, isGlobalSpecific }
+const isTheSameUser = (requesterId, userId) => {
+  try {
+    return requesterId === userId
+  } catch (e) {
+    throw new Error(e.message)
+  }
+}
+
+module.exports = {
+  isAuthenticated,
+  isAdmin,
+  isGlobal,
+  isGlobalSpecific,
+  isTheSameUser,
+}

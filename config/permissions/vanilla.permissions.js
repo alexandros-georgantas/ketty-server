@@ -4,96 +4,274 @@ const {
   isAuthenticated,
   isAdmin,
   isGlobalSpecific,
+  isTheSameUser,
 } = require('./helpers/helpers')
 
 const isAuthor = async (userId, bookId) => {
-  /* eslint-disable global-require */
-  const User = require('../../models/user/user.model')
-  /* eslint-enable global-require */
-  return User.hasRoleOnObject(userId, 'author', bookId)
+  try {
+    /* eslint-disable global-require */
+    const User = require('../../models/user/user.model')
+    /* eslint-enable global-require */
+    return User.hasRoleOnObject(userId, 'author', bookId)
+  } catch (e) {
+    throw new Error(e.message)
+  }
 }
 
 const isProductionEditor = async (userId, bookId) => {
-  /* eslint-disable global-require */
-  const User = require('../../models/user/user.model')
-  /* eslint-enable global-require */
-  return User.hasRoleOnObject(userId, 'productionEditor', bookId)
+  try {
+    /* eslint-disable global-require */
+    const User = require('../../models/user/user.model')
+    /* eslint-enable global-require */
+    return User.hasRoleOnObject(userId, 'productionEditor', bookId)
+  } catch (e) {
+    throw new Error(e.message)
+  }
 }
 
 const isCopyEditor = async (userId, bookId) => {
-  /* eslint-disable global-require */
-  const User = require('../../models/user/user.model')
-  /* eslint-enable global-require */
-  return User.hasRoleOnObject(userId, 'copyEditor', bookId)
+  try {
+    /* eslint-disable global-require */
+    const User = require('../../models/user/user.model')
+    /* eslint-enable global-require */
+    return User.hasRoleOnObject(userId, 'copyEditor', bookId)
+  } catch (e) {
+    throw new Error(e.message)
+  }
 }
 
-const isAuthenticatedRule = rule()(async (parent, args, ctx, info) => {
-  const { user: userId } = ctx
-  return isAuthenticated(userId)
-})
+const hasAnyRoleOnObject = async (userId, bookId) => {
+  try {
+    const belongsToAuthorTeam = await isAuthor(userId, bookId)
 
-const isAdminRule = rule()(async (parent, args, ctx, info) => {
-  const { user: userId } = ctx
-  const isAuthenticatedUser = await isAuthenticated(userId)
-  return isAuthenticatedUser && isAdmin(userId)
-})
+    if (belongsToAuthorTeam) {
+      return true
+    }
 
-const createBookRule = rule()(async (parent, args, ctx, info) => {
-  const { user: userId } = ctx
-  const isAuthenticatedUser = await isAuthenticated(userId)
+    const belongsToProductionEditorTeam = await isProductionEditor(
+      userId,
+      bookId,
+    )
 
-  const belongsToAdminTeam = await isAdmin(userId)
+    if (belongsToProductionEditorTeam) {
+      return true
+    }
 
-  const belongsToGlobalProductionEditorTeam = await isGlobalSpecific(
-    userId,
-    'productionEditor',
-  )
+    const belongsToCopyEditorTeam = await isCopyEditor(userId, bookId)
 
-  return (
-    isAuthenticatedUser &&
-    (belongsToAdminTeam || belongsToGlobalProductionEditorTeam)
-  )
-})
+    if (belongsToCopyEditorTeam) {
+      return true
+    }
 
-const modifyBooksInDashboardRule = rule()(
-  async (parent, { id: bookId }, ctx, info) => {
-    const { user: userId } = ctx
-    const belongsToAdminTeam = await isAdmin(userId)
+    return false
+  } catch (e) {
+    throw new Error(e.message)
+  }
+}
 
+const isGlobalProductionEditorOrBelongsToObjectTeam = async (
+  userId,
+  bookId,
+) => {
+  try {
     const belongsToGlobalProductionEditorTeam = await isGlobalSpecific(
       userId,
       'productionEditor',
     )
 
-    const belongsToBookProductionEditorTeam = await isProductionEditor(
-      userId,
-      bookId,
-    )
+    if (belongsToGlobalProductionEditorTeam) {
+      return belongsToGlobalProductionEditorTeam
+    }
 
-    return (
-      belongsToAdminTeam ||
-      belongsToGlobalProductionEditorTeam ||
-      belongsToBookProductionEditorTeam
-    )
+    const belongsToAnyObjectTeam = await hasAnyRoleOnObject(userId, bookId)
+
+    return belongsToAnyObjectTeam
+  } catch (e) {
+    throw new Error(e.message)
+  }
+}
+
+const canFetchBookAndRelevantAssets = async (userId, bookId) => {
+  try {
+    const isAuthenticatedUser = await isAuthenticated(userId)
+
+    if (!isAuthenticatedUser) {
+      return false
+    }
+
+    const belongsToAdminTeam = await isAdmin(userId)
+
+    if (belongsToAdminTeam) {
+      return true
+    }
+
+    return isGlobalProductionEditorOrBelongsToObjectTeam(userId, bookId)
+  } catch (e) {
+    throw new Error(e.message)
+  }
+}
+
+const isAuthenticatedRule = rule()(async (parent, args, ctx, info) => {
+  try {
+    const { user: userId } = ctx
+    return isAuthenticated(userId)
+  } catch (e) {
+    throw new Error(e.message)
+  }
+})
+
+const isAdminRule = rule()(async (parent, args, ctx, info) => {
+  try {
+    const { user: userId } = ctx
+    const isAuthenticatedUser = await isAuthenticated(userId)
+
+    if (!isAuthenticatedUser) {
+      return false
+    }
+
+    return isAdmin(userId)
+  } catch (e) {
+    throw new Error(e.message)
+  }
+})
+
+const createBookRule = rule()(async (parent, args, ctx, info) => {
+  try {
+    const { user: userId } = ctx
+    const isAuthenticatedUser = await isAuthenticated(userId)
+
+    if (!isAuthenticatedUser) {
+      return false
+    }
+
+    const belongsToAdminTeam = await isAdmin(userId)
+
+    if (belongsToAdminTeam) {
+      return true
+    }
+
+    return isGlobalSpecific(userId, 'productionEditor')
+  } catch (e) {
+    throw new Error(e.message)
+  }
+})
+
+const modifyBooksInDashboardRule = rule()(
+  async (parent, { id: bookId }, ctx, info) => {
+    try {
+      const { user: userId } = ctx
+      const isAuthenticatedUser = await isAuthenticated(userId)
+
+      if (!isAuthenticatedUser) {
+        return false
+      }
+
+      const belongsToAdminTeam = await isAdmin(userId)
+
+      if (belongsToAdminTeam) {
+        return true
+      }
+
+      const belongsToGlobalProductionEditorTeam = await isGlobalSpecific(
+        userId,
+        'productionEditor',
+      )
+
+      const belongsToBookProductionEditorTeam = await isProductionEditor(
+        userId,
+        bookId,
+      )
+
+      return (
+        belongsToGlobalProductionEditorTeam || belongsToBookProductionEditorTeam
+      )
+    } catch (e) {
+      throw new Error(e.message)
+    }
+  },
+)
+
+const userRule = rule()(async (parent, { id: requestedId }, ctx, info) => {
+  try {
+    const { user: requesterId } = ctx
+    const isAuthenticatedUser = await isAuthenticated(requesterId)
+
+    if (!isAuthenticatedUser) {
+      return false
+    }
+
+    const belongsToAdminTeam = await isAdmin(requesterId)
+
+    if (belongsToAdminTeam) {
+      return true
+    }
+
+    return isTheSameUser(requesterId, requestedId)
+  } catch (e) {
+    throw new Error(e.message)
+  }
+})
+
+const getBookRule = rule()(async (parent, { id: bookId }, ctx, info) => {
+  try {
+    const { user: userId } = ctx
+
+    return canFetchBookAndRelevantAssets(userId, bookId)
+  } catch (e) {
+    throw new Error(e.message)
+  }
+})
+
+const getEntityFilesRule = rule()(
+  async (parent, { entityId: bookId }, ctx, info) => {
+    try {
+      const { user: userId } = ctx
+
+      return canFetchBookAndRelevantAssets(userId, bookId)
+    } catch (e) {
+      throw new Error(e.message)
+    }
+  },
+)
+
+const getBookComponentRule = rule()(
+  async (parent, { id: bookComponentId }, ctx, info) => {
+    try {
+      const { user: userId } = ctx
+
+      if (!bookComponentId) {
+        throw new Error('bookComponent id should be provided')
+      }
+
+      /* eslint-disable global-require */
+      const BookComponent = require('../../models/bookComponent/bookComponent.model')
+      /* eslint-enable global-require */
+      const bookComponent = await BookComponent.findById(bookComponentId)
+      const { bookId } = bookComponent
+
+      return canFetchBookAndRelevantAssets(userId, bookId)
+    } catch (e) {
+      throw new Error(e.message)
+    }
   },
 )
 
 const permissions = {
   Query: {
-    user: isAuthenticatedRule,
+    user: userRule,
     currentUser: isAuthenticatedRule,
     users: isAdminRule,
     team: isAuthenticatedRule,
     teams: isAuthenticatedRule,
-    getGlobalTeams: isAuthenticatedRule,
+    getGlobalTeams: isAdminRule,
     getObjectTeams: isAuthenticatedRule,
     getWaxRules: isAuthenticatedRule,
     getDashBoardRules: isAuthenticatedRule,
     getBookBuilderRules: isAuthenticatedRule,
     getApplicationParameters: isAuthenticatedRule,
-    getBook: isAuthenticatedRule,
+    getBook: getBookRule,
     getPagedPreviewerLink: isAuthenticatedRule,
-    getBookComponent: isAuthenticatedRule,
+    getBookComponent: getBookComponentRule,
     getBookCollection: isAuthenticatedRule,
     getBookCollections: isAuthenticatedRule,
     getCustomTags: isAuthenticatedRule,
@@ -101,7 +279,7 @@ const permissions = {
     getFiles: isAuthenticatedRule,
     getFile: isAuthenticatedRule,
     getSignedURL: isAuthenticatedRule,
-    getEntityFiles: isAuthenticatedRule,
+    getEntityFiles: getEntityFilesRule,
     getSpecificFiles: isAuthenticatedRule,
     getTemplates: isAuthenticatedRule,
     getTemplate: isAuthenticatedRule,
