@@ -1,11 +1,20 @@
 const { rule } = require('@coko/server/authorization')
+const { indexOf } = require('lodash/indexOf')
 
 const {
   isAuthenticated,
   isAdmin,
   isGlobalSpecific,
-  isTheSameUser,
+  hasEditAccessBasedOnRoleAndStage,
 } = require('./helpers/helpers')
+
+const editAccessMatrix = {
+  author: [{ type: 'review', label: 'Review', value: 0 }],
+  copyEditor: [
+    { type: 'edit', label: 'Edit', value: 0 },
+    { title: 'Clean Up', type: 'clean_up', value: 0 },
+  ],
+}
 
 const isAuthor = async (userId, bookId) => {
   try {
@@ -69,6 +78,50 @@ const hasAnyRoleOnObject = async (userId, bookId) => {
   }
 }
 
+const allButTheAuthor = async (userId, bookId) => {
+  try {
+    const isAuthenticatedUser = await isAuthenticated(userId)
+
+    if (!isAuthenticatedUser) {
+      return false
+    }
+
+    const belongsToAdminTeam = await isAdmin(userId)
+
+    if (belongsToAdminTeam) {
+      return true
+    }
+
+    const belongsToGlobalProductionEditorTeam = await isGlobalSpecific(
+      userId,
+      'productionEditor',
+    )
+
+    if (belongsToGlobalProductionEditorTeam) {
+      return true
+    }
+
+    const belongsToProductionEditorTeam = await isProductionEditor(
+      userId,
+      bookId,
+    )
+
+    if (belongsToProductionEditorTeam) {
+      return true
+    }
+
+    const belongsToCopyEditorTeam = await isCopyEditor(userId, bookId)
+
+    if (belongsToCopyEditorTeam) {
+      return true
+    }
+
+    return false
+  } catch (e) {
+    throw new Error(e.message)
+  }
+}
+
 const isGlobalProductionEditorOrBelongsToObjectTeam = async (
   userId,
   bookId,
@@ -91,7 +144,7 @@ const isGlobalProductionEditorOrBelongsToObjectTeam = async (
   }
 }
 
-const canFetchBookAndRelevantAssets = async (userId, bookId) => {
+const canInteractWithBookAndRelevantAssets = async (userId, bookId) => {
   try {
     const isAuthenticatedUser = await isAuthenticated(userId)
 
@@ -191,48 +244,75 @@ const modifyBooksInDashboardRule = rule()(
   },
 )
 
-const userRule = rule()(async (parent, { id: requestedId }, ctx, info) => {
-  try {
-    const { user: requesterId } = ctx
-    const isAuthenticatedUser = await isAuthenticated(requesterId)
-
-    if (!isAuthenticatedUser) {
-      return false
-    }
-
-    const belongsToAdminTeam = await isAdmin(requesterId)
-
-    if (belongsToAdminTeam) {
-      return true
-    }
-
-    return isTheSameUser(requesterId, requestedId)
-  } catch (e) {
-    throw new Error(e.message)
-  }
-})
-
 const getBookRule = rule()(async (parent, { id: bookId }, ctx, info) => {
   try {
     const { user: userId } = ctx
 
-    return canFetchBookAndRelevantAssets(userId, bookId)
+    return canInteractWithBookAndRelevantAssets(userId, bookId)
   } catch (e) {
     throw new Error(e.message)
   }
 })
 
-const getEntityFilesRule = rule()(
+const interactWithBookFilesRule = rule()(
   async (parent, { entityId: bookId }, ctx, info) => {
     try {
       const { user: userId } = ctx
 
-      return canFetchBookAndRelevantAssets(userId, bookId)
+      return canInteractWithBookAndRelevantAssets(userId, bookId)
     } catch (e) {
       throw new Error(e.message)
     }
   },
 )
+
+const updateFileRule = rule()(async (parent, { id: fileId }, ctx, info) => {
+  try {
+    const { user: userId } = ctx
+    /* eslint-disable global-require */
+    const File = require('../../models/file/file.model')
+    /* eslint-enable global-require */
+    const file = await File.findById(fileId)
+    const { objectId: bookId } = file
+
+    if (!bookId) {
+      throw new Error('file does not contain objectId')
+    }
+
+    return canInteractWithBookAndRelevantAssets(userId, bookId)
+  } catch (e) {
+    throw new Error(e.message)
+  }
+})
+
+const deleteFilesRule = rule()(async (parent, { ids }, ctx, info) => {
+  try {
+    const { user: userId } = ctx
+    /* eslint-disable global-require */
+    const File = require('../../models/file/file.model')
+    /* eslint-enable global-require */
+    const files = File.query().whereIn(ids)
+    const bookIds = []
+
+    files.forEach(file => {
+      if (file.objectId && indexOf(bookIds, file.objectId) === -1) {
+        bookIds.push(file.objectId)
+      }
+    })
+
+    if (bookIds.length === 0) {
+      throw new Error('the files that you want to delete should have objectId')
+    }
+
+    if (bookIds.length > 1) {
+      throw new Error('multiple objectIds detected')
+    }
+
+    return canInteractWithBookAndRelevantAssets(userId, bookIds[0])
+  } catch (e) {
+    throw new Error(e.message)
+  }
+})
 
 const getBookComponentRule = rule()(
   async (parent, { id: bookComponentId }, ctx, info) => {
@@ -249,7 +329,324 @@ const getBookComponentRule = rule()(
       const bookComponent = await BookComponent.findById(bookComponentId)
       const { bookId } = bookComponent
 
-      return canFetchBookAndRelevantAssets(userId, bookId)
+      return canInteractWithBookAndRelevantAssets(userId, bookId)
+    } catch (e) {
+      throw new Error(e.message)
+    }
+  },
+)
+
+const updateMetadataRule = rule()(async (parent, { id: bookId }, ctx, info) => {
+  try {
+    const { user: userId } = ctx
+
+    if (!bookId) {
+      throw new Error('book id should be provided')
+    }
+
+    return canInteractWithBookAndRelevantAssets(userId, bookId)
+  } catch (e) {
+    throw new Error(e.message)
+  }
+})
+
+const updateRunningHeadersRule = rule()(
+  async (parent, { id: bookId }, ctx, info) => {
+    try {
+      const { user: userId } = ctx
+
+      if (!bookId) {
+        throw new Error('book id should be provided')
+      }
+
+      return canInteractWithBookAndRelevantAssets(userId, bookId)
+    } catch (e) {
+      throw new Error(e.message)
+    }
+  },
+)
+
+const exportBookRule = rule()(async (parent, { bookId }, ctx, info) => {
+  try {
+    const { user: userId } = ctx
+
+    if (!bookId) {
+      throw new Error('book id should be provided')
+    }
+
+    return canInteractWithBookAndRelevantAssets(userId, bookId)
+  } catch (e) {
+    throw new Error(e.message)
+  }
+})
+
+const ingestWordFileRule = rule()(async (parent, { bookId }, ctx, info) => {
+  try {
+    const { user: userId } = ctx
+
+    if (!bookId) {
+      throw new Error('book id should be provided')
+    }
+
+    return allButTheAuthor(userId, bookId)
+  } catch (e) {
+    throw new Error(e.message)
+  }
+})
+
+const addBookComponentRule = rule()(async (parent, { bookId }, ctx, info) => {
+  try {
+    const { user: userId } = ctx
+
+    if (!bookId) {
+      throw new Error('book id should be provided')
+    }
+
+    return allButTheAuthor(userId, bookId)
+  } catch (e) {
+    throw new Error(e.message)
+  }
+})
+
+const deleteBookComponentRule = rule()(
+  async (parent, { id: bookComponentId }, ctx, info) => {
+    try {
+      const { user: userId } = ctx
+
+      if (!bookComponentId) {
+        throw new Error('bookComponent id should be provided')
+      }
+
+      /* eslint-disable global-require */
+      const BookComponent = require('../../models/bookComponent/bookComponent.model')
+      /* eslint-enable global-require */
+      const bookComponent = await BookComponent.findById(bookComponentId)
+      const { bookId } = bookComponent
+
+      return allButTheAuthor(userId, bookId)
+    } catch (e) {
+      throw new Error(e.message)
+    }
+  },
+)
+
+const updatePaginationRule = rule()(
+  async (parent, { id: bookComponentId }, ctx, info) => {
+    try {
+      const { user: userId } = ctx
+
+      if (!bookComponentId) {
+        throw new Error('bookComponent id should be provided')
+      }
+
+      /* eslint-disable global-require */
+      const BookComponent = require('../../models/bookComponent/bookComponent.model')
+      /* eslint-enable global-require */
+      const bookComponent = await BookComponent.findById(bookComponentId)
+      const { bookId } = bookComponent
+
+      return canInteractWithBookAndRelevantAssets(userId, bookId)
+    } catch (e) {
+      throw new Error(e.message)
+    }
+  },
+)
+
+const updateTrackChangesRule = rule()(
+  async (parent, { id: bookComponentId }, ctx, info) => {
+    try {
+      const { user: userId } = ctx
+
+      if (!bookComponentId) {
+        throw new Error('bookComponent id should be provided')
+      }
+
+      /* eslint-disable global-require */
+      const BookComponent = require('../../models/bookComponent/bookComponent.model')
+      /* eslint-enable global-require */
+      const bookComponent = await BookComponent.findById(bookComponentId)
+      const { bookId } = bookComponent
+
+      return allButTheAuthor(userId, bookId)
+    } catch (e) {
+      throw new Error(e.message)
+    }
+  },
+)
+
+const updateComponentTypeRule = rule()(
+  async (parent, { id: bookComponentId }, ctx, info) => {
+    try {
+      const { user: userId } = ctx
+
+      if (!bookComponentId) {
+        throw new Error('bookComponent id should be provided')
+      }
+
+      /* eslint-disable global-require */
+      const BookComponent = require('../../models/bookComponent/bookComponent.model')
+      /* eslint-enable global-require */
+      const bookComponent = await BookComponent.findById(bookComponentId)
+      const { bookId } = bookComponent
+
+      return canInteractWithBookAndRelevantAssets(userId, bookId)
+    } catch (e) {
+      throw new Error(e.message)
+    }
+  },
+)
+
+const toggleIncludeInTOCRule = rule()(
+  async (parent, { id: bookComponentId }, ctx, info) => {
+    try {
+      const { user: userId } = ctx
+
+      if (!bookComponentId) {
+        throw new Error('bookComponent id should be provided')
+      }
+
+      /* eslint-disable global-require */
+      const BookComponent = require('../../models/bookComponent/bookComponent.model')
+      /* eslint-enable global-require */
+      const bookComponent = await BookComponent.findById(bookComponentId)
+      const { bookId } = bookComponent
+
+      return canInteractWithBookAndRelevantAssets(userId, bookId)
+    } catch (e) {
+      throw new Error(e.message)
+    }
+  },
+)
+
+const updateBookComponentOrderRule = rule()(
+  async (parent, { id: bookComponentId }, ctx, info) => {
+    try {
+      const { user: userId } = ctx
+
+      if (!bookComponentId) {
+        throw new Error('bookComponent id should be provided')
+      }
+
+      /* eslint-disable global-require */
+      const BookComponent = require('../../models/bookComponent/bookComponent.model')
+      /* eslint-enable global-require */
+      const bookComponent = await BookComponent.findById(bookComponentId)
+      const { bookId } = bookComponent
+
+      return canInteractWithBookAndRelevantAssets(userId, bookId)
+    } catch (e) {
+      throw new Error(e.message)
+    }
+  },
+)
+
+const updateKetidaTeamMembersRule = rule()(
+  async (parent, { teamId }, ctx, info) => {
+    try {
+      const { user: userId } = ctx
+
+      /* eslint-disable global-require */
+      const Team = require('../../models/team/team.model')
+      /* eslint-enable global-require */
+      const team = await Team.findById(teamId)
+      const { objectId, global } = team
+
+      if (global) {
+        return isAdminRule()
+      }
+
+      if (!objectId) {
+        throw new Error('team object id is needed')
+      }
+
+      return allButTheAuthor(userId, objectId)
+    } catch (e) {
+      throw new Error(e.message)
+    }
+  },
+)
+
+const unlockBookComponentRule = rule()(async (parent, { lock }, ctx, info) => {
+  try {
+    const { user: userId } = ctx
+
+    const belongsToAdminTeam = await isAdminRule()
+
+    if (belongsToAdminTeam) {
+      return true
+    }
+
+    if (!lock) {
+      throw new Error('no lock info provided')
+    }
+
+    const isAuthenticatedUser = await isAuthenticated(userId)
+    return isAuthenticatedUser && userId === lock.userId
+  } catch (e) {
+    throw new Error(e.message)
+  }
+})
+
+const interactWithBookComponentRule = rule()(
+  async (parent, { id: bookComponentId }, ctx, info) => {
+    try {
+      const { user: userId } = ctx
+
+      const belongsToAdminTeam = await isAdminRule()
+
+      if (belongsToAdminTeam) {
+        return true
+      }
+
+      const belongsToGlobalProductionEditorTeam = await isGlobalSpecific(
+        userId,
+        'productionEditor',
+      )
+
+      if (belongsToGlobalProductionEditorTeam) {
+        return true
+      }
+
+      if (!bookComponentId) {
+        throw new Error('bookComponent id should be provided')
+      }
+
+      /* eslint-disable global-require */
+      const BookComponent = require('../../models/bookComponent/bookComponent.model')
+      /* eslint-enable global-require */
+      const bookComponent = await BookComponent.findById(bookComponentId)
+      const { bookId } = bookComponent
+
+      const belongsToBookProductionEditorTeam = await isProductionEditor(
+        userId,
+        bookId,
+      )
+
+      if (belongsToBookProductionEditorTeam) {
+        return true
+      }
+
+      const belongsToAuthorTeam = await isAuthor(userId, bookId)
+
+      if (belongsToAuthorTeam) {
+        return hasEditAccessBasedOnRoleAndStage(
+          'author',
+          bookComponentId,
+          editAccessMatrix,
+        )
+      }
+
+      const belongsToCopyEditorTeam = await isCopyEditor(userId, bookId)
+
+      if (belongsToCopyEditorTeam) {
+        return hasEditAccessBasedOnRoleAndStage(
+          'copyEditor',
+          bookComponentId,
+          editAccessMatrix,
+        )
+      }
+
+      return false
     } catch (e) {
       throw new Error(e.message)
     }
@@ -258,9 +655,8 @@ const getBookComponentRule = rule()(
 
 const permissions = {
   Query: {
-    user: userRule,
+    '*': false,
     currentUser: isAuthenticatedRule,
-    users: isAdminRule,
     team: isAuthenticatedRule,
     teams: isAuthenticatedRule,
     getGlobalTeams: isAdminRule,
@@ -279,14 +675,14 @@ const permissions = {
     getFiles: isAuthenticatedRule,
     getFile: isAuthenticatedRule,
     getSignedURL: isAuthenticatedRule,
-    getEntityFiles: getEntityFilesRule,
+    getEntityFiles: interactWithBookFilesRule,
     getSpecificFiles: isAuthenticatedRule,
     getTemplates: isAuthenticatedRule,
     getTemplate: isAuthenticatedRule,
     chatGPT: isAuthenticatedRule,
   },
   Mutation: {
-    upload: isAuthenticatedRule,
+    '*': false,
     deleteUser: isAuthenticatedRule,
     updateUser: isAuthenticatedRule,
     updatePassword: isAuthenticatedRule,
@@ -295,33 +691,29 @@ const permissions = {
     createBook: createBookRule,
     renameBook: modifyBooksInDashboardRule,
     deleteBook: modifyBooksInDashboardRule,
-    updateMetadata: isAuthenticatedRule,
-    updateRunningHeaders: isAuthenticatedRule,
-    exportBook: isAuthenticatedRule,
-    ingestWordFile: isAuthenticatedRule,
-    addBookComponent: isAuthenticatedRule,
-    renameBookComponent: isAuthenticatedRule,
-    deleteBookComponent: isAuthenticatedRule,
-    archiveBookComponent: isAuthenticatedRule,
+    updateMetadata: updateMetadataRule,
+    updateRunningHeaders: updateRunningHeadersRule,
+    exportBook: exportBookRule,
+    ingestWordFile: ingestWordFileRule,
+    addBookComponent: addBookComponentRule,
+    renameBookComponent: interactWithBookComponentRule,
+    deleteBookComponent: deleteBookComponentRule,
     updateWorkflowState: isAuthenticatedRule,
-    updatePagination: isAuthenticatedRule,
-    unlockBookComponent: isAuthenticatedRule,
-    lockBookComponent: isAuthenticatedRule,
-    updateTrackChanges: isAuthenticatedRule,
-    updateContent: isAuthenticatedRule,
-    updateComponentType: isAuthenticatedRule,
+    updatePagination: updatePaginationRule,
+    unlockBookComponent: unlockBookComponentRule,
+    lockBookComponent: interactWithBookComponentRule,
+    updateTrackChanges: updateTrackChangesRule,
+    updateContent: interactWithBookComponentRule,
+    updateComponentType: updateComponentTypeRule,
     updateUploading: isAuthenticatedRule,
-    toggleIncludeInTOC: isAuthenticatedRule,
-    createBookCollection: isAuthenticatedRule,
+    toggleIncludeInTOC: toggleIncludeInTOCRule,
     addCustomTag: isAuthenticatedRule,
-    updateBookComponentOrder: isAuthenticatedRule,
-    uploadFiles: isAuthenticatedRule,
-    updateFile: isAuthenticatedRule,
-    deleteFiles: isAuthenticatedRule,
-    updateTeamMembership: isAuthenticatedRule,
+    updateBookComponentOrder: updateBookComponentOrderRule,
+    uploadFiles: interactWithBookFilesRule,
+    updateFile: updateFileRule,
+    deleteFiles: deleteFilesRule,
+    updateKetidaTeamMembers: updateKetidaTeamMembersRule,
     searchForUsers: isAuthenticatedRule,
-    addTeamMember: isAuthenticatedRule,
-    removeTeamMember: isAuthenticatedRule,
     createTemplate: isAuthenticatedRule,
     cloneTemplate: isAuthenticatedRule,
     updateTemplate: isAuthenticatedRule,

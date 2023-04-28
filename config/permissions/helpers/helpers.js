@@ -1,3 +1,5 @@
+const { find } = require('lodash/find')
+
 const isAuthenticated = async userId => {
   try {
     /* eslint-disable global-require */
@@ -70,9 +72,43 @@ const isGlobalSpecific = async (userId, role) => {
   }
 }
 
-const isTheSameUser = (requesterId, userId) => {
+// const isTheSameUser = (requesterId, userId) => {
+//   try {
+//     return requesterId === userId
+//   } catch (e) {
+//     throw new Error(e.message)
+//   }
+// }
+
+const hasEditAccessBasedOnRoleAndStage = async (
+  role,
+  bookComponentId,
+  editAccessMatrix,
+) => {
   try {
-    return requesterId === userId
+    /* eslint-disable global-require */
+    const BookComponentState = require('../../../models/bookComponentState/bookComponentState.model')
+    /* eslint-enable global-require */
+
+    const bookComponentState = await BookComponentState.findOne({
+      bookComponentId,
+    })
+
+    if (!bookComponentState) {
+      throw new Error(
+        `can not find associated book component state for book component with id ${bookComponentId}`,
+      )
+    }
+
+    const { workflowStages } = bookComponentState
+
+    const result = []
+    editAccessMatrix[role].forEach(editItem => {
+      if (find(workflowStages, editItem)) {
+        result.push(true)
+      }
+    })
+    return result.some(item => item)
   } catch (e) {
     throw new Error(e.message)
   }
@@ -83,5 +119,6 @@ module.exports = {
   isAdmin,
   isGlobal,
   isGlobalSpecific,
-  isTheSameUser,
+  // isTheSameUser,
+  hasEditAccessBasedOnRoleAndStage,
 }
