@@ -1,3 +1,5 @@
+# [1.5.0](https://gitlab.coko.foundation/ketida/server/compare/v1.4.1...v1.5.0) (2023-05-03)
+
 ## [1.4.1](https://gitlab.coko.foundation/ketida/server/compare/v1.4.0...v1.4.1) (2023-04-11)
 
 
