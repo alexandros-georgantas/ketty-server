@@ -159,13 +159,6 @@ const ingestWordFileHandler = async (_, { bookComponentFiles }, ctx) => {
         )
       }
 
-      const currentAndUpdate = {
-        current: currentComponentState,
-        update: { uploading },
-      }
-
-      await ctx.helpers.can(ctx.user, 'update', currentAndUpdate)
-
       await updateUploading(componentId, uploading)
 
       await renameBookComponent(componentId, title, 'en')
@@ -251,20 +244,13 @@ const renameBookComponentHandler = async (_, { input }, ctx) => {
 
 const deleteBookComponentHandler = async (_, { input }, ctx) => {
   try {
-    const { id, deleted } = input
+    const { id } = input
     const pubsub = await pubsubManager.getPubsub()
     const bookComponent = await getBookComponent(id)
 
     if (!bookComponent) {
       throw new Error(`book component with id ${id} does not exists`)
     }
-
-    const currentAndUpdate = {
-      current: bookComponent,
-      update: { deleted },
-    }
-
-    await ctx.helpers.can(ctx.user, 'update', currentAndUpdate)
 
     const deletedBookComponent = await deleteBookComponent(bookComponent)
 
@@ -304,13 +290,6 @@ const updateWorkflowStateHandler = async (_, { input }, ctx) => {
         `book component state does not exists for the book component with id ${id}`,
       )
     }
-
-    const currentAndUpdate = {
-      current: bookComponentState,
-      update: { workflowStages },
-    }
-
-    await ctx.helpers.can(ctx.user, 'update', currentAndUpdate)
 
     await updateWorkflowState(id, workflowStages, ctx)
 
@@ -433,13 +412,6 @@ const updatePaginationHandler = async (_, { input }, ctx) => {
       throw new Error(`book component with id ${id} does not exists`)
     }
 
-    const currentAndUpdate = {
-      current: currentBookComponent,
-      update: { pagination },
-    }
-
-    await ctx.helpers.can(ctx.user, 'update', currentAndUpdate)
-
     const updatedBookComponent = await updatePagination(id, pagination)
 
     pubsub.publish(BOOK_COMPONENT_PAGINATION_UPDATED, {
@@ -471,13 +443,6 @@ const updateTrackChangesHandler = async (_, { input }, ctx) => {
         `no state info exists for the book component with id ${id}`,
       )
     }
-
-    const currentAndUpdate = {
-      current: currentState,
-      update: { trackChangesEnabled },
-    }
-
-    await ctx.helpers.can(ctx.user, 'update', currentAndUpdate)
 
     await updateTrackChanges(id, trackChangesEnabled)
 
@@ -512,13 +477,6 @@ const updateUploadingHandler = async (_, { input }, ctx) => {
         `no state info exists for the book component with id ${id}`,
       )
     }
-
-    const currentAndUpdate = {
-      current: currentState,
-      update: { uploading },
-    }
-
-    await ctx.helpers.can(ctx.user, 'update', currentAndUpdate)
 
     await updateUploading(id, uploading)
 
