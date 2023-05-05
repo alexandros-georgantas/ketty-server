@@ -108,6 +108,7 @@ module.exports = {
   fileStorage: {},
   services: {},
   templates: ['Atla'],
+  seedTemplates: true,
   export: {
     rootFolder: 'config/exportScripts',
     scripts: [],

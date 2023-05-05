@@ -56,7 +56,9 @@ const init = async () => {
       }
     }
 
-    await createTemplates()
+    if (config.seedTemplates && config.templates.length > 0) {
+      await createTemplates()
+    }
   } catch (e) {
     throw new Error(e)
   }
