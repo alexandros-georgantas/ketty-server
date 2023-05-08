@@ -1,4 +1,4 @@
-const { Model } = require('objection')
+  const { Model } = require('objection')
 
 const { uuid } = require('@coko/server')
 
@@ -108,7 +108,6 @@ class Book extends Base {
   static get schema() {
     return {
       type: 'object',
-      required: ['collectionId'],
       $id: 'book',
       properties: {
         archived: booleanDefaultFalse,
