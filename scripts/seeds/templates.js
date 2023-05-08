@@ -12,9 +12,13 @@ const { createTemplate, getTemplates } = require('../helpers/templates')
 
 const seedTemplates = async () => {
   try {
-    const whichTemplates = config.get('templates')
+    const normalizedTemplates = config.get('templates').map(t => ({
+      label: t.label.toLowerCase(),
+      url: t.url,
+      assetsRoot: t.assetsRoot.replace(/^\/+/, '').replace(/\/+$/, ''),
+    }))
 
-    if (!isNil(whichTemplates) && !isEmpty(whichTemplates)) {
+    if (!isNil(normalizedTemplates) && !isEmpty(normalizedTemplates)) {
       await getTemplates()
 
       const templatesFolder = path.join(__dirname, '..', '..', 'templates')
@@ -37,7 +41,7 @@ const seedTemplates = async () => {
             const manifest = JSON.parse(raw)
             const { name, author, target } = manifest
 
-            if (find(whichTemplates, { label: name.toLowerCase() })) {
+            if (find(normalizedTemplates, { label: name.toLowerCase() })) {
               logger.info(
                 '******* Create Templates script is starting ********',
               )

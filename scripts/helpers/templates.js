@@ -64,9 +64,17 @@ const filesChecker = async folder => {
 
 const createTemplate = async (sourceRoot, data, cssFile, notes) => {
   try {
-    const whichTemplates = config.get('templates')
+    const normalizedTemplates = config.get('templates').map(t => ({
+      label: t.label.toLowerCase(),
+      url: t.url,
+      assetsRoot: t.assetsRoot.replace(/^\/+/, '').replace(/\/+$/, ''),
+    }))
+
     const { name, author, target } = data
-    const foundTemplate = find(whichTemplates, { label: name.toLowerCase() })
+
+    const foundTemplate = find(normalizedTemplates, {
+      label: name.toLowerCase(),
+    })
 
     if (!foundTemplate) {
       throw new Error(`template with name ${name} was not fetched from source`)
@@ -177,10 +185,15 @@ const cleanTemplatesFolder = async () => {
 
 const getTemplates = async () => {
   try {
-    const whichTemplates = config.get('templates')
+    const normalizedTemplates = config.get('templates').map(t => ({
+      label: t.label.toLowerCase(),
+      url: t.url,
+      assetsRoot: t.assetsRoot.replace(/^\/+/, '').replace(/\/+$/, ''),
+    }))
+
     await cleanTemplatesFolder()
     return Promise.all(
-      whichTemplates.map(async templateDetails => {
+      normalizedTemplates.map(async templateDetails => {
         const { url, label } = templateDetails
         return execute(`git clone ${url} ./templates/${label}`)
       }),
