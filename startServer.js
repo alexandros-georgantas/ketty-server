@@ -1,8 +1,16 @@
 const { startServer, logger } = require('@coko/server')
 const config = require('config')
-const createTemplates = require('./scripts/seeds/createTemplates')
+const isEmpty = require('lodash/isEmpty')
 
-const scripts = config.get('export.scripts')
+const seedTemplates = require('./scripts/seeds/templates')
+
+const hasScripts =
+  config.has('export') &&
+  config.has('export.scripts') &&
+  !isEmpty(config.get('export.scripts'))
+
+const hasTemplates =
+  config.has('templates') && !isEmpty(config.get('templates'))
 
 const { startWSServer } = require('./startWebSocketServer')
 const { cleanUpLocks } = require('./services/bookComponentLock.service')
@@ -24,7 +32,8 @@ const init = async () => {
     logger.info('starting WebSockets server')
     await startWSServer()
 
-    if (scripts && scripts.length > 0) {
+    if (hasScripts) {
+      const scripts = config.get('export.scripts')
       const errors = []
 
       for (let i = 0; i < scripts.length; i += 1) {
@@ -56,8 +65,8 @@ const init = async () => {
       }
     }
 
-    if (config.seedTemplates && config.templates.length > 0) {
-      await createTemplates()
+    if (hasTemplates) {
+      await seedTemplates()
     }
   } catch (e) {
     throw new Error(e)

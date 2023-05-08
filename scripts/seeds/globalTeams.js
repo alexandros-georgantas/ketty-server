@@ -2,7 +2,7 @@ const { logger } = require('@coko/server')
 const config = require('config')
 const Team = require('../../models/team/team.model')
 
-const createGlobalTeams = async () => {
+const seedGlobalTeams = async () => {
   try {
     logger.info('Seeding global teams...')
 
@@ -39,4 +39,4 @@ const createGlobalTeams = async () => {
   }
 }
 
-module.exports = createGlobalTeams
+module.exports = seedGlobalTeams
