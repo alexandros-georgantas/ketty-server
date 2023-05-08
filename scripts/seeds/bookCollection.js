@@ -22,7 +22,7 @@ const createBookCollection = async trx => {
   return true
 }
 
-const createBookCollectionHandler = async () => {
+const seedBookCollection = async () => {
   try {
     logger.info('>>> checking if books collection already exists...')
 
@@ -40,4 +40,4 @@ const createBookCollectionHandler = async () => {
   }
 }
 
-module.exports = createBookCollectionHandler
+module.exports = seedBookCollection

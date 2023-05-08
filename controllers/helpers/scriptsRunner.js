@@ -24,8 +24,15 @@ const scriptsRunner = async (book, template) => {
       const label = deconstructedValue[0]
       const scope = deconstructedValue[1]
 
-      const scriptsRootFolder = config.get('export.rootFolder')
-      const availableScripts = config.get('export.scripts')
+      const scriptsRootFolder =
+        config.has('export') &&
+        config.has('export.rootFolder') &&
+        config.get('export.rootFolder')
+
+      const availableScripts =
+        config.has('export') &&
+        config.has('export.scripts') &&
+        config.get('export.scripts')
 
       if (!scriptsRootFolder || !availableScripts) {
         throw new Error(`something went wrong with your scripts configuration`)

@@ -3,17 +3,17 @@ const Identity = require('@coko/server/src/models/identity/identity.model')
 const Team = require('../../models/team/team.model')
 const User = require('../../models/user/user.model')
 
-const createAdmin = async userData => {
+const seedAdmin = async userData => {
   try {
     logger.info('### CREATING ADMIN USER ###')
-    logger.info(
-      '>>> checking if admin user with provided email and username already exists...',
-    )
 
     const { username, password, email, givenNames, surname } = userData
 
     await useTransaction(async trx => {
       let adminUser
+      logger.info(
+        '>>> checking if admin user with provided email and username already exists...',
+      )
 
       const existingUsers = await User.query(trx)
         .leftJoin('identities', 'users.id', 'identities.user_id')
@@ -86,4 +86,4 @@ const createAdmin = async userData => {
   }
 }
 
-module.exports = createAdmin
+module.exports = seedAdmin

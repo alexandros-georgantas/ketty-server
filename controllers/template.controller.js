@@ -8,7 +8,6 @@ const map = require('lodash/map')
 const find = require('lodash/find')
 const forEach = require('lodash/forEach')
 
-const scripts = config.get('export.scripts')
 const uploadsPath = config.get('pubsweet-server').uploads
 
 const { Template, File } = require('../models').models
@@ -501,6 +500,11 @@ const updateTemplateCSSFile = async (id, data, hashed, options = {}) => {
 const getExportScripts = async (scope = undefined) => {
   try {
     let res = []
+
+    const scripts =
+      config.has('export') &&
+      config.has('export.scripts') &&
+      config.get('export.scripts')
 
     if (!scripts || scripts.length === 0) {
       return res

@@ -15,5 +15,3 @@ const truncateDB = async () => {
 }
 
 module.exports = truncateDB
-
-truncateDB()
