@@ -3,7 +3,7 @@ type Book {
   authors: [User]
   archived: Boolean!
   bookStructure: BookStructure
-  collectionId: ID!
+  collectionId: ID
   copyrightStatement: String
   copyrightYear: Int
   copyrightHolder: String
@@ -20,8 +20,8 @@ type Book {
 }
 
 input CreateBookInput {
-  collectionId: ID!
-  title: String!
+  collectionId: ID
+  title: String
 }
 
 input ExportBookInput {
