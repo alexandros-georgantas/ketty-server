@@ -3,7 +3,7 @@ type Book {
   authors: [User]
   archived: Boolean!
   bookStructure: BookStructure
-  collectionId: ID
+  collectionId: ID!
   copyrightStatement: String
   copyrightYear: Int
   copyrightHolder: String
