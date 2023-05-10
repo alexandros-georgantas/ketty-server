@@ -96,9 +96,17 @@ type PagedPreviewerLink {
   link: String!
 }
 
+input UserInput {
+  userID: ID!
+  page: Int
+  limit: Int
+  teamId: ID
+}
+
 extend type Query {
   getBook(id: ID!): Book!
   getPagedPreviewerLink(hash: String!): PagedPreviewerLink!
+  getBooks(input: UserInput!): [Book!]!
 }
 
 input MetadataInput {

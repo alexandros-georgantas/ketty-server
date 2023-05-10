@@ -106,7 +106,7 @@ const getBooks = async (collectionId, archived, userId, options = {}) => {
   try {
     const { trx } = options
     logger.info(
-      `${BOOK_CONTROLLER} getBooks: fetching books for collection with id ${collectionId}`,
+      `${BOOK_CONTROLLER} getBooks: fetching books for user with id ${userId}`,
     )
     return useTransaction(
       async tr => {
