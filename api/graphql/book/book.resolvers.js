@@ -1,6 +1,7 @@
 const { withFilter } = require('graphql-subscriptions')
 const { pubsubManager, logger } = require('@coko/server')
 const map = require('lodash/map')
+const isEmpty = require('lodash/isEmpty')
 
 const {
   BOOK_CREATED,
@@ -53,10 +54,22 @@ const createBookHandler = async (_, { input }, ctx) => {
   try {
     logger.info('book resolver: executing createBook use case')
 
-    const { collectionId, title } = input
+    const { collectionId, title, addUserToBookTeams } = input
     const pubsub = await pubsubManager.getPubsub()
+    let newBook
 
-    const newBook = await createBook(collectionId, title)
+    if (addUserToBookTeams && !isEmpty(addUserToBookTeams)) {
+      newBook = await createBook({
+        collectionId,
+        title,
+        options: {
+          addUserToBookTeams,
+          userId: ctx.user,
+        },
+      })
+    } else {
+      newBook = await createBook({ collectionId, title })
+    }
 
     logger.info('book resolver: broadcasting new book to clients')
 

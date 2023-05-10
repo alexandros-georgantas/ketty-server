@@ -13,7 +13,16 @@ module.exports = {
     {
       displayName: 'models',
       testEnvironment: 'node',
-      testRegex: './data-model/__tests__/.+test.js$',
+      testRegex: './models/__tests__/.+test.js$',
+      globalSetup: './scripts/helpers/_setup.js',
+      globalTeardown: './scripts/helpers/_teardown.js',
+    },
+    {
+      displayName: 'controllers',
+      testEnvironment: 'node',
+      testRegex: './controllers/__tests__/.+test.js$',
+      globalSetup: './scripts/helpers/_setup.js',
+      globalTeardown: './scripts/helpers/_teardown.js',
     },
   ],
 }

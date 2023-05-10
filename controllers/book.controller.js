@@ -9,6 +9,7 @@ const BPromise = require('bluebird')
 
 const {
   getObjectTeams,
+  updateTeamMembership,
 } = require('@coko/server/src/models/team/team.controller')
 
 const {
@@ -170,12 +171,27 @@ const getBooks = async (collectionId, archived, userId, options = {}) => {
   }
 }
 
-const createBook = async (collectionId, title, options = {}) => {
+const createBook = async (data = {}) => {
   try {
-    const { trx } = options
+    const { collectionId, title, options } = data
+
+    let trx
+    let addUserToBookTeams
+    let userId
+
+    if (options) {
+      trx = options.trx
+      addUserToBookTeams = options.addUserToBookTeams
+      userId = options.userId
+    }
+
     return useTransaction(
       async tr => {
-        const newBookData = { collectionId }
+        const newBookData = {}
+
+        if (collectionId) {
+          newBookData.collectionId = collectionId
+        }
 
         if (
           config.has('featureBookStructure') &&
@@ -198,18 +214,32 @@ const createBook = async (collectionId, title, options = {}) => {
           `${BOOK_CONTROLLER} createBook: new book created with id ${bookId}`,
         )
 
-        await BookTranslation.insert(
-          {
-            bookId,
-            title,
-            languageIso: 'en',
-          },
-          { trx: tr },
-        )
+        if (title) {
+          await BookTranslation.insert(
+            {
+              bookId,
+              title,
+              languageIso: 'en',
+            },
+            { trx: tr },
+          )
 
-        logger.info(
-          `${BOOK_CONTROLLER} createBook: new book translation (title: ${title}) created for the book with id ${bookId}`,
-        )
+          logger.info(
+            `${BOOK_CONTROLLER} createBook: new book translation (title: ${title}) created for the book with id ${bookId}`,
+          )
+        } else {
+          await BookTranslation.insert(
+            {
+              bookId,
+              languageIso: 'en',
+            },
+            { trx: tr },
+          )
+
+          logger.info(
+            `${BOOK_CONTROLLER} createBook: new book translation placeholder created for the book with id ${bookId}`,
+          )
+        }
 
         const { config: divisions } = await getApplicationParameters(
           'bookBuilder',
@@ -284,7 +314,7 @@ const createBook = async (collectionId, title, options = {}) => {
                 return
               }
 
-              await createTeam(
+              const createdTeam = await createTeam(
                 teamData.displayName,
                 bookId,
                 'book',
@@ -294,9 +324,25 @@ const createBook = async (collectionId, title, options = {}) => {
                   trx: tr,
                 },
               )
+
               logger.info(
                 `${BOOK_CONTROLLER} createBook: Added team "${teamData.role}" for book with id ${bookId}`,
               )
+
+              if (findIndex(addUserToBookTeams, createTeam.role) !== -1) {
+                if (!userId) {
+                  throw new Error(
+                    'userId should be provided if addUserToBookTeams is used',
+                  )
+                }
+
+                logger.info(
+                  `${BOOK_CONTROLLER} createBook: Adding book creator as member of team "${createdTeam.displayName}" for book with id ${bookId}`,
+                )
+                await updateTeamMembership(createdTeam.id, [userId], {
+                  trx: tr,
+                })
+              }
             }),
           )
         }

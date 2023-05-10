@@ -22,6 +22,7 @@ type Book {
 input CreateBookInput {
   collectionId: ID
   title: String
+  addUserToBookTeams: [String!]
 }
 
 input ExportBookInput {
