@@ -3,7 +3,7 @@ type Book {
   authors: [User]
   archived: Boolean!
   bookStructure: BookStructure
-  collectionId: ID!
+  collectionId: ID
   copyrightStatement: String
   copyrightYear: Int
   copyrightHolder: String
@@ -96,6 +96,7 @@ type PagedPreviewerLink {
   link: String!
 }
 
+<<<<<<< HEAD
 input BookPageInput {
   pageSize: Int
   page: Int
@@ -106,12 +107,23 @@ input BookPageInput {
 type BookResponse {
   result: [Book!]!
   totalCount: Int!
+=======
+input UserInput {
+  userID: ID!
+  page: Int
+  limit: Int
+  teamId: ID
+>>>>>>> feat(*): updated getBooks query and made collectionId optional
 }
 
 extend type Query {
   getBook(id: ID!): Book!
   getPagedPreviewerLink(hash: String!): PagedPreviewerLink!
+<<<<<<< HEAD
   getBooks(options: BookPageInput): BookResponse!
+=======
+  getBooks(input: UserInput!): [Book!]!
+>>>>>>> feat(*): updated getBooks query and made collectionId optional
 }
 
 input MetadataInput {
