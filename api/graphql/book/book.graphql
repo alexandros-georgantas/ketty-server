@@ -16,7 +16,7 @@ type Book {
   license: String
   productionEditors: [String]!
   publicationDate: Date
-  title: String!
+  title: String
 }
 
 input CreateBookInput {
