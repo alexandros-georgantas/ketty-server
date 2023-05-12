@@ -9,7 +9,7 @@ const seedAdmin = async userData => {
 
     const { username, password, email, givenNames, surname } = userData
 
-    await useTransaction(async trx => {
+    return useTransaction(async trx => {
       let adminUser
       logger.info(
         '>>> checking if admin user with provided email and username already exists...',
@@ -78,8 +78,6 @@ const seedAdmin = async userData => {
 
       return adminUser
     })
-
-    return true
   } catch (e) {
     logger.error(e.message)
     throw new Error(e)

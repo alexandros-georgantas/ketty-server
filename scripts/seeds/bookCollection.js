@@ -19,7 +19,7 @@ const createBookCollection = async trx => {
   logger.info(
     `books collection translation created with id: ${createdBookCollectionTranslation.id}`,
   )
-  return true
+  return createdBookCollection
 }
 
 const seedBookCollection = async () => {

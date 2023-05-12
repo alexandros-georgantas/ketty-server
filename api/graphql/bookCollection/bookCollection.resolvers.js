@@ -120,7 +120,7 @@ module.exports = {
 
           return {
             id: book.id,
-            title: title.toLowerCase().trim(),
+            title: title?.toLowerCase().trim(),
             status,
             author: auth,
           }

@@ -16,12 +16,13 @@ type Book {
   license: String
   productionEditors: [String]!
   publicationDate: Date
-  title: String!
+  title: String
 }
 
 input CreateBookInput {
   collectionId: ID
   title: String
+  addUserToBookTeams: [String!]
 }
 
 input ExportBookInput {
