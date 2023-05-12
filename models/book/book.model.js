@@ -7,6 +7,8 @@ const Base = require('../ketidaBase')
 const { booleanDefaultFalse, id, string, year, booleanDefaultTrue } =
   require('../helpers').schema
 
+const { applyListQueryOptions } = require('../helpers')
+
 const outlineItem = {
   type: 'object',
   additionalProperties: false,
@@ -102,6 +104,50 @@ class Book extends Base {
           to: 'BookCollection.id',
         },
       },
+    }
+  }
+
+  static async filterBooks(collectionId, archived, userId, options = {}) {
+    try {
+      let query, parentQuery
+
+      if (!archived) {
+        query = Book.query(options.trx)
+          .leftJoin('teams', 'book.id', 'teams.object_id')
+          .leftJoin('team_members', 'teams.id', 'team_members.team_id')
+          .leftJoin('users', 'team_members.user_id', 'users.id')
+          .distinctOn('book.id')
+          .where({
+            'book.collection_id': collectionId,
+            'book.deleted': false,
+            'book.archived': false,
+            'users.id': userId,
+          })
+          .orderBy(['book.id', { column: 'book.created', order: 'desc' }])
+
+        parentQuery = Book.query(options.trx).select('*').from(query)
+
+        return applyListQueryOptions(parentQuery, options)
+      }
+
+      query = Book.query(trx)
+        .leftJoin('teams', 'book.id', 'teams.object_id')
+        .leftJoin('team_members', 'teams.id', 'team_members.team_id')
+        .leftJoin('users', 'team_members.user_id', 'users.id')
+        .distinctOn('book.id')
+        .where({
+          'book.collection_id': collectionId,
+          'book.deleted': false,
+          'users.id': userId,
+        })
+        .andWhere({ 'users.id': userId })
+
+      parentQuery = Book.query(options.trx).select('*').from(query)
+
+      return applyListQueryOptions(parentQuery, options)
+    } catch (e) {
+      console.error('Question model: filter failed', e)
+      throw new Error(e)
     }
   }
 

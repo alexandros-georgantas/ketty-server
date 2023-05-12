@@ -96,17 +96,22 @@ type PagedPreviewerLink {
   link: String!
 }
 
-input UserInput {
-  userID: ID!
+input BookPageInput {
+  pageSize: Int
   page: Int
-  limit: Int
-  teamId: ID
+  orderBy: String
+  ascending: Boolean
+}
+
+type BookResponse {
+  result: [Book!]!
+  totalCount: Int!
 }
 
 extend type Query {
   getBook(id: ID!): Book!
   getPagedPreviewerLink(hash: String!): PagedPreviewerLink!
-  getBooks(input: UserInput!): [Book!]!
+  getBooks(options: BookPageInput): BookResponse!
 }
 
 input MetadataInput {

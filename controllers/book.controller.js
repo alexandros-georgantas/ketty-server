@@ -12,6 +12,8 @@ const {
   updateTeamMembership,
 } = require('@coko/server/src/models/team/team.controller')
 
+const { Team, TeamMember } = require('@coko/server/src/models')
+
 const {
   labels: { BOOK_CONTROLLER },
 } = require('./constants')
@@ -37,7 +39,8 @@ const { createDivision } = require('./division.controller')
 
 const { createTeam, getObjectTeam, deleteTeam } = require('./team.controller')
 
-const { isGlobal } = require('./user.controller')
+const { isGlobal, isAdmin } = require('./user.controller')
+const { find } = require('lodash')
 
 const toCamelCase = string =>
   string
@@ -104,15 +107,28 @@ const getBook = async (id, options = {}) => {
 
 const getBooks = async (collectionId, archived, userId, options = {}) => {
   try {
-    const { trx } = options
+    const { pageSize, page, orderBy, ascending, trx } = options
     logger.info(
       `${BOOK_CONTROLLER} getBooks: fetching books for user with id ${userId}`,
     )
     return useTransaction(
       async tr => {
-        const isGlobalUser = await isGlobal(userId, true)
+        const globalProductionEditorsTeam = await Team.findGlobalTeamByRole(
+          'productionEditor',
+          { trx: tr },
+        )
 
-        if (isGlobalUser) {
+        const { result: teamMembers } = await TeamMember.find(
+          {
+            teamId: globalProductionEditorsTeam.id,
+          },
+          { trx: tr },
+        )
+
+        const isGlobalProductionEditor = find(teamMembers, { userId })
+        const isUserAdmin = await isAdmin(userId)
+
+        if (isUserAdmin || isGlobalProductionEditor) {
           if (!archived) {
             const { result } = await Book.find(
               {
@@ -137,31 +153,13 @@ const getBooks = async (collectionId, archived, userId, options = {}) => {
           return result
         }
 
-        if (!archived) {
-          return Book.query(tr)
-            .leftJoin('teams', 'book.id', 'teams.object_id')
-            .leftJoin('team_members', 'teams.id', 'team_members.team_id')
-            .leftJoin('users', 'team_members.user_id', 'users.id')
-            .distinctOn('book.id')
-            .where({
-              'book.collection_id': collectionId,
-              'book.deleted': false,
-              'book.archived': false,
-              'users.id': userId,
-            })
-        }
-
-        return Book.query(tr)
-          .leftJoin('teams', 'book.id', 'teams.object_id')
-          .leftJoin('team_members', 'teams.id', 'team_members.team_id')
-          .leftJoin('users', 'team_members.user_id', 'users.id')
-          .distinctOn('book.id')
-          .where({
-            'book.collection_id': collectionId,
-            'book.deleted': false,
-            'users.id': userId,
-          })
-          .andWhere({ 'users.id': userId })
+        return Book.filterBooks(collectionId, archived, userId, {
+          orderBy,
+          ascending,
+          page,
+          pageSize,
+          trx: tr,
+        })
       },
       { trx, passedTrxOnly: true },
     )

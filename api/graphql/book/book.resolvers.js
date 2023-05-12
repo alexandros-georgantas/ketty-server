@@ -51,12 +51,16 @@ const getBookHandler = async (_, { id }, ctx, info) => {
   }
 }
 
-const getBooksHandler = async (_, { collectionId, archived, userId }, ctx) => {
+const getBooksHandler = async (
+  _,
+  { collectionId, archived, userId, options },
+  ctx,
+) => {
   try {
-    logger.info('book resolver: executing getBooks use case');
-    return getBooks(collectionId, archived, userId);
+    logger.info('book resolver: executing getBooks use case')
+    return getBooks(collectionId, archived, userId, options)
   } catch (e) {
-    throw new Error(e);
+    throw new Error(e)
   }
 }
 
@@ -334,7 +338,7 @@ module.exports = {
   Query: {
     getBook: getBookHandler,
     getPagedPreviewerLink: getPagedPreviewerLinkHandler,
-    getBooks: getBooksHandler
+    getBooks: getBooksHandler,
   },
   Mutation: {
     archiveBook: archiveBookHandler,
