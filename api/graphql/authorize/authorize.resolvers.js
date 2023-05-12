@@ -137,8 +137,6 @@ const getBookBuilderRules = async (_, args, ctx) => {
             workFlowStages,
           )
 
-          // const data = map(workFlowStages, key => {let data={}; data[key] = true; return data; })
-
           return { type: v.type, ...rules }
         }),
       )

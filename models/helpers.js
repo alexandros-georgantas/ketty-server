@@ -312,8 +312,6 @@ const schema = {
     format: 'uri-reference',
   },
   year: {
-    // type: 'string',
-    // pattern: '(19|20d{2})',
     type: 'integer',
     minimum: 1900,
     maximum: 2099,

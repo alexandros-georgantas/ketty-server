@@ -13,12 +13,7 @@ const {
   BOOK_RUNNING_HEADERS_UPDATED,
 } = require('./constants')
 
-const BookTranslation = require('../../../models/bookTranslation/bookTranslation.model')
-
-const {
-  // getEntityTeam,
-  getObjectTeam,
-} = require('../../../controllers/team.controller')
+const { getObjectTeam } = require('../../../controllers/team.controller')
 
 const {
   pagedPreviewerLink,
@@ -26,6 +21,7 @@ const {
 
 const {
   getBook,
+  getBooks,
   archiveBook,
   createBook,
   renameBook,
@@ -45,6 +41,22 @@ const getBookHandler = async (_, { id }, ctx, info) => {
   try {
     logger.info('book resolver: executing getBook use case')
     return getBook(id)
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
+const getBooksHandler = async (
+  _,
+  { archived, orderBy, page, pageSize },
+  ctx,
+) => {
+  try {
+    logger.info('book resolver: executing getBooks use case')
+    return getBooks({
+      userId: ctx.user,
+      options: { showArchived: archived, orderBy, page, pageSize },
+    })
   } catch (e) {
     throw new Error(e)
   }
@@ -324,6 +336,7 @@ module.exports = {
   Query: {
     getBook: getBookHandler,
     getPagedPreviewerLink: getPagedPreviewerLinkHandler,
+    getBooks: getBooksHandler,
   },
   Mutation: {
     archiveBook: archiveBookHandler,
@@ -342,12 +355,7 @@ module.exports = {
   },
   Book: {
     async title(book, _, ctx) {
-      const bookTranslation = await BookTranslation.findOne({
-        bookId: book.id,
-        languageIso: 'en',
-      })
-
-      return bookTranslation.title
+      return book.title
     },
     divisions(book, _, ctx) {
       return book.divisions
@@ -356,7 +364,6 @@ module.exports = {
       return book.archived
     },
     async authors(book, args, ctx, info) {
-      // const authorsTeam = await getEntityTeam(book.id, 'book', 'author', true)
       const authorsTeam = await getObjectTeam('author', book.id, true)
 
       let authors = []
