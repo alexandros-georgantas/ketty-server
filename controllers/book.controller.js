@@ -12,7 +12,9 @@ const {
   updateTeamMembership,
 } = require('@coko/server/src/models/team/team.controller')
 
-const { Team, TeamMember } = require('@coko/server/src/models')
+const {
+  hasMembershipInTeams,
+} = require('../config/permissions/helpers/helpers')
 
 const {
   labels: { BOOK_CONTROLLER },
@@ -38,9 +40,6 @@ const {
 const { createDivision } = require('./division.controller')
 
 const { createTeam, getObjectTeam, deleteTeam } = require('./team.controller')
-
-const { isGlobal, isAdmin } = require('./user.controller')
-const { find } = require('lodash')
 
 const toCamelCase = string =>
   string
@@ -105,60 +104,43 @@ const getBook = async (id, options = {}) => {
   }
 }
 
-const getBooks = async (collectionId, archived, userId, options = {}) => {
+const getBooks = async ({ collectionId, userId, options }) => {
   try {
-    const { pageSize, page, orderBy, ascending, trx } = options
+    const getAllBooksTeams =
+      config.has('filters.getBooks.all') && config.get('filters.getBooks.all')
+
+    const { trx, page, pageSize, orderBy, showArchived } = options
+
+    const isEligibleForAll = await hasMembershipInTeams(
+      userId,
+      getAllBooksTeams,
+    )
+
     logger.info(
       `${BOOK_CONTROLLER} getBooks: fetching books for user with id ${userId}`,
     )
     return useTransaction(
       async tr => {
-        const globalProductionEditorsTeam = await Team.findGlobalTeamByRole(
-          'productionEditor',
-          { trx: tr },
-        )
-
-        const { result: teamMembers } = await TeamMember.find(
-          {
-            teamId: globalProductionEditorsTeam.id,
-          },
-          { trx: tr },
-        )
-
-        const isGlobalProductionEditor = find(teamMembers, { userId })
-        const isUserAdmin = await isAdmin(userId)
-
-        if (isUserAdmin || isGlobalProductionEditor) {
-          if (!archived) {
-            const { result } = await Book.find(
-              {
-                collectionId,
-                deleted: false,
-                archived: false,
-              },
-              { trx: tr },
-            )
-
-            return result
-          }
-
-          const { result } = await Book.find(
+        if (isEligibleForAll) {
+          return Book.getAllBooks(
             {
-              collectionId,
-              deleted: false,
+              trx: tr,
+              showArchived,
+              page,
+              pageSize,
+              orderBy,
             },
-            { trx: tr },
+            collectionId,
           )
-
-          return result
         }
 
-        return Book.filterBooks(collectionId, archived, userId, {
-          orderBy,
-          ascending,
+        return Book.getUserBooks(userId, {
+          trx: tr,
+          showArchived,
           page,
           pageSize,
-          trx: tr,
+          orderBy,
+          collectionId,
         })
       },
       { trx, passedTrxOnly: true },

@@ -6,9 +6,9 @@ const authsomeBooksprints = require('./modules/authsomeBooksprints')
 const bbVanilla = require('./modules/bookBuilderVanilla')
 const bbOEN = require('./modules/bookBuilderOEN')
 const bbBooksprints = require('./modules/bookBuilderBooksprints')
-// const permissions = require('./permissions')
 const oenTeams = require('./modules/oenTeams')
 const vanillaTeams = require('./modules/vanillaTeams')
+const vanillaFilters = require('./modules/vanillaFilters')
 const booksprintTeams = require('./modules/booksprintTeams')
 const vanillaPermissions = require('./permissions/vanilla.permissions')
 const booksprintPermissions = require('./permissions/booksprint.permissions')
@@ -54,6 +54,7 @@ module.exports = {
   featureBookStructure: false,
   featureUploadDOCXFiles: true,
   permissions,
+  filters: vanillaFilters,
   pubsweet: {
     components,
   },

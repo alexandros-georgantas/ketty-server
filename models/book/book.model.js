@@ -7,8 +7,6 @@ const Base = require('../ketidaBase')
 const { booleanDefaultFalse, id, string, year, booleanDefaultTrue } =
   require('../helpers').schema
 
-const { applyListQueryOptions } = require('../helpers')
-
 const outlineItem = {
   type: 'object',
   additionalProperties: false,
@@ -107,47 +105,186 @@ class Book extends Base {
     }
   }
 
-  static async filterBooks(collectionId, archived, userId, options = {}) {
+  static async getAllBooks(options, collectionId = undefined) {
     try {
-      let query, parentQuery
+      const { trx, showArchived, page, pageSize, orderBy } = options
+      let queryBuilder = Book.query(trx)
+        .leftJoin('book_translation', 'book_translation.book_id', 'book.id')
+        .distinct()
 
-      if (!archived) {
-        query = Book.query(options.trx)
-          .leftJoin('teams', 'book.id', 'teams.object_id')
-          .leftJoin('team_members', 'teams.id', 'team_members.team_id')
-          .leftJoin('users', 'team_members.user_id', 'users.id')
-          .distinctOn('book.id')
-          .where({
-            'book.collection_id': collectionId,
-            'book.deleted': false,
-            'book.archived': false,
-            'users.id': userId,
-          })
-          .orderBy(['book.id', { column: 'book.created', order: 'desc' }])
-
-        parentQuery = Book.query(options.trx).select('*').from(query)
-
-        return applyListQueryOptions(parentQuery, options)
+      if (orderBy) {
+        if (orderBy.column === 'title') {
+          queryBuilder = queryBuilder.orderByRaw(
+            `LOWER(book_translation.title) ${orderBy.order} NULLS LAST`,
+          )
+        } else {
+          queryBuilder = queryBuilder.orderBy([orderBy])
+        }
       }
 
-      query = Book.query(trx)
+      if (
+        (Number.isInteger(page) && !Number.isInteger(pageSize)) ||
+        (!Number.isInteger(page) && Number.isInteger(pageSize))
+      ) {
+        throw new Error(
+          'both page and pageSize integers needed for paginated results',
+        )
+      }
+
+      if (Number.isInteger(page) && Number.isInteger(pageSize)) {
+        if (page < 0) {
+          throw new Error(
+            'invalid index for page (page should be an integer and greater than or equal to 0)',
+          )
+        }
+
+        if (pageSize <= 0) {
+          throw new Error(
+            'invalid size for pageSize (pageSize should be an integer and greater than 0)',
+          )
+        }
+
+        queryBuilder = queryBuilder.page(page, pageSize)
+      }
+
+      let res
+
+      if (!collectionId) {
+        res = await queryBuilder
+          .where({
+            'book.deleted': false,
+            'book.archived': showArchived,
+          })
+          .select([
+            'book.id',
+            'book.collectionId',
+            'book.publicationDate',
+            'book.archived',
+            'book.bookStructure',
+            'book.divisions',
+            'book_translation.title',
+          ])
+      } else {
+        res = await queryBuilder
+          .where({
+            'book.deleted': false,
+            'book.archived': showArchived,
+            'book.collectionId': collectionId,
+          })
+          .select([
+            'book.id',
+            'book.collectionId',
+            'book.publicationDate',
+            'book.archived',
+            'book.bookStructure',
+            'book.divisions',
+            'book_translation.title',
+          ])
+      }
+
+      const { results, total } = res
+
+      return {
+        result: page !== undefined ? results : res,
+        totalCount: total || res.length,
+      }
+    } catch (e) {
+      throw new Error(e.message)
+    }
+  }
+
+  static async getUserBooks(userId, options) {
+    try {
+      const { trx, showArchived, page, pageSize, orderBy, collectionId } =
+        options
+
+      let queryBuilder = Book.query(trx)
+        .leftJoin('book_translation', 'book_translation.book_id', 'book.id')
         .leftJoin('teams', 'book.id', 'teams.object_id')
         .leftJoin('team_members', 'teams.id', 'team_members.team_id')
         .leftJoin('users', 'team_members.user_id', 'users.id')
-        .distinctOn('book.id')
-        .where({
-          'book.collection_id': collectionId,
-          'book.deleted': false,
-          'users.id': userId,
-        })
-        .andWhere({ 'users.id': userId })
+        .distinct()
 
-      parentQuery = Book.query(options.trx).select('*').from(query)
+      if (orderBy) {
+        if (orderBy.column === 'title') {
+          queryBuilder = queryBuilder.orderByRaw(
+            `LOWER(book_translation.title) ${orderBy.order} NULLS LAST`,
+          )
+        } else {
+          queryBuilder = queryBuilder.orderBy([orderBy])
+        }
+      }
 
-      return applyListQueryOptions(parentQuery, options)
+      if (
+        (Number.isInteger(page) && !Number.isInteger(pageSize)) ||
+        (!Number.isInteger(page) && Number.isInteger(pageSize))
+      ) {
+        throw new Error(
+          'both page and pageSize integers needed for paginated results',
+        )
+      }
+
+      if (Number.isInteger(page) && Number.isInteger(pageSize)) {
+        if (page < 0) {
+          throw new Error(
+            'invalid index for page (page should be an integer and greater than or equal to 0)',
+          )
+        }
+
+        if (pageSize <= 0) {
+          throw new Error(
+            'invalid size for pageSize (pageSize should be an integer and greater than 0)',
+          )
+        }
+
+        queryBuilder = queryBuilder.page(page, pageSize)
+      }
+
+      let res
+
+      if (!collectionId) {
+        res = await queryBuilder
+          .where({
+            'book.deleted': false,
+            'book.archived': showArchived,
+            'users.id': userId,
+          })
+          .select([
+            'book.id',
+            'book.collectionId',
+            'book.publicationDate',
+            'book.archived',
+            'book.bookStructure',
+            'book.divisions',
+            'book_translation.title',
+          ])
+      } else {
+        res = await queryBuilder
+          .where({
+            'book.deleted': false,
+            'book.archived': showArchived,
+            'users.id': userId,
+            'book.collectionId': collectionId,
+          })
+          .select([
+            'book.id',
+            'book.collectionId',
+            'book.publicationDate',
+            'book.archived',
+            'book.bookStructure',
+            'book.divisions',
+            'book_translation.title',
+          ])
+      }
+
+      const { results, total } = res
+
+      return {
+        result: page !== undefined ? results : res,
+        totalCount: total || res.length,
+      }
     } catch (e) {
-      console.error('Question model: filter failed', e)
-      throw new Error(e)
+      throw new Error(e.message)
     }
   }
 

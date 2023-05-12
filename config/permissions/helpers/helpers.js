@@ -32,6 +32,22 @@ const isAdmin = async userId => {
   }
 }
 
+const hasMembershipInTeams = async (userId, teams) => {
+  /* eslint-disable global-require */
+  const config = require('config')
+  const globalTeams = config.get('teams.global')
+  const User = require('../../../models/user/user.model')
+  /* eslint-enable global-require */
+
+  const isGlobalList = await Promise.all(
+    teams.map(async team =>
+      User.hasGlobalRole(userId, globalTeams[team.role].role),
+    ),
+  )
+
+  return isGlobalList.some(global => global)
+}
+
 const isGlobal = async (userId, includeAdmin = false) => {
   try {
     /* eslint-disable global-require */
@@ -72,14 +88,6 @@ const isGlobalSpecific = async (userId, role) => {
   }
 }
 
-// const isTheSameUser = (requesterId, userId) => {
-//   try {
-//     return requesterId === userId
-//   } catch (e) {
-//     throw new Error(e.message)
-//   }
-// }
-
 const hasEditAccessBasedOnRoleAndStage = async (
   role,
   bookComponentId,
@@ -119,6 +127,6 @@ module.exports = {
   isAdmin,
   isGlobal,
   isGlobalSpecific,
-  // isTheSameUser,
   hasEditAccessBasedOnRoleAndStage,
+  hasMembershipInTeams,
 }
