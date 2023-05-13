@@ -13,6 +13,7 @@ const config = require('../modules/luluTeams')
 const collaboratorStatus = config.nonGlobal.collaborator.status
 
 const editAccessMatrix = {
+  owner: [{ type: 'review', label: 'Review', value: 0 }],
   collaborator: [
     {
       type: 'read',
@@ -51,47 +52,9 @@ const isCollaborator = async (userId, bookId) => {
 
 const hasAnyRoleOnObject = async (userId, bookId) => {
   try {
-    const belongsToAuthorTeam = await isCollaborator(userId, bookId)
-
-    if (belongsToAuthorTeam) {
-      return true
-    }
-
     const belongsToOwnerTeam = await isOwner(userId, bookId)
 
     if (belongsToOwnerTeam) {
-      return true
-    }
-
-    return false
-  } catch (e) {
-    throw new Error(e.message)
-  }
-}
-
-const allButTheAuthor = async (userId, bookId) => {
-  try {
-    const isAuthenticatedUser = await isAuthenticated(userId)
-
-    if (!isAuthenticatedUser) {
-      return false
-    }
-
-    const belongsToAdminTeam = await isAdmin(userId)
-
-    if (belongsToAdminTeam) {
-      return true
-    }
-
-    const belongsToOwnerTeam = await isGlobalSpecific(userId, 'owner')
-
-    if (belongsToOwnerTeam) {
-      return true
-    }
-
-    const belongsToCollaboratorTeam = await isCollaborator(userId, bookId)
-
-    if (belongsToCollaboratorTeam) {
       return true
     }
 
@@ -176,7 +139,7 @@ const createBookRule = rule()(async (parent, args, ctx, info) => {
       return true
     }
 
-    return isGlobalSpecific(userId, 'owner')
+    return isAuthenticated(userId)
   } catch (e) {
     throw new Error(e.message)
   }
@@ -198,7 +161,7 @@ const modifyBooksInDashboardRule = rule()(
         return true
       }
 
-      const belongsToOwnerTeam = await isGlobalSpecific(userId, 'owner')
+      const belongsToOwnerTeam = await isOwner(userId, bookId)
 
       const belongsToBookOwnerTeam = await isOwner(userId, bookId)
 
@@ -315,22 +278,6 @@ const updateMetadataRule = rule()(async (parent, { id: bookId }, ctx, info) => {
   }
 })
 
-const updateRunningHeadersRule = rule()(
-  async (parent, { id: bookId }, ctx, info) => {
-    try {
-      const { user: userId } = ctx
-
-      if (!bookId) {
-        throw new Error('book id should be provided')
-      }
-
-      return canInteractWithBookAndRelevantAssets(userId, bookId)
-    } catch (e) {
-      throw new Error(e.message)
-    }
-  },
-)
-
 const exportBookRule = rule()(async (parent, { bookId }, ctx, info) => {
   try {
     const { user: userId } = ctx
@@ -353,7 +300,16 @@ const ingestWordFileRule = rule()(async (parent, { bookId }, ctx, info) => {
       throw new Error('book id should be provided')
     }
 
-    return allButTheAuthor(userId, bookId)
+    const isAdminUser = await isAdmin(userId)
+    const isOwnerUser = await isOwner(userId, bookId)
+
+    if (collaboratorStatus === 'write') {
+      const isCollaboratorUser = await isCollaborator(userId, bookId)
+
+      return isCollaboratorUser
+    }
+
+    return isAdminUser || isOwnerUser
   } catch (e) {
     throw new Error(e.message)
   }
@@ -367,7 +323,16 @@ const addBookComponentRule = rule()(async (parent, { bookId }, ctx, info) => {
       throw new Error('book id should be provided')
     }
 
-    return allButTheAuthor(userId, bookId)
+    const isAdminUser = await isAdmin(userId)
+    const isOwnerUser = await isOwner(userId, bookId)
+
+    if (collaboratorStatus === 'write') {
+      const isCollaboratorUser = await isCollaborator(userId, bookId)
+
+      return isCollaboratorUser
+    }
+
+    return isAdminUser || isOwnerUser
   } catch (e) {
     throw new Error(e.message)
   }
@@ -387,30 +352,16 @@ const deleteBookComponentRule = rule()(
       /* eslint-enable global-require */
       const bookComponent = await BookComponent.findById(bookComponentId)
       const { bookId } = bookComponent
+      const isAdminUser = await isAdmin(userId)
+      const isOwnerUser = await isOwner(userId, bookId)
 
-      return allButTheAuthor(userId, bookId)
-    } catch (e) {
-      throw new Error(e.message)
-    }
-  },
-)
+      if (collaboratorStatus === 'write') {
+        const isCollaboratorUser = await isCollaborator(userId, bookId)
 
-const updatePaginationRule = rule()(
-  async (parent, { id: bookComponentId }, ctx, info) => {
-    try {
-      const { user: userId } = ctx
-
-      if (!bookComponentId) {
-        throw new Error('bookComponent id should be provided')
+        return isCollaboratorUser
       }
 
-      /* eslint-disable global-require */
-      const BookComponent = require('../../models/bookComponent/bookComponent.model')
-      /* eslint-enable global-require */
-      const bookComponent = await BookComponent.findById(bookComponentId)
-      const { bookId } = bookComponent
-
-      return canInteractWithBookAndRelevantAssets(userId, bookId)
+      return isAdminUser || isOwnerUser
     } catch (e) {
       throw new Error(e.message)
     }
@@ -431,8 +382,16 @@ const updateTrackChangesRule = rule()(
       /* eslint-enable global-require */
       const bookComponent = await BookComponent.findById(bookComponentId)
       const { bookId } = bookComponent
+      const isAdminUser = await isAdmin(userId)
+      const isOwnerUser = await isOwner(userId, bookId)
 
-      return allButTheAuthor(userId, bookId)
+      if (collaboratorStatus === 'write') {
+        const isCollaboratorUser = await isCollaborator(userId, bookId)
+
+        return isCollaboratorUser
+      }
+
+      return isAdminUser || isOwnerUser
     } catch (e) {
       throw new Error(e.message)
     }
@@ -506,7 +465,7 @@ const updateBookComponentOrderRule = rule()(
 )
 
 const updateKetidaTeamMembersRule = rule()(
-  async (parent, { teamId }, ctx, info) => {
+  async (parent, { teamId, bookId }, ctx, info) => {
     try {
       const { user: userId } = ctx
 
@@ -524,7 +483,14 @@ const updateKetidaTeamMembersRule = rule()(
         throw new Error('team object id is needed')
       }
 
-      return allButTheAuthor(userId, objectId)
+      if (!bookId) {
+        throw new Error('book id should be provided')
+      }
+
+      const isAdminUser = await isAdmin(userId)
+      const isOwnerUser = await isOwner(userId, bookId)
+
+      return isAdminUser || isOwnerUser
     } catch (e) {
       throw new Error(e.message)
     }
@@ -563,12 +529,6 @@ const interactWithBookComponentRule = rule()(
         return true
       }
 
-      const belongsToOwnerTeam = await isGlobalSpecific(userId, 'owner')
-
-      if (belongsToOwnerTeam) {
-        return true
-      }
-
       if (!bookComponentId) {
         throw new Error('bookComponent id should be provided')
       }
@@ -579,9 +539,9 @@ const interactWithBookComponentRule = rule()(
       const bookComponent = await BookComponent.findById(bookComponentId)
       const { bookId } = bookComponent
 
-      const belongsToBookCollaboratorTeam = await isCollaborator(userId, bookId)
+      const belongsToBookOwnerTeam = await isOwner(userId, bookId)
 
-      if (belongsToBookCollaboratorTeam) {
+      if (belongsToBookOwnerTeam) {
         return true
       }
 
@@ -641,14 +601,11 @@ const permissions = {
     renameBook: modifyBooksInDashboardRule,
     deleteBook: modifyBooksInDashboardRule,
     updateMetadata: updateMetadataRule,
-    updateRunningHeaders: updateRunningHeadersRule,
     exportBook: exportBookRule,
     ingestWordFile: ingestWordFileRule,
     addBookComponent: addBookComponentRule,
     renameBookComponent: interactWithBookComponentRule,
     deleteBookComponent: deleteBookComponentRule,
-    updateWorkflowState: isAuthenticatedRule,
-    updatePagination: updatePaginationRule,
     unlockBookComponent: unlockBookComponentRule,
     lockBookComponent: interactWithBookComponentRule,
     updateTrackChanges: updateTrackChangesRule,
@@ -663,11 +620,6 @@ const permissions = {
     deleteFiles: deleteFilesRule,
     updateKetidaTeamMembers: updateKetidaTeamMembersRule,
     searchForUsers: isAuthenticatedRule,
-    createTemplate: isAuthenticatedRule,
-    cloneTemplate: isAuthenticatedRule,
-    updateTemplate: isAuthenticatedRule,
-    updateTemplateCSSFile: isAuthenticatedRule,
-    deleteTemplate: isAuthenticatedRule,
   },
 }
 
