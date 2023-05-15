@@ -108,13 +108,15 @@ class Book extends Base {
   static async getAllBooks(options, collectionId = undefined) {
     try {
       const { trx, showArchived, page, pageSize, orderBy } = options
-      let queryBuilder = Book.query(trx)
-        .leftJoin('book_translation', 'book_translation.book_id', 'book.id')
-        .distinct()
+      let queryBuilder = Book.query(trx).leftJoin(
+        'book_translation',
+        'book_translation.book_id',
+        'book.id',
+      )
 
       if (orderBy) {
         if (orderBy.column === 'title') {
-          queryBuilder = queryBuilder.orderByRaw(
+          queryBuilder.orderByRaw(
             `LOWER(book_translation.title) ${orderBy.order} NULLS LAST`,
           )
         } else {
@@ -147,40 +149,23 @@ class Book extends Base {
         queryBuilder = queryBuilder.page(page, pageSize)
       }
 
-      let res
-
-      if (!collectionId) {
-        res = await queryBuilder
-          .where({
-            'book.deleted': false,
-            'book.archived': showArchived,
-          })
-          .select([
-            'book.id',
-            'book.collectionId',
-            'book.publicationDate',
-            'book.archived',
-            'book.bookStructure',
-            'book.divisions',
-            'book_translation.title',
-          ])
-      } else {
-        res = await queryBuilder
-          .where({
-            'book.deleted': false,
-            'book.archived': showArchived,
-            'book.collectionId': collectionId,
-          })
-          .select([
-            'book.id',
-            'book.collectionId',
-            'book.publicationDate',
-            'book.archived',
-            'book.bookStructure',
-            'book.divisions',
-            'book_translation.title',
-          ])
-      }
+      const res = await queryBuilder
+        .select([
+          'book.id',
+          'book.collectionId',
+          'book.publicationDate',
+          'book.archived',
+          'book.bookStructure',
+          'book.divisions',
+          'book_translation.title',
+        ])
+        .groupBy('book.id', 'book_translation.title')
+        .where({
+          'book.deleted': false,
+          'book.archived': showArchived,
+          'book.collectionId': collectionId,
+        })
+        .skipUndefined()
 
       const { results, total } = res
 
@@ -203,7 +188,6 @@ class Book extends Base {
         .leftJoin('teams', 'book.id', 'teams.object_id')
         .leftJoin('team_members', 'teams.id', 'team_members.team_id')
         .leftJoin('users', 'team_members.user_id', 'users.id')
-        .distinct()
 
       if (orderBy) {
         if (orderBy.column === 'title') {
@@ -240,42 +224,24 @@ class Book extends Base {
         queryBuilder = queryBuilder.page(page, pageSize)
       }
 
-      let res
-
-      if (!collectionId) {
-        res = await queryBuilder
-          .where({
-            'book.deleted': false,
-            'book.archived': showArchived,
-            'users.id': userId,
-          })
-          .select([
-            'book.id',
-            'book.collectionId',
-            'book.publicationDate',
-            'book.archived',
-            'book.bookStructure',
-            'book.divisions',
-            'book_translation.title',
-          ])
-      } else {
-        res = await queryBuilder
-          .where({
-            'book.deleted': false,
-            'book.archived': showArchived,
-            'users.id': userId,
-            'book.collectionId': collectionId,
-          })
-          .select([
-            'book.id',
-            'book.collectionId',
-            'book.publicationDate',
-            'book.archived',
-            'book.bookStructure',
-            'book.divisions',
-            'book_translation.title',
-          ])
-      }
+      const res = await queryBuilder
+        .select([
+          'book.id',
+          'book.collectionId',
+          'book.publicationDate',
+          'book.archived',
+          'book.bookStructure',
+          'book.divisions',
+          'book_translation.title',
+        ])
+        .groupBy('book.id', 'book_translation.title')
+        .where({
+          'book.deleted': false,
+          'book.archived': showArchived,
+          'users.id': userId,
+          'book.collectionId': collectionId,
+        })
+        .skipUndefined()
 
       const { results, total } = res
 
