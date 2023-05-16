@@ -1,6 +1,7 @@
 module.exports = {
   featureBookStructure: 'FEATURE_BOOK_STRUCTURE',
   featureUploadDOCXFiles: 'FEATURE_UPLOAD_DOCX_FILES',
+  featurePOD: 'FEATURE_POD',
   tempDirectoryCleanUp: 'TEMP_DIRECTORY_CLEAN_UP',
   tempDirectoryCRONJobSchedule: 'TEMP_DIRECTORY_CRON_JOB_SCHEDULE',
   tempDirectoryCRONJobOffset: 'TEMP_DIRECTORY_CRON_JOB_OFFSET',
