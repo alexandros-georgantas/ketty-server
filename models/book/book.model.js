@@ -108,6 +108,7 @@ class Book extends Base {
   static async getAllBooks(options, collectionId = undefined) {
     try {
       const { trx, showArchived, page, pageSize, orderBy } = options
+
       let queryBuilder = Book.query(trx).leftJoin(
         'book_translation',
         'book_translation.book_id',

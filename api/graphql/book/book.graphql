@@ -97,7 +97,7 @@ type PagedPreviewerLink {
 
 type BookResponse {
   result: [Book!]!
-  totalCount: Int!
+  totalCount: Int
 }
 
 input OrderByInput {

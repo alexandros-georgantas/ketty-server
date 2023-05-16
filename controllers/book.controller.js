@@ -1102,6 +1102,26 @@ const updateShowWelcome = async (bookId, options = {}) => {
   }
 }
 
+const getBookTitle = async (bookId, options = {}) => {
+  try {
+    const bookTranslation = await BookTranslation.findOne({
+      bookId,
+      languageIso: 'en',
+    })
+
+    if (!bookTranslation) {
+      throw new Error(
+        `book with id ${bookId} does not have a translation entry`,
+      )
+    }
+
+    return bookTranslation.title
+  } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} getBookTitle: ${e.message}`)
+    throw new Error(e)
+  }
+}
+
 module.exports = {
   getBook,
   getBooks,
@@ -1118,4 +1138,5 @@ module.exports = {
   updateLevelContentStructure,
   updateShowWelcome,
   finalizeBookStructure,
+  getBookTitle,
 }
