@@ -1,5 +1,6 @@
 const { useTransaction, logger } = require('@coko/server')
 const map = require('lodash/map')
+const indexOf = require('lodash/indexOf')
 const findIndex = require('lodash/findIndex')
 const assign = require('lodash/assign')
 const omitBy = require('lodash/omitBy')
@@ -309,7 +310,7 @@ const createBook = async (data = {}) => {
                 `${BOOK_CONTROLLER} createBook: Added team "${teamData.role}" for book with id ${bookId}`,
               )
 
-              if (findIndex(addUserToBookTeams, createTeam.role) !== -1) {
+              if (indexOf(addUserToBookTeams, createdTeam.role) !== -1) {
                 if (!userId) {
                   throw new Error(
                     'userId should be provided if addUserToBookTeams is used',
