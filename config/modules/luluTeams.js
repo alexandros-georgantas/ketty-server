@@ -13,10 +13,6 @@ module.exports = {
     collaborator: {
       displayName: 'Collaborator',
       role: 'collaborator',
-      status: {
-        read: 'Read',
-        write: 'Write',
-      },
     },
   },
 }

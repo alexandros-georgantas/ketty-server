@@ -35,6 +35,7 @@ const {
   updateLevelContentStructure,
   updateShowWelcome,
   finalizeBookStructure,
+  getBookTitle,
 } = require('../../../controllers/book.controller')
 
 const getBookHandler = async (_, { id }, ctx, info) => {
@@ -46,12 +47,9 @@ const getBookHandler = async (_, { id }, ctx, info) => {
   }
 }
 
-const getBooksHandler = async (
-  _,
-  { archived, orderBy, page, pageSize },
-  ctx,
-) => {
+const getBooksHandler = async (_, { options }, ctx) => {
   try {
+    const { archived, orderBy, page, pageSize } = options
     logger.info('book resolver: executing getBooks use case')
     return getBooks({
       userId: ctx.user,
@@ -355,7 +353,15 @@ module.exports = {
   },
   Book: {
     async title(book, _, ctx) {
-      return book.title
+      let { title } = book
+
+      /* eslint-disable no-prototype-builtins */
+      if (!book.hasOwnProperty('title')) {
+        title = await getBookTitle(book.id)
+      }
+      /* eslint-enable no-prototype-builtins */
+
+      return title
     },
     divisions(book, _, ctx) {
       return book.divisions

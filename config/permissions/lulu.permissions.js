@@ -1,32 +1,7 @@
 const { rule } = require('@coko/server/authorization')
 const { indexOf } = require('lodash/indexOf')
 
-const {
-  isAuthenticated,
-  isAdmin,
-  isGlobalSpecific,
-  hasEditAccessBasedOnRoleAndStage,
-} = require('./helpers/helpers')
-
-const config = require('../modules/luluTeams')
-
-const collaboratorStatus = config.nonGlobal.collaborator.status
-
-const editAccessMatrix = {
-  owner: [{ type: 'review', label: 'Review', value: 0 }],
-  collaborator: [
-    {
-      type: 'read',
-      label: collaboratorStatus === 'read' ? 'Read' : '',
-      value: 0,
-    },
-    {
-      type: 'write',
-      label: collaboratorStatus === 'write' ? 'Write' : '',
-      value: 0,
-    },
-  ],
-}
+const { isAuthenticated, isAdmin } = require('./helpers/helpers')
 
 const isOwner = async (userId, bookId) => {
   try {
@@ -58,6 +33,12 @@ const hasAnyRoleOnObject = async (userId, bookId) => {
       return true
     }
 
+    const belongsToCollaboratorTeam = await isCollaborator(userId, bookId)
+
+    if (belongsToCollaboratorTeam) {
+      return true
+    }
+
     return false
   } catch (e) {
     throw new Error(e.message)
@@ -66,12 +47,6 @@ const hasAnyRoleOnObject = async (userId, bookId) => {
 
 const isOwnerOrBelongsToObjectTeam = async (userId, bookId) => {
   try {
-    const belongsToOwnerTeam = await isGlobalSpecific(userId, 'owner')
-
-    if (belongsToOwnerTeam) {
-      return belongsToOwnerTeam
-    }
-
     const belongsToAnyObjectTeam = await hasAnyRoleOnObject(userId, bookId)
 
     return belongsToAnyObjectTeam
@@ -161,11 +136,9 @@ const modifyBooksInDashboardRule = rule()(
         return true
       }
 
-      const belongsToOwnerTeam = await isOwner(userId, bookId)
-
       const belongsToBookOwnerTeam = await isOwner(userId, bookId)
 
-      return belongsToOwnerTeam || belongsToBookOwnerTeam
+      return belongsToBookOwnerTeam
     } catch (e) {
       throw new Error(e.message)
     }
@@ -303,11 +276,11 @@ const ingestWordFileRule = rule()(async (parent, { bookId }, ctx, info) => {
     const isAdminUser = await isAdmin(userId)
     const isOwnerUser = await isOwner(userId, bookId)
 
-    if (collaboratorStatus === 'write') {
-      const isCollaboratorUser = await isCollaborator(userId, bookId)
+    // if (collaboratorStatus === 'write') {
+    //   const isCollaboratorUser = await isCollaborator(userId, bookId)
 
-      return isCollaboratorUser
-    }
+    //   return isCollaboratorUser
+    // }
 
     return isAdminUser || isOwnerUser
   } catch (e) {
@@ -326,11 +299,11 @@ const addBookComponentRule = rule()(async (parent, { bookId }, ctx, info) => {
     const isAdminUser = await isAdmin(userId)
     const isOwnerUser = await isOwner(userId, bookId)
 
-    if (collaboratorStatus === 'write') {
-      const isCollaboratorUser = await isCollaborator(userId, bookId)
+    // if (collaboratorStatus === 'write') {
+    //   const isCollaboratorUser = await isCollaborator(userId, bookId)
 
-      return isCollaboratorUser
-    }
+    //   return isCollaboratorUser
+    // }
 
     return isAdminUser || isOwnerUser
   } catch (e) {
@@ -355,11 +328,11 @@ const deleteBookComponentRule = rule()(
       const isAdminUser = await isAdmin(userId)
       const isOwnerUser = await isOwner(userId, bookId)
 
-      if (collaboratorStatus === 'write') {
-        const isCollaboratorUser = await isCollaborator(userId, bookId)
+      // if (collaboratorStatus === 'write') {
+      //   const isCollaboratorUser = await isCollaborator(userId, bookId)
 
-        return isCollaboratorUser
-      }
+      //   return isCollaboratorUser
+      // }
 
       return isAdminUser || isOwnerUser
     } catch (e) {
@@ -385,11 +358,11 @@ const updateTrackChangesRule = rule()(
       const isAdminUser = await isAdmin(userId)
       const isOwnerUser = await isOwner(userId, bookId)
 
-      if (collaboratorStatus === 'write') {
-        const isCollaboratorUser = await isCollaborator(userId, bookId)
+      // if (collaboratorStatus === 'write') {
+      //   const isCollaboratorUser = await isCollaborator(userId, bookId)
 
-        return isCollaboratorUser
-      }
+      //   return isCollaboratorUser
+      // }
 
       return isAdminUser || isOwnerUser
     } catch (e) {
@@ -545,15 +518,15 @@ const interactWithBookComponentRule = rule()(
         return true
       }
 
-      const belongsToCollaboratorTeam = await isCollaborator(userId, bookId)
+      // const belongsToCollaboratorTeam = await isCollaborator(userId, bookId)
 
-      if (belongsToCollaboratorTeam) {
-        return hasEditAccessBasedOnRoleAndStage(
-          'collaborator',
-          bookComponentId,
-          editAccessMatrix,
-        )
-      }
+      // if (belongsToCollaboratorTeam) {
+      //   return hasEditAccessBasedOnRoleAndStage(
+      //     'collaborator',
+      //     bookComponentId,
+      //     editAccessMatrix,
+      //   )
+      // }
 
       return false
     } catch (e) {
@@ -575,6 +548,7 @@ const permissions = {
     getBookBuilderRules: isAuthenticatedRule,
     getApplicationParameters: isAuthenticatedRule,
     getBook: getBookRule,
+    getBooks: isAuthenticatedRule,
     getPagedPreviewerLink: isAuthenticatedRule,
     getBookComponent: getBookComponentRule,
     getBookCollection: isAuthenticatedRule,

@@ -108,6 +108,7 @@ class Book extends Base {
   static async getAllBooks(options, collectionId = undefined) {
     try {
       const { trx, showArchived, page, pageSize, orderBy } = options
+
       let queryBuilder = Book.query(trx).leftJoin(
         'book_translation',
         'book_translation.book_id',
@@ -145,7 +146,7 @@ class Book extends Base {
             'invalid size for pageSize (pageSize should be an integer and greater than 0)',
           )
         }
-
+        
         queryBuilder = queryBuilder.page(page, pageSize)
       }
 
@@ -220,7 +221,7 @@ class Book extends Base {
             'invalid size for pageSize (pageSize should be an integer and greater than 0)',
           )
         }
-
+        
         queryBuilder = queryBuilder.page(page, pageSize)
       }
 
