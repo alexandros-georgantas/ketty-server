@@ -146,7 +146,7 @@ class Book extends Base {
             'invalid size for pageSize (pageSize should be an integer and greater than 0)',
           )
         }
-        
+
         queryBuilder = queryBuilder.page(page, pageSize)
       }
 
@@ -221,7 +221,7 @@ class Book extends Base {
             'invalid size for pageSize (pageSize should be an integer and greater than 0)',
           )
         }
-        
+
         queryBuilder = queryBuilder.page(page, pageSize)
       }
 
