@@ -1,3 +1,25 @@
+# [1.6.0](https://gitlab.coko.foundation/ketida/server/compare/v1.5.0...v1.6.0) (2023-05-16)
+
+
+### Bug Fixes
+
+* clean slashes in templates config ([d55ad69](https://gitlab.coko.foundation/ketida/server/commit/d55ad69e8ddfbd0691fefcf75d41463828349067))
+* fixes in templates configuration and cleanups ([db1fff1](https://gitlab.coko.foundation/ketida/server/commit/db1fff1cd6b69cfcf04a4beed9e497ea0e53bbb4))
+* **models:** getbooks query fix ([02f35a1](https://gitlab.coko.foundation/ketida/server/commit/02f35a16f6ca102f6a3c74434f950629205d97a8))
+
+
+### Features
+
+* added new teams and permissions for lulu ([fbdfddb](https://gitlab.coko.foundation/ketida/server/commit/fbdfddb62a3b9715ba1268e07affc1c0b77fc7d6))
+* added pagination support ([0fa76f0](https://gitlab.coko.foundation/ketida/server/commit/0fa76f06a3a5dd9b69bf474faa99d86577b4c5e6))
+* added pagination support ([51074a2](https://gitlab.coko.foundation/ketida/server/commit/51074a237dc97d551a7a0b5a64dad9ba5dd10c4a))
+* make collectionId optional for books ([0dd7241](https://gitlab.coko.foundation/ketida/server/commit/0dd72414b21b031e9cdfdcaa5f07e0341fd441fd))
+* removed unwanted changes ([346b0b7](https://gitlab.coko.foundation/ketida/server/commit/346b0b740ef4179c7844c9cd674cd1a7e40ce372))
+* removed unwanted changes ([c75feb5](https://gitlab.coko.foundation/ketida/server/commit/c75feb52ad28852fb279ac13ca0d4f3ae7342770))
+* updated getBooks query and made collectionId optional ([c0cc050](https://gitlab.coko.foundation/ketida/server/commit/c0cc05033eb0e52375cf7e912f0722f1fa883e4f))
+* updated getBooks query and made collectionId optional ([07a6b1d](https://gitlab.coko.foundation/ketida/server/commit/07a6b1dae162e8c83de8a1318cb6c80e017cffab))
+* updates to lulu permissions based on feedback ([cf36167](https://gitlab.coko.foundation/ketida/server/commit/cf36167910746bdf6abf96f456bc1bb6dacdfde6))
+
 # [1.5.0](https://gitlab.coko.foundation/ketida/server/compare/v1.4.1...v1.5.0) (2023-05-03)
 
 ## [1.4.1](https://gitlab.coko.foundation/ketida/server/compare/v1.4.0...v1.4.1) (2023-04-11)
