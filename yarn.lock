@@ -1157,7 +1157,7 @@
   dependencies:
     nodemailer "^6.4.18"
 
-"@pubsweet/db-manager@^3.1.21", "@pubsweet/db-manager@^3.1.26":
+"@pubsweet/db-manager@3.1.26", "@pubsweet/db-manager@^3.1.21", "@pubsweet/db-manager@^3.1.26":
   version "3.1.26"
   resolved "https://registry.yarnpkg.com/@pubsweet/db-manager/-/db-manager-3.1.26.tgz#59797ba78ef744fd83e4205a7ac9729f9459568d"
   integrity sha512-wCseWcdTeDAaYg8QntZxnzwd46Qb88kc8T2OwkzI62LKmBMcnKEmA+Q1T69U/t4Hg6mgcfgvunwOYcymJbfSGw==

@@ -1,6 +1,7 @@
 const { withFilter } = require('graphql-subscriptions')
 const { pubsubManager, logger } = require('@coko/server')
 const map = require('lodash/map')
+const isEmpty = require('lodash/isEmpty')
 
 const {
   BOOK_CREATED,
@@ -12,12 +13,7 @@ const {
   BOOK_RUNNING_HEADERS_UPDATED,
 } = require('./constants')
 
-const BookTranslation = require('../../../models/bookTranslation/bookTranslation.model')
-
-const {
-  // getEntityTeam,
-  getObjectTeam,
-} = require('../../../controllers/team.controller')
+const { getObjectTeam } = require('../../../controllers/team.controller')
 
 const {
   pagedPreviewerLink,
@@ -25,6 +21,7 @@ const {
 
 const {
   getBook,
+  getBooks,
   archiveBook,
   createBook,
   renameBook,
@@ -38,6 +35,7 @@ const {
   updateLevelContentStructure,
   updateShowWelcome,
   finalizeBookStructure,
+  getBookTitle,
 } = require('../../../controllers/book.controller')
 
 const getBookHandler = async (_, { id }, ctx, info) => {
@@ -49,14 +47,39 @@ const getBookHandler = async (_, { id }, ctx, info) => {
   }
 }
 
+const getBooksHandler = async (_, { options }, ctx) => {
+  try {
+    const { archived, orderBy, page, pageSize } = options
+    logger.info('book resolver: executing getBooks use case')
+    return getBooks({
+      userId: ctx.user,
+      options: { showArchived: archived, orderBy, page, pageSize },
+    })
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
 const createBookHandler = async (_, { input }, ctx) => {
   try {
     logger.info('book resolver: executing createBook use case')
 
-    const { collectionId, title } = input
+    const { collectionId, title, addUserToBookTeams } = input
     const pubsub = await pubsubManager.getPubsub()
+    let newBook
 
-    const newBook = await createBook(collectionId, title)
+    if (addUserToBookTeams && !isEmpty(addUserToBookTeams)) {
+      newBook = await createBook({
+        collectionId,
+        title,
+        options: {
+          addUserToBookTeams,
+          userId: ctx.user,
+        },
+      })
+    } else {
+      newBook = await createBook({ collectionId, title })
+    }
 
     logger.info('book resolver: broadcasting new book to clients')
 
@@ -311,6 +334,7 @@ module.exports = {
   Query: {
     getBook: getBookHandler,
     getPagedPreviewerLink: getPagedPreviewerLinkHandler,
+    getBooks: getBooksHandler,
   },
   Mutation: {
     archiveBook: archiveBookHandler,
@@ -329,12 +353,15 @@ module.exports = {
   },
   Book: {
     async title(book, _, ctx) {
-      const bookTranslation = await BookTranslation.findOne({
-        bookId: book.id,
-        languageIso: 'en',
-      })
+      let { title } = book
 
-      return bookTranslation.title
+      /* eslint-disable no-prototype-builtins */
+      if (!book.hasOwnProperty('title')) {
+        title = await getBookTitle(book.id)
+      }
+      /* eslint-enable no-prototype-builtins */
+
+      return title
     },
     divisions(book, _, ctx) {
       return book.divisions
@@ -343,7 +370,6 @@ module.exports = {
       return book.archived
     },
     async authors(book, args, ctx, info) {
-      // const authorsTeam = await getEntityTeam(book.id, 'book', 'author', true)
       const authorsTeam = await getObjectTeam('author', book.id, true)
 
       let authors = []

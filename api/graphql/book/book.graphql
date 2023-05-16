@@ -3,7 +3,7 @@ type Book {
   authors: [User]
   archived: Boolean!
   bookStructure: BookStructure
-  collectionId: ID!
+  collectionId: ID
   copyrightStatement: String
   copyrightYear: Int
   copyrightHolder: String
@@ -14,14 +14,15 @@ type Book {
   issn: String
   issnL: String
   license: String
-  productionEditors: [String]!
+  productionEditors: [String]
   publicationDate: Date
-  title: String!
+  title: String
 }
 
 input CreateBookInput {
-  collectionId: ID!
-  title: String!
+  collectionId: ID
+  title: String
+  addUserToBookTeams: [String!]
 }
 
 input ExportBookInput {
@@ -77,7 +78,6 @@ input OutlineInput {
 
 type BookStructure {
   id: ID!
-  # numberOfLevels: Int!
   levels: [Level!]!
   outline: [Outline!]!
   finalized: Boolean!
@@ -95,9 +95,21 @@ type PagedPreviewerLink {
   link: String!
 }
 
-extend type Query {
-  getBook(id: ID!): Book!
-  getPagedPreviewerLink(hash: String!): PagedPreviewerLink!
+type BookResponse {
+  result: [Book!]!
+  totalCount: Int
+}
+
+input OrderByInput {
+  column: String!
+  order: Order!
+}
+
+input BookPageInput {
+  archived: Boolean!
+  pageSize: Int
+  page: Int
+  orderBy: OrderByInput
 }
 
 input MetadataInput {
@@ -123,6 +135,13 @@ type ExportResult {
   path: String!
   validationResult: String
 }
+
+extend type Query {
+  getBook(id: ID!): Book!
+  getPagedPreviewerLink(hash: String!): PagedPreviewerLink!
+  getBooks(options: BookPageInput!): BookResponse!
+}
+
 extend type Mutation {
   archiveBook(id: ID!, archive: Boolean!): Book!
   createBook(input: CreateBookInput!): Book!

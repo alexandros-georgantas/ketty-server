@@ -10,7 +10,9 @@
   "license": "MIT",
   "author": "Yannis Barlas, Alexandros Georgantas",
   "scripts": {
-    "create:admin": "node ./scripts/createAdmin.js",
+    "create:admin": "node ./scripts/runners/createAdmin.js",
+    "create:collection": "node ./scripts/runners/createCollection.js",
+    "exec:fixUploading": "node ./scripts/runners/unfreezeUploads.js",
     "cz": "git-cz",
     "lint": "eslint '**/*.js'",
     "test": "jest"
@@ -32,6 +34,7 @@
   "dependencies": {
     "@coko/server": "3.0.0-beta.10",
     "@pubsweet/component-password-reset-server": "^2.2.26",
+    "@pubsweet/db-manager": "3.1.26",
     "@pubsweet/models": "^0.3.26",
     "archiver": "^3.1.1",
     "axios": "^0.17.1",

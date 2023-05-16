@@ -1,9 +1,10 @@
 #!/usr/bin/env node
-const { createTemplates } = require('./seeds')
+
+const seedBookCollection = require('../seeds/bookCollection')
 
 const run = async () => {
   try {
-    await createTemplates()
+    return seedBookCollection()
   } catch (e) {
     throw new Error(e.message)
   }

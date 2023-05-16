@@ -6,9 +6,9 @@ const authsomeBooksprints = require('./modules/authsomeBooksprints')
 const bbVanilla = require('./modules/bookBuilderVanilla')
 const bbOEN = require('./modules/bookBuilderOEN')
 const bbBooksprints = require('./modules/bookBuilderBooksprints')
-// const permissions = require('./permissions')
 const oenTeams = require('./modules/oenTeams')
 const vanillaTeams = require('./modules/vanillaTeams')
+const vanillaFilters = require('./modules/vanillaFilters')
 const booksprintTeams = require('./modules/booksprintTeams')
 const vanillaPermissions = require('./permissions/vanilla.permissions')
 const booksprintPermissions = require('./permissions/booksprint.permissions')
@@ -49,47 +49,24 @@ module.exports = {
   authsome: flavour === 'BOOKSPRINTS' ? authsomeBooksprints : authsomeVanilla,
   bookBuilder,
   'password-reset': {
-    path: 'password-reset',
+    pathToPage: '/password-reset',
   },
-  mailer: {
-    from: 'info@ketida.com',
-    path: path.join(__dirname, 'mailer'),
-  },
+  featureBookStructure: false,
+  featureUploadDOCXFiles: true,
   permissions,
-  publicKeys: [
-    'authsome',
-    'bookBuilder',
-    'pubsweet',
-    'pubsweet-client',
-    'pubsweet-server',
-    'validations',
-    'wax',
-  ],
+  filters: vanillaFilters,
   pubsweet: {
     components,
   },
-  'pubsweet-client': {
-    API_ENDPOINT: '/api',
-    'login-redirect': '/',
-    navigation: 'app/components/Navigation/Navigation.jsx',
-    routes: 'app/routes.jsx',
-    theme: 'ThemeEditoria',
-    port: 3000,
-    protocol: 'http',
-    host: 'localhost',
-  },
   'pubsweet-server': {
-    db: {},
     useGraphQLServer: true,
     useJobQueue: false,
     useFileStorage: true,
     serveClient: false,
     graphiql: true,
     tokenExpiresIn: '360 days',
-    serverUrl: undefined,
-    port: 3000,
-    protocol: 'http',
     host: 'localhost',
+    port: 3000,
     uploads: 'uploads',
     emailVerificationTokenExpiry: {
       amount: 24,
@@ -105,15 +82,5 @@ module.exports = {
     },
   },
   teams: flavorTeams,
-  fileStorage: {},
-  services: {},
-  templates: ['Atla'],
-  export: {
-    rootFolder: 'config/exportScripts',
-    scripts: [],
-  },
-  schema: {},
-  featureBookStructure: false,
-  featureUploadDOCXFiles: true,
   tempDirectoryCleanUp: true,
 }

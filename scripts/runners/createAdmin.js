@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 const config = require('config')
 
-const { createAdminUser } = require('./seeds')
+const seedAdmin = require('../seeds/admin')
 
 const adminUser = config.get('pubsweet-server.admin')
 
 const run = async () => {
   try {
-    await createAdminUser({
+    return seedAdmin({
       ...adminUser,
     })
   } catch (e) {

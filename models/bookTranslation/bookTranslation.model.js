@@ -2,8 +2,7 @@ const { Model } = require('objection')
 
 const Translation = require('../translation')
 
-const { arrayOfStringsNotEmpty, id, string, stringNotEmpty } =
-  require('../helpers').schema
+const { arrayOfStringsNotEmpty, id, string } = require('../helpers').schema
 
 class BookTranslation extends Translation {
   constructor(properties) {
@@ -34,7 +33,7 @@ class BookTranslation extends Translation {
   static get schema() {
     return {
       type: 'object',
-      required: ['bookId', 'title'],
+      required: ['bookId'],
       properties: {
         abstractContent: string,
         abstractTitle: string,
@@ -42,7 +41,7 @@ class BookTranslation extends Translation {
         bookId: id,
         keywords: arrayOfStringsNotEmpty,
         subtitle: string,
-        title: stringNotEmpty,
+        title: string,
       },
     }
   }

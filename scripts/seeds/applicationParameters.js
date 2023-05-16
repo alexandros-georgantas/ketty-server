@@ -21,7 +21,7 @@ const truncate = async () => {
   logger.info(`truncate table application parameter`)
 }
 
-const createApplicationParams = async () => {
+const seedApplicationParameters = async () => {
   try {
     if (!flavour) {
       throw new Error(
@@ -104,4 +104,4 @@ const createApplicationParams = async () => {
   }
 }
 
-module.exports = createApplicationParams
+module.exports = seedApplicationParameters

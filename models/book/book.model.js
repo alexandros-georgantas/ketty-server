@@ -105,10 +105,159 @@ class Book extends Base {
     }
   }
 
+  static async getAllBooks(options, collectionId = undefined) {
+    try {
+      const { trx, showArchived, page, pageSize, orderBy } = options
+
+      let queryBuilder = Book.query(trx).leftJoin(
+        'book_translation',
+        'book_translation.book_id',
+        'book.id',
+      )
+
+      if (orderBy) {
+        if (orderBy.column === 'title') {
+          queryBuilder.orderByRaw(
+            `LOWER(book_translation.title) ${orderBy.order} NULLS LAST`,
+          )
+        } else {
+          queryBuilder = queryBuilder.orderBy([orderBy])
+        }
+      }
+
+      if (
+        (Number.isInteger(page) && !Number.isInteger(pageSize)) ||
+        (!Number.isInteger(page) && Number.isInteger(pageSize))
+      ) {
+        throw new Error(
+          'both page and pageSize integers needed for paginated results',
+        )
+      }
+
+      if (Number.isInteger(page) && Number.isInteger(pageSize)) {
+        if (page < 0) {
+          throw new Error(
+            'invalid index for page (page should be an integer and greater than or equal to 0)',
+          )
+        }
+
+        if (pageSize <= 0) {
+          throw new Error(
+            'invalid size for pageSize (pageSize should be an integer and greater than 0)',
+          )
+        }
+
+        queryBuilder = queryBuilder.page(page, pageSize)
+      }
+
+      const res = await queryBuilder
+        .select([
+          'book.id',
+          'book.collectionId',
+          'book.publicationDate',
+          'book.archived',
+          'book.bookStructure',
+          'book.divisions',
+          'book_translation.title',
+        ])
+        .groupBy('book.id', 'book_translation.title')
+        .where({
+          'book.deleted': false,
+          'book.archived': showArchived,
+          'book.collectionId': collectionId,
+        })
+        .skipUndefined()
+
+      const { results, total } = res
+
+      return {
+        result: page !== undefined ? results : res,
+        totalCount: total || res.length,
+      }
+    } catch (e) {
+      throw new Error(e.message)
+    }
+  }
+
+  static async getUserBooks(userId, options) {
+    try {
+      const { trx, showArchived, page, pageSize, orderBy, collectionId } =
+        options
+
+      let queryBuilder = Book.query(trx)
+        .leftJoin('book_translation', 'book_translation.book_id', 'book.id')
+        .leftJoin('teams', 'book.id', 'teams.object_id')
+        .leftJoin('team_members', 'teams.id', 'team_members.team_id')
+        .leftJoin('users', 'team_members.user_id', 'users.id')
+
+      if (orderBy) {
+        if (orderBy.column === 'title') {
+          queryBuilder = queryBuilder.orderByRaw(
+            `LOWER(book_translation.title) ${orderBy.order} NULLS LAST`,
+          )
+        } else {
+          queryBuilder = queryBuilder.orderBy([orderBy])
+        }
+      }
+
+      if (
+        (Number.isInteger(page) && !Number.isInteger(pageSize)) ||
+        (!Number.isInteger(page) && Number.isInteger(pageSize))
+      ) {
+        throw new Error(
+          'both page and pageSize integers needed for paginated results',
+        )
+      }
+
+      if (Number.isInteger(page) && Number.isInteger(pageSize)) {
+        if (page < 0) {
+          throw new Error(
+            'invalid index for page (page should be an integer and greater than or equal to 0)',
+          )
+        }
+
+        if (pageSize <= 0) {
+          throw new Error(
+            'invalid size for pageSize (pageSize should be an integer and greater than 0)',
+          )
+        }
+
+        queryBuilder = queryBuilder.page(page, pageSize)
+      }
+
+      const res = await queryBuilder
+        .select([
+          'book.id',
+          'book.collectionId',
+          'book.publicationDate',
+          'book.archived',
+          'book.bookStructure',
+          'book.divisions',
+          'book_translation.title',
+        ])
+        .groupBy('book.id', 'book_translation.title')
+        .where({
+          'book.deleted': false,
+          'book.archived': showArchived,
+          'users.id': userId,
+          'book.collectionId': collectionId,
+        })
+        .skipUndefined()
+
+      const { results, total } = res
+
+      return {
+        result: page !== undefined ? results : res,
+        totalCount: total || res.length,
+      }
+    } catch (e) {
+      throw new Error(e.message)
+    }
+  }
+
   static get schema() {
     return {
       type: 'object',
-      required: ['collectionId'],
       $id: 'book',
       properties: {
         archived: booleanDefaultFalse,

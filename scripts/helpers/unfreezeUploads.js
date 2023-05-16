@@ -1,7 +1,7 @@
 const { logger } = require('@coko/server')
 const map = require('lodash/map')
 
-const BookComponentState = require('../models/bookComponentState/bookComponentState.model')
+const BookComponentState = require('../../models/bookComponentState/bookComponentState.model')
 
 const unfreezeUploading = async () => {
   try {
@@ -34,5 +34,3 @@ const unfreezeUploading = async () => {
 }
 
 module.exports = unfreezeUploading
-
-unfreezeUploading()

@@ -2,8 +2,10 @@ const { logger, useTransaction } = require('@coko/server')
 const { exec } = require('child_process')
 const fs = require('fs-extra')
 const path = require('path')
+const config = require('config')
 
 const map = require('lodash/map')
+const find = require('lodash/find')
 
 const Template = require('../../models/template/template.model')
 
@@ -62,9 +64,30 @@ const filesChecker = async folder => {
 
 const createTemplate = async (sourceRoot, data, cssFile, notes) => {
   try {
-    const assetsRoot = path.join(sourceRoot, 'dist')
-    const areAssetsOK = await filesChecker(assetsRoot)
+    const normalizedTemplates = config.get('templates').map(t => ({
+      label: t.label.toLowerCase(),
+      url: t.url,
+      assetsRoot: t.assetsRoot.replace(/^\/+/, '').replace(/\/+$/, ''),
+    }))
+
     const { name, author, target } = data
+
+    const foundTemplate = find(normalizedTemplates, {
+      label: name.toLowerCase(),
+    })
+
+    if (!foundTemplate) {
+      throw new Error(`template with name ${name} was not fetched from source`)
+    }
+
+    if (!foundTemplate.assetsRoot) {
+      throw new Error(
+        `template with name ${name} does not contain assetsRoot in its configuration`,
+      )
+    }
+
+    const assetsRoot = path.join(sourceRoot, foundTemplate.assetsRoot)
+    const areAssetsOK = await filesChecker(assetsRoot)
 
     const transactionWrapper = async trx => {
       logger.info('About to create a new template')
@@ -142,7 +165,7 @@ const createTemplate = async (sourceRoot, data, cssFile, notes) => {
       }
     } else {
       throw new Error(
-        'an unsupported file exists in either dist/css, dist/fonts, dist/img. The supported files are .css, .otf, .woff, .woff2, .ttf',
+        `an unsupported file exists in either ${foundTemplate.assetsRoot}/css, ${foundTemplate.assetsRoot}/fonts. The supported files are .css, .otf, .woff, .woff2, .ttf`,
       )
     }
 
@@ -162,8 +185,19 @@ const cleanTemplatesFolder = async () => {
 
 const getTemplates = async () => {
   try {
+    const normalizedTemplates = config.get('templates').map(t => ({
+      label: t.label.toLowerCase(),
+      url: t.url,
+      assetsRoot: t.assetsRoot.replace(/^\/+/, '').replace(/\/+$/, ''),
+    }))
+
     await cleanTemplatesFolder()
-    await execute(`. ${path.join(__dirname, 'fetchTemplates.sh')}`)
+    return Promise.all(
+      normalizedTemplates.map(async templateDetails => {
+        const { url, label } = templateDetails
+        return execute(`git clone ${url} ./templates/${label}`)
+      }),
+    )
   } catch (e) {
     throw new Error(e)
   }

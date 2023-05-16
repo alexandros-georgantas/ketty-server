@@ -2,78 +2,42 @@ version: '2'
 
 services:
   server:
-    restart: always
+    restart: unless-stopped
     build:
       context: ./
       dockerfile: Dockerfile-development
     depends_on:
       - db
       - s3
+      - createbucket
       - xsweet
       - epubchecker
       - pagedjs
       - icml
     entrypoint:
-      [
-        'sh',
-        'scripts/wait-for-it',
-        'db:5432',
-        '-t',
-        '60',
-        '--',
-        'sh',
-        'scripts/wait-for-it',
-        'http://s3:9001',
-        '-t',
-        '60',
-        '--',
-        'sh',
-        'scripts/wait-for-it',
-        'http://epubchecker:3001/healthcheck',
-        '-t',
-        '60',
-        '--',
-        'sh',
-        'scripts/wait-for-it',
-        'http://icml:3002/healthcheck',
-        '-t',
-        '60',
-        '--',
-        'sh',
-        'scripts/wait-for-it',
-        'http://pagedjs:3003/healthcheck',
-        '-t',
-        '60',
-        '--',
-        'sh',
-        'scripts/wait-for-it',
-        'http://xsweet:3004/healthcheck',
-        '-t',
-        '60',
-        '--',
-        'sh',
-        'scripts/setupDevServer.sh',
-      ]
+      ['sh', 'scripts/setupDevServer.sh', 'sh', 'scripts/createCollection.sh']
     command:
       [
         'node_modules/.bin/nodemon',
         '--watch',
+        'api',
+        '--watch',
         'config',
         '--watch',
-        'api',
+        'controllers',
+        '--watch',
+        'models',
+        '--watch',
+        'scripts',
         '--watch',
         'services',
         '--watch',
         'utilities',
         '--watch',
-        'models',
-        '--watch',
-        'controllers',
-        '--watch',
-        'scripts',
-        'startServer.js',
-        'startWebSocketServer.js',
         'app.js',
+        '--watch',
+        'startWebSocketServer.js',
+        'startServer.js',
         '--ext',
         'js,graphql',
       ]
@@ -132,13 +96,13 @@ services:
       - TEMP_DIRECTORY_CLEAN_UP=${TEMP_DIRECTORY_CLEAN_UP:-true}
       - CHAT_GPT_KEY=${CHAT_GPT_KEY}
     volumes:
-      - ./config:/home/node/server/config
       - ./api:/home/node/server/api
-      - ./services:/home/node/server/services
-      - ./utilities:/home/node/server/utilities
+      - ./config:/home/node/server/config
       - ./controllers:/home/node/server/controllers
       - ./models:/home/node/server/models
       - ./scripts:/home/node/server/scripts
+      - ./services:/home/node/server/services
+      - ./utilities:/home/node/server/utilities
       - ./app.js:/home/node/server/app.js
       - ./startServer.js:/home/node/server/startServer.js
       - ./startWebSocketServer.js:/home/node/server/startWebSocketServer.js
@@ -146,7 +110,7 @@ services:
   epubchecker:
     depends_on:
       - db-epubchecker
-    image: cokoapps/epubchecker:1.1.2
+    image: cokoapps/epubchecker:1.2.0
     ports:
       - ${SERVICE_EPUB_CHECKER_PORT:-3001}:${SERVICE_EPUB_CHECKER_PORT:-3001}
     environment:
@@ -197,7 +161,7 @@ services:
   pagedjs:
     depends_on:
       - db-pagedjs
-    image: cokoapps/pagedjs:1.4.7
+    image: cokoapps/pagedjs:1.5.0
     ports:
       - ${SERVICE_PAGEDJS_PORT:-3003}:${SERVICE_PAGEDJS_PORT:-3003}
     environment:

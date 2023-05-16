@@ -9,7 +9,12 @@ const BPromise = require('bluebird')
 
 const {
   getObjectTeams,
+  updateTeamMembership,
 } = require('@coko/server/src/models/team/team.controller')
+
+const {
+  hasMembershipInTeams,
+} = require('../config/permissions/helpers/helpers')
 
 const {
   labels: { BOOK_CONTROLLER },
@@ -35,8 +40,6 @@ const {
 const { createDivision } = require('./division.controller')
 
 const { createTeam, getObjectTeam, deleteTeam } = require('./team.controller')
-
-const { isGlobal } = require('./user.controller')
 
 const toCamelCase = string =>
   string
@@ -101,66 +104,44 @@ const getBook = async (id, options = {}) => {
   }
 }
 
-const getBooks = async (collectionId, archived, userId, options = {}) => {
+const getBooks = async ({ collectionId, userId, options }) => {
   try {
-    const { trx } = options
+    const getAllBooksTeams =
+      config.has('filters.getBooks.all') && config.get('filters.getBooks.all')
+
+    const { trx, page, pageSize, orderBy, showArchived } = options
+
+    const isEligibleForAll = await hasMembershipInTeams(
+      userId,
+      getAllBooksTeams,
+    )
+
     logger.info(
-      `${BOOK_CONTROLLER} getBooks: fetching books for collection with id ${collectionId}`,
+      `${BOOK_CONTROLLER} getBooks: fetching books for user with id ${userId}`,
     )
     return useTransaction(
       async tr => {
-        const isGlobalUser = await isGlobal(userId, true)
-
-        if (isGlobalUser) {
-          if (!archived) {
-            const { result } = await Book.find(
-              {
-                collectionId,
-                deleted: false,
-                archived: false,
-              },
-              { trx: tr },
-            )
-
-            return result
-          }
-
-          const { result } = await Book.find(
+        if (isEligibleForAll) {
+          return Book.getAllBooks(
             {
-              collectionId,
-              deleted: false,
+              trx: tr,
+              showArchived,
+              page,
+              pageSize,
+              orderBy,
             },
-            { trx: tr },
+            collectionId,
           )
-
-          return result
         }
 
-        if (!archived) {
-          return Book.query(tr)
-            .leftJoin('teams', 'book.id', 'teams.object_id')
-            .leftJoin('team_members', 'teams.id', 'team_members.team_id')
-            .leftJoin('users', 'team_members.user_id', 'users.id')
-            .distinctOn('book.id')
-            .where({
-              'book.collection_id': collectionId,
-              'book.deleted': false,
-              'book.archived': false,
-              'users.id': userId,
-            })
-        }
-
-        return Book.query(tr)
-          .leftJoin('teams', 'book.id', 'teams.object_id')
-          .leftJoin('team_members', 'teams.id', 'team_members.team_id')
-          .leftJoin('users', 'team_members.user_id', 'users.id')
-          .distinctOn('book.id')
-          .where({
-            'book.collection_id': collectionId,
-            'book.deleted': false,
-            'users.id': userId,
-          })
-          .andWhere({ 'users.id': userId })
+        return Book.getUserBooks(userId, {
+          trx: tr,
+          showArchived,
+          page,
+          pageSize,
+          orderBy,
+          collectionId,
+        })
       },
       { trx, passedTrxOnly: true },
     )
@@ -170,12 +151,27 @@ const getBooks = async (collectionId, archived, userId, options = {}) => {
   }
 }
 
-const createBook = async (collectionId, title, options = {}) => {
+const createBook = async (data = {}) => {
   try {
-    const { trx } = options
+    const { collectionId, title, options } = data
+
+    let trx
+    let addUserToBookTeams
+    let userId
+
+    if (options) {
+      trx = options.trx
+      addUserToBookTeams = options.addUserToBookTeams
+      userId = options.userId
+    }
+
     return useTransaction(
       async tr => {
-        const newBookData = { collectionId }
+        const newBookData = {}
+
+        if (collectionId) {
+          newBookData.collectionId = collectionId
+        }
 
         if (
           config.has('featureBookStructure') &&
@@ -198,18 +194,32 @@ const createBook = async (collectionId, title, options = {}) => {
           `${BOOK_CONTROLLER} createBook: new book created with id ${bookId}`,
         )
 
-        await BookTranslation.insert(
-          {
-            bookId,
-            title,
-            languageIso: 'en',
-          },
-          { trx: tr },
-        )
+        if (title) {
+          await BookTranslation.insert(
+            {
+              bookId,
+              title,
+              languageIso: 'en',
+            },
+            { trx: tr },
+          )
 
-        logger.info(
-          `${BOOK_CONTROLLER} createBook: new book translation (title: ${title}) created for the book with id ${bookId}`,
-        )
+          logger.info(
+            `${BOOK_CONTROLLER} createBook: new book translation (title: ${title}) created for the book with id ${bookId}`,
+          )
+        } else {
+          await BookTranslation.insert(
+            {
+              bookId,
+              languageIso: 'en',
+            },
+            { trx: tr },
+          )
+
+          logger.info(
+            `${BOOK_CONTROLLER} createBook: new book translation placeholder created for the book with id ${bookId}`,
+          )
+        }
 
         const { config: divisions } = await getApplicationParameters(
           'bookBuilder',
@@ -284,7 +294,7 @@ const createBook = async (collectionId, title, options = {}) => {
                 return
               }
 
-              await createTeam(
+              const createdTeam = await createTeam(
                 teamData.displayName,
                 bookId,
                 'book',
@@ -294,9 +304,25 @@ const createBook = async (collectionId, title, options = {}) => {
                   trx: tr,
                 },
               )
+
               logger.info(
                 `${BOOK_CONTROLLER} createBook: Added team "${teamData.role}" for book with id ${bookId}`,
               )
+
+              if (findIndex(addUserToBookTeams, createTeam.role) !== -1) {
+                if (!userId) {
+                  throw new Error(
+                    'userId should be provided if addUserToBookTeams is used',
+                  )
+                }
+
+                logger.info(
+                  `${BOOK_CONTROLLER} createBook: Adding book creator as member of team "${createdTeam.displayName}" for book with id ${bookId}`,
+                )
+                await updateTeamMembership(createdTeam.id, [userId], {
+                  trx: tr,
+                })
+              }
             }),
           )
         }
@@ -1076,6 +1102,26 @@ const updateShowWelcome = async (bookId, options = {}) => {
   }
 }
 
+const getBookTitle = async (bookId, options = {}) => {
+  try {
+    const bookTranslation = await BookTranslation.findOne({
+      bookId,
+      languageIso: 'en',
+    })
+
+    if (!bookTranslation) {
+      throw new Error(
+        `book with id ${bookId} does not have a translation entry`,
+      )
+    }
+
+    return bookTranslation.title
+  } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} getBookTitle: ${e.message}`)
+    throw new Error(e)
+  }
+}
+
 module.exports = {
   getBook,
   getBooks,
@@ -1092,4 +1138,5 @@ module.exports = {
   updateLevelContentStructure,
   updateShowWelcome,
   finalizeBookStructure,
+  getBookTitle,
 }
