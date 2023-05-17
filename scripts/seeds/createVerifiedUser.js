@@ -3,9 +3,7 @@ const Identity = require('@coko/server/src/models/identity/identity.model')
 
 const User = require('../../models/user/user.model')
 
-;
-
-(async () => {
+;(async () => {
   try {
     const email = process.argv[2]
     const username = process.argv[3]
