@@ -1,3 +1,4 @@
+/* eslint-disable import/newline-after-import */
 const { logger } = require('@coko/server')
 const Identity = require('@coko/server/src/models/identity/identity.model')
 
