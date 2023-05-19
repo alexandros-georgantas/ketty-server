@@ -4,6 +4,7 @@ const { BOOK_COMPONENT_ORDER_UPDATED } = require('./constants')
 
 const {
   updateBookComponentOrder,
+  updateBookComponentsOrder,
   getDivision,
 } = require('../../../controllers/division.controller')
 
@@ -32,9 +33,36 @@ const updateBookComponentOrderHandler = async (
       bookComponentOrderUpdated: book,
     })
 
+    return book
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
+const updateBookComponentsOrderHandler = async (
+  _,
+  { targetDivisionId, bookComponents },
+  ctx,
+) => {
+  try {
+    const pubsub = await pubsubManager.getPubsub()
     logger.info(
-      'custom tags resolver: broadcasting new book components order to clients',
+      'division resolver: executing updateBookComponentsOrder use case',
     )
+
+    const book = await updateBookComponentsOrder(
+      targetDivisionId,
+      bookComponents,
+    )
+
+    pubsub.publish(`BOOK_UPDATED`, {
+      bookUpdated: book,
+    })
+
+    pubsub.publish(BOOK_COMPONENT_ORDER_UPDATED, {
+      bookComponentOrderUpdated: book,
+    })
+
     return book
   } catch (e) {
     throw new Error(e)
@@ -44,6 +72,7 @@ const updateBookComponentOrderHandler = async (
 module.exports = {
   Mutation: {
     updateBookComponentOrder: updateBookComponentOrderHandler,
+    updateBookComponentsOrder: updateBookComponentsOrderHandler,
   },
   Division: {
     async bookComponents(divisionId, _, ctx) {

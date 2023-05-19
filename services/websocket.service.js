@@ -103,7 +103,9 @@ const initializeFailSafeUnlocking = async WSServer => {
       )
       const lockedBookComponentIds = []
       WSServer.clients.forEach(ws => {
-        lockedBookComponentIds.push(ws.bookComponentId)
+        if (ws.bookComponentId) {
+          lockedBookComponentIds.push(ws.bookComponentId)
+        }
       })
 
       if (lockedBookComponentIds.length === 0) {
