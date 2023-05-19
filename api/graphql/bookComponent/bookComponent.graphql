@@ -130,8 +130,10 @@ extend type Query {
 extend type Mutation {
   ingestWordFile(bookComponentFiles: [IngestWordFiles!]): [BookComponent!]
   addBookComponent(input: BookComponentInput): BookComponent!
+  podAddBookComponent(input: BookComponentInput): Book!
   renameBookComponent(input: UpdateBookComponentInput): BookComponent!
   deleteBookComponent(input: UpdateBookComponentInput): BookComponent!
+  podDeleteBookComponent(input: UpdateBookComponentInput): Book!
   archiveBookComponent(input: UpdateBookComponentInput): BookComponent!
   updateWorkflowState(input: UpdateBookComponentInput): BookComponent!
   updatePagination(input: UpdateBookComponentInput): BookComponent!

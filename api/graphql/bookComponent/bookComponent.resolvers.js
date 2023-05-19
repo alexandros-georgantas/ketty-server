@@ -211,6 +211,35 @@ const addBookComponentHandler = async (_, { input }, ctx, info) => {
   }
 }
 
+const podAddBookComponentHandler = async (_, { input }, ctx, info) => {
+  try {
+    const { divisionId, bookId, componentType, title } = input
+    const pubsub = await pubsubManager.getPubsub()
+
+    const newBookComponent = await addBookComponent(
+      divisionId,
+      bookId,
+      componentType,
+      title,
+    )
+
+    const updatedBook = await getBook(bookId)
+
+    pubsub.publish(`BOOK_UPDATED`, {
+      bookUpdated: updatedBook,
+    })
+
+    pubsub.publish(BOOK_COMPONENT_ADDED, {
+      bookComponentAdded: newBookComponent,
+    })
+
+    return updatedBook
+  } catch (e) {
+    logger.error(e.message)
+    throw new Error(e)
+  }
+}
+
 const renameBookComponentHandler = async (_, { input }, ctx) => {
   try {
     const { id, title } = input
@@ -270,6 +299,40 @@ const deleteBookComponentHandler = async (_, { input }, ctx) => {
     logger.info('message BOOK_COMPONENT_DELETED broadcasted')
 
     return deletedBookComponent
+  } catch (e) {
+    logger.error(e.message)
+    throw new Error(e)
+  }
+}
+
+const podDeleteBookComponentHandler = async (_, { input }, ctx) => {
+  try {
+    const { id } = input
+    const pubsub = await pubsubManager.getPubsub()
+    const bookComponent = await getBookComponent(id)
+
+    if (!bookComponent) {
+      throw new Error(`book component with id ${id} does not exists`)
+    }
+
+    const deletedBookComponent = await deleteBookComponent(bookComponent)
+
+    const updatedBook = await getBook(bookComponent.bookId)
+
+    pubsub.publish(`BOOK_UPDATED`, {
+      bookUpdated: updatedBook,
+    })
+
+    pubsub.publish(BOOK_COMPONENT_DELETED, {
+      bookComponentDeleted: deletedBookComponent,
+    })
+    pubsub.publish(BOOK_COMPONENT_UPDATED, {
+      bookComponentUpdated: deletedBookComponent,
+    })
+
+    logger.info('message BOOK_COMPONENT_DELETED broadcasted')
+
+    return updatedBook
   } catch (e) {
     logger.error(e.message)
     throw new Error(e)
@@ -549,8 +612,10 @@ module.exports = {
   Mutation: {
     ingestWordFile: ingestWordFileHandler,
     addBookComponent: addBookComponentHandler,
+    podAddBookComponent: podAddBookComponentHandler,
     renameBookComponent: renameBookComponentHandler,
     deleteBookComponent: deleteBookComponentHandler,
+    podDeleteBookComponent: podDeleteBookComponentHandler,
     updateWorkflowState: updateWorkflowStateHandler,
     updatePagination: updatePaginationHandler,
     unlockBookComponent: unlockBookComponentHandler,
