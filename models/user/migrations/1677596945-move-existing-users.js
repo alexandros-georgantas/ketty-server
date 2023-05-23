@@ -1,10 +1,11 @@
 const Identity = require('@coko/server/src/models/identity/identity.model')
 const { logger } = require('@coko/server')
 
-/* eslint-disable import/no-unresolved */
-const User = require('../models/user/user.model')
-const Team = require('../models/team/team.model')
-/* eslint-enable import/no-unresolved */
+// /* eslint-disable import/no-unresolved */
+// const User = require('../models/user/user.model')
+// const Team = require('../models/team/team.model')
+// /* eslint-enable import/no-unresolved */
+const { User, Team } = require('@pubsweet/models')
 
 exports.up = async knex => {
   try {

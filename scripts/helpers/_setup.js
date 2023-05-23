@@ -1,5 +1,4 @@
 const { migrate } = require('@pubsweet/db-manager')
-const seedApplicationParameters = require('../seeds/applicationParameters')
 
 // Ideally, instead of running a single worker, we should be spinning up
 // one db per worker, so that the tests run in parallel without interfering
@@ -10,5 +9,4 @@ const seedApplicationParameters = require('../seeds/applicationParameters')
 
 module.exports = async jestConfig => {
   await migrate()
-  return seedApplicationParameters()
 }
