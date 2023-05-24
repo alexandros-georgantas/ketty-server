@@ -71,10 +71,14 @@ class Template extends Base {
   }
 
   async getThumbnail(tr = undefined) {
+    /* eslint-disable global-require */
+    const File = require('../file/file.model')
+    /* eslint-enable global-require */
+
     const { thumbnailId } = this
 
     if (thumbnailId) {
-      return this.$relatedQuery('thumbnail', tr)
+      return File.findById(thumbnailId, { trx: tr })
     }
 
     return null

@@ -1,8 +1,10 @@
 const { logger } = require('@coko/server')
 
 /* eslint-disable import/no-unresolved */
-const Team = require('../models/team/team.model')
+// const Team = require('../models/team/team.model')
 /* eslint-enable import/no-unresolved */
+
+const { Team } = require('@pubsweet/models')
 
 exports.up = async knex => {
   try {

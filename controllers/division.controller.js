@@ -164,8 +164,35 @@ const updateBookComponentOrder = async (
   }
 }
 
+const updateBookComponentsOrder = async (
+  targetDivisionId,
+  bookComponents,
+  options = {},
+) => {
+  try {
+    const { trx } = options
+    return useTransaction(
+      async tr => {
+        const updatedDivision = await updateDivision(
+          targetDivisionId,
+          {
+            bookComponents,
+          },
+          { trx: tr },
+        )
+
+        return Book.findById(updatedDivision.bookId, { trx: tr })
+      },
+      { trx },
+    )
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
 module.exports = {
   createDivision,
   updateBookComponentOrder,
+  updateBookComponentsOrder,
   getDivision,
 }

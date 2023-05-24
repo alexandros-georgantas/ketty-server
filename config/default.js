@@ -66,6 +66,7 @@ module.exports = {
     pathToPage: '/password-reset',
   },
   featureBookStructure: false,
+  flavour,
   featureUploadDOCXFiles: true,
   permissions,
   filters,
