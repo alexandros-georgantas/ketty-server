@@ -28,6 +28,7 @@ const {
   deleteBook,
   exportBook,
   updateMetadata,
+  updatePODMetadata,
   updateRunningHeaders,
   changeLevelLabel,
   changeNumberOfLevels,
@@ -159,6 +160,24 @@ const updateMetadataHandler = async (_, { input }, ctx) => {
     const pubsub = await pubsubManager.getPubsub()
 
     const updatedBook = await updateMetadata(input)
+
+    logger.info('book resolver: broadcasting updated book to clients')
+
+    pubsub.publish(BOOK_METADATA_UPDATED, {
+      bookMetadataUpdated: updatedBook.id,
+    })
+    return updatedBook
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
+const updatePODMetadataHandler = async (_, { bookId, metadata }, ctx) => {
+  try {
+    logger.info('book resolver: executing updatePODMetadata use case')
+    const pubsub = await pubsubManager.getPubsub()
+
+    const updatedBook = await updatePODMetadata(bookId, metadata)
 
     logger.info('book resolver: broadcasting updated book to clients')
 
@@ -343,6 +362,7 @@ module.exports = {
     deleteBook: deleteBookHandler,
     exportBook: exportBookHandler,
     updateMetadata: updateMetadataHandler,
+    updatePODMetadata: updatePODMetadataHandler,
     updateRunningHeaders: updateRunningHeadersHandler,
     changeLevelLabel: changeLevelLabelHandler,
     changeNumberOfLevels: changeNumberOfLevelsHandler,

@@ -1,5 +1,6 @@
 const { useTransaction, logger } = require('@coko/server')
 const map = require('lodash/map')
+const indexOf = require('lodash/indexOf')
 const findIndex = require('lodash/findIndex')
 const assign = require('lodash/assign')
 const omitBy = require('lodash/omitBy')
@@ -155,6 +156,9 @@ const createBook = async (data = {}) => {
   try {
     const { collectionId, title, options } = data
 
+    const featurePODEnabled =
+      (process.env.FEATURE_POD && JSON.parse(process.env.FEATURE_POD)) || false
+
     let trx
     let addUserToBookTeams
     let userId
@@ -184,6 +188,26 @@ const createBook = async (data = {}) => {
           )
 
           newBookData.bookStructure = defaultBookStructure
+        }
+
+        if (featurePODEnabled) {
+          newBookData.podMetadata = {
+            authors: '',
+            bottomPage: '',
+            copyrightLicense: '',
+            isbn: '',
+            licenseTypes: {
+              NC: false,
+              SA: false,
+              ND: false,
+            },
+            ncCopyrightHolder: '',
+            ncCopyrightYear: null,
+            publicDomainType: '',
+            saCopyrightHolder: '',
+            saCopyrightYear: null,
+            topPage: '',
+          }
         }
 
         const newBook = await Book.insert(newBookData, { trx: tr })
@@ -309,7 +333,7 @@ const createBook = async (data = {}) => {
                 `${BOOK_CONTROLLER} createBook: Added team "${teamData.role}" for book with id ${bookId}`,
               )
 
-              if (findIndex(addUserToBookTeams, createTeam.role) !== -1) {
+              if (indexOf(addUserToBookTeams, createdTeam.role) !== -1) {
                 if (!userId) {
                   throw new Error(
                     'userId should be provided if addUserToBookTeams is used',
@@ -637,6 +661,35 @@ const updateMetadata = async (metadata, options = {}) => {
     )
   } catch (e) {
     logger.error(`${BOOK_CONTROLLER} updateMetadata: ${e.message}`)
+    throw new Error(e)
+  }
+}
+
+const updatePODMetadata = async (bookId, metadata, options = {}) => {
+  try {
+    const { trx } = options
+    return useTransaction(
+      async tr => {
+        const clean = omitBy(metadata, isNil)
+
+        const updatedBook = await Book.patchAndFetchById(
+          bookId,
+          {
+            podMetadata: clean,
+          },
+          { trx: tr },
+        )
+
+        logger.info(
+          `${BOOK_CONTROLLER} updatePODMetadata: book with id ${updatedBook.id} has new POD metadata`,
+        )
+
+        return updatedBook
+      },
+      { trx },
+    )
+  } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} updatePODMetadata: ${e.message}`)
     throw new Error(e)
   }
 }
@@ -1131,6 +1184,7 @@ module.exports = {
   deleteBook,
   exportBook,
   updateMetadata,
+  updatePODMetadata,
   updateRunningHeaders,
   changeLevelLabel,
   changeNumberOfLevels,

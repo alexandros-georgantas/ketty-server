@@ -8,11 +8,14 @@ const bbOEN = require('./modules/bookBuilderOEN')
 const bbBooksprints = require('./modules/bookBuilderBooksprints')
 const oenTeams = require('./modules/oenTeams')
 const vanillaTeams = require('./modules/vanillaTeams')
+const podTeams = require('./modules/podTeams')
 const vanillaFilters = require('./modules/vanillaFilters')
+const podFilters = require('./modules/podFilters')
 const booksprintTeams = require('./modules/booksprintTeams')
 const vanillaPermissions = require('./permissions/vanilla.permissions')
 const booksprintPermissions = require('./permissions/booksprint.permissions')
 const oenPermissions = require('./permissions/oen.permissions')
+const podPermissions = require('./permissions/pod.permissions')
 
 const flavour =
   process.env.KETIDA_FLAVOUR && process.env.KETIDA_FLAVOUR === 'BOOKSPRINTS'
@@ -23,6 +26,9 @@ const featureBookStructureEnabled =
   (process.env.FEATURE_BOOK_STRUCTURE &&
     JSON.parse(process.env.FEATURE_BOOK_STRUCTURE)) ||
   false
+
+const featurePODEnabled =
+  (process.env.FEATURE_POD && JSON.parse(process.env.FEATURE_POD)) || false
 
 let bookBuilder
 let permissions = vanillaPermissions
@@ -45,6 +51,14 @@ if (!featureBookStructureEnabled) {
   flavorTeams = flavour === 'BOOKSPRINTS' ? booksprintTeams : vanillaTeams
 }
 
+let filters = vanillaFilters
+
+if (featurePODEnabled) {
+  flavorTeams = podTeams
+  permissions = podPermissions
+  filters = podFilters
+}
+
 module.exports = {
   authsome: flavour === 'BOOKSPRINTS' ? authsomeBooksprints : authsomeVanilla,
   bookBuilder,
@@ -52,9 +66,10 @@ module.exports = {
     pathToPage: '/password-reset',
   },
   featureBookStructure: false,
+  flavour,
   featureUploadDOCXFiles: true,
   permissions,
-  filters: vanillaFilters,
+  filters,
   pubsweet: {
     components,
   },

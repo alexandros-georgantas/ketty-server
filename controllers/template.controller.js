@@ -167,7 +167,7 @@ const createTemplate = async (
             throw new Error('File extension is not allowed')
           const fileStream = fileReadStream()
 
-          const newThumbnail = createFile(
+          const newThumbnail = await createFile(
             fileStream,
             filename,
             null,

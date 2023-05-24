@@ -4,8 +4,14 @@ const { uuid } = require('@coko/server')
 
 const Base = require('../ketidaBase')
 
-const { booleanDefaultFalse, id, string, year, booleanDefaultTrue } =
-  require('../helpers').schema
+const {
+  booleanDefaultFalse,
+  id,
+  string,
+  year,
+  booleanDefaultTrue,
+  dateOrNull,
+} = require('../helpers').schema
 
 const outlineItem = {
   type: 'object',
@@ -76,6 +82,38 @@ const bookStructure = {
     },
     finalized: booleanDefaultFalse,
     showWelcome: booleanDefaultTrue,
+  },
+}
+
+const podMetadata = {
+  type: ['object'],
+  additionalProperties: false,
+  properties: {
+    authors: string,
+    bottomPage: string,
+    copyrightLicense: string,
+    isbn: string,
+    licenseTypes: {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        NC: {
+          type: ['boolean', 'null'],
+        },
+        SA: {
+          type: ['boolean', 'null'],
+        },
+        ND: {
+          type: ['boolean', 'null'],
+        },
+      },
+    },
+    ncCopyrightHolder: string,
+    ncCopyrightYear: dateOrNull,
+    publicDomainType: string,
+    saCopyrightHolder: string,
+    saCopyrightYear: dateOrNull,
+    topPage: string,
   },
 }
 
@@ -283,6 +321,7 @@ class Book extends Base {
         issn: string,
         issnL: string,
         license: string,
+        podMetadata,
       },
     }
   }

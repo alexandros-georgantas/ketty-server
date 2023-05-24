@@ -25,4 +25,5 @@ module.exports = {
       globalTeardown: './scripts/helpers/_teardown.js',
     },
   ],
+  maxWorkers: 1,
 }
