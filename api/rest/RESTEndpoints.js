@@ -37,14 +37,6 @@ const RESTEndpoints = app => {
       } = body
 
       if (!convertedContent && error) {
-        const updatedBookComponent = await BookComponent.findById(
-          bookComponentId,
-        )
-
-        await deleteBookComponent(updatedBookComponent)
-        await pubsub.publish(BOOK_COMPONENT_UPLOADING_UPDATED, {
-          bookComponentUploadingUpdated: updatedBookComponent,
-        })
         throw new Error('error in xsweet conversion')
       }
 

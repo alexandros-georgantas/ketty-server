@@ -245,6 +245,11 @@ const schema = {
     // format: 'date-time',
     format: 'date',
   },
+  dateOrNull: {
+    type: ['string', 'object', 'null'],
+    format: 'date-time',
+    // format: 'date',
+  },
   email: {
     type: 'string',
     format: 'email',

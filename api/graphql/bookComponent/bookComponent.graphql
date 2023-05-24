@@ -120,6 +120,8 @@ input IngestWordFiles {
   file: Upload!
   bookComponentId: ID
   bookId: ID
+  componentType: String
+  divisionLabel: String
 }
 
 extend type Query {

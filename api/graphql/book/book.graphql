@@ -17,6 +17,46 @@ type Book {
   productionEditors: [String]
   publicationDate: Date
   title: String
+  podMetadata: PODMetadata
+}
+type LicenseTypes {
+  NC: Boolean
+  SA: Boolean
+  ND: Boolean
+}
+
+input LicenseTypesInput {
+  NC: Boolean
+  SA: Boolean
+  ND: Boolean
+}
+
+type PODMetadata {
+  authors: String
+  bottomPage: String
+  copyrightLicense: String
+  isbn: String
+  licenseTypes: LicenseTypes
+  ncCopyrightHolder: String
+  ncCopyrightYear: Date
+  publicDomainType: String
+  saCopyrightHolder: String
+  saCopyrightYear: Date
+  topPage: String
+}
+
+input PODMetadataInput {
+  authors: String
+  bottomPage: String
+  copyrightLicense: String
+  isbn: String
+  licenseTypes: LicenseTypesInput
+  ncCopyrightHolder: String
+  ncCopyrightYear: Date
+  publicDomainType: String
+  saCopyrightHolder: String
+  saCopyrightYear: Date
+  topPage: String
 }
 
 input CreateBookInput {
@@ -148,6 +188,7 @@ extend type Mutation {
   renameBook(id: ID!, title: String!): Book!
   deleteBook(id: ID!): Book!
   updateMetadata(input: MetadataInput!): Book!
+  updatePODMetadata(bookId: ID!, metadata: PODMetadataInput!): Book!
   changeLevelLabel(bookId: ID!, levelId: ID!, label: String!): Level!
   changeNumberOfLevels(bookId: ID!, levelsNumber: Int!): [Level!]!
   updateLevelContentStructure(bookId: ID!, levels: [LevelInput!]!): [Level!]!
