@@ -1,3 +1,12 @@
+# [1.7.0](https://gitlab.coko.foundation/ketida/server/compare/v1.6.0...v1.7.0) (2023-05-24)
+
+
+### Bug Fixes
+
+* fixes for permissions and getBooks ([e21f96a](https://gitlab.coko.foundation/ketida/server/commit/e21f96aeac28245db2cbfcea85cd9dabc19208ed))
+* fixes for the testing env ([3eaa148](https://gitlab.coko.foundation/ketida/server/commit/3eaa1480a8bb2c3abc861abd8b9ea2036fd9b62a))
+* fixes needed for pod client interactions ([cfa133a](https://gitlab.coko.foundation/ketida/server/commit/cfa133a1221fbbefcb3c717fb027297097206ddc))
+
 # [1.6.0](https://gitlab.coko.foundation/ketida/server/compare/v1.5.0...v1.6.0) (2023-05-16)
 
 
