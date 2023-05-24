@@ -102,7 +102,14 @@ const ingestWordFileHandler = async (_, { bookComponentFiles }, ctx) => {
     const pubsub = await pubsubManager.getPubsub()
     const bookComponents = []
     await BPromise.mapSeries(bookComponentFiles, async bookComponentFile => {
-      const { file, bookComponentId, bookId } = await bookComponentFile
+      const {
+        file,
+        bookComponentId,
+        bookId,
+        componentType: forceComponentType,
+        divisionLabel: forceDivisionLabel,
+      } = await bookComponentFile
+
       const { createReadStream, filename } = await file
       const title = filename.split('.')[0]
       const readerStream = createReadStream()
@@ -120,17 +127,29 @@ const ingestWordFileHandler = async (_, { bookComponentFiles }, ctx) => {
       let componentId = bookComponentId
 
       if (!bookComponentId) {
-        const name = filename.replace(/\.[^/.]+$/, '')
-        const { componentType, label } = DOCXFilenameParser(name)
+        let componentType = forceComponentType
+        let divisionLabel = forceDivisionLabel
+
+        if (!componentType && !divisionLabel) {
+          const name = filename.replace(/\.[^/.]+$/, '')
+
+          const {
+            componentType: aggregatedComponentType,
+            label: aggregatedDivisionLabel,
+          } = DOCXFilenameParser(name)
+
+          componentType = aggregatedComponentType
+          divisionLabel = aggregatedDivisionLabel
+        }
 
         const division = await Division.findOne({
           bookId,
-          label,
+          label: divisionLabel,
         })
 
         if (!division) {
           throw new Error(
-            `division with label ${label} does not exist for the book with id ${bookId}`,
+            `division with label ${divisionLabel} does not exist for the book with id ${bookId}`,
           )
         }
 

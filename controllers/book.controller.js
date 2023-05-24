@@ -156,6 +156,9 @@ const createBook = async (data = {}) => {
   try {
     const { collectionId, title, options } = data
 
+    const featurePODEnabled =
+      (process.env.FEATURE_POD && JSON.parse(process.env.FEATURE_POD)) || false
+
     let trx
     let addUserToBookTeams
     let userId
@@ -185,6 +188,26 @@ const createBook = async (data = {}) => {
           )
 
           newBookData.bookStructure = defaultBookStructure
+        }
+
+        if (featurePODEnabled) {
+          newBookData.podMetadata = {
+            authors: '',
+            bottomPage: '',
+            copyrightLicense: '',
+            isbn: '',
+            licenseTypes: {
+              NC: false,
+              SA: false,
+              ND: false,
+            },
+            ncCopyrightHolder: '',
+            ncCopyrightYear: null,
+            publicDomainType: '',
+            saCopyrightHolder: '',
+            saCopyrightYear: null,
+            topPage: '',
+          }
         }
 
         const newBook = await Book.insert(newBookData, { trx: tr })
@@ -638,6 +661,35 @@ const updateMetadata = async (metadata, options = {}) => {
     )
   } catch (e) {
     logger.error(`${BOOK_CONTROLLER} updateMetadata: ${e.message}`)
+    throw new Error(e)
+  }
+}
+
+const updatePODMetadata = async (bookId, metadata, options = {}) => {
+  try {
+    const { trx } = options
+    return useTransaction(
+      async tr => {
+        const clean = omitBy(metadata, isNil)
+
+        const updatedBook = await Book.patchAndFetchById(
+          bookId,
+          {
+            podMetadata: clean,
+          },
+          { trx: tr },
+        )
+
+        logger.info(
+          `${BOOK_CONTROLLER} updatePODMetadata: book with id ${updatedBook.id} has new POD metadata`,
+        )
+
+        return updatedBook
+      },
+      { trx },
+    )
+  } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} updatePODMetadata: ${e.message}`)
     throw new Error(e)
   }
 }
@@ -1132,6 +1184,7 @@ module.exports = {
   deleteBook,
   exportBook,
   updateMetadata,
+  updatePODMetadata,
   updateRunningHeaders,
   changeLevelLabel,
   changeNumberOfLevels,
