@@ -25,6 +25,9 @@ const featureBookStructureEnabled =
     JSON.parse(config.get('featureBookStructure'))) ||
     false)
 
+const featurePODEnabled =
+  (process.env.FEATURE_POD && JSON.parse(process.env.FEATURE_POD)) || false
+
 const runningHeadersGenerator = (runningHeadersLeft, runningHeadersRight) => {
   if (!featureBookStructureEnabled) {
     return `<div class="running-left">${runningHeadersLeft || '&#xA0;'}</div>
@@ -104,7 +107,35 @@ const generatePagedjsContainer = bookTitle => {
   return output.html()
 }
 
+const generateTitlePage = (bookComponent, subtitle = '', authors = '') => {
+  const {
+    id,
+    componentType,
+    division,
+    pagination,
+    runningHeadersLeft,
+    runningHeadersRight,
+    title,
+  } = bookComponent
+
+  const output = cheerio.load(
+    `<section id="comp-number-${id}" class="component-${division} ${componentType} ${
+      !featurePODEnabled ? paginationExtractor(pagination) : ''
+    }">${runningHeadersGenerator(
+      runningHeadersLeft,
+      runningHeadersRight,
+    )}<header><h1 class="component-title">${title}</h1>
+      ${subtitle ? `<h2 class="component-subtitle">${subtitle}</h2>` : ''}
+      ${authors ? `<h2 class="component-subtitle">${authors}</h2>` : ''}
+      </header>
+      </section>`,
+  )
+
+  return output('body').html()
+}
+
 module.exports = {
   generatePagedjsContainer,
   generateContainer,
+  generateTitlePage,
 }

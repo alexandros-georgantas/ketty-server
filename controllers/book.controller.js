@@ -450,6 +450,89 @@ const createBook = async (data = {}) => {
           { trx: tr },
         )
 
+        if (featurePODEnabled) {
+          try {
+            const newTitlePageBookComponent = {
+              bookId,
+              componentType: 'title-page',
+              divisionId: division.id,
+              pagination: {
+                left: false,
+                right: true,
+              },
+              archived: false,
+              deleted: false,
+            }
+
+            const createdTitlePageBookComponent = await BookComponent.insert(
+              newTitlePageBookComponent,
+              { trx: tr },
+            )
+
+            logger.info(
+              `${BOOK_CONTROLLER} createBook: new book component Title Page created with id ${createdTitlePageBookComponent.id}`,
+            )
+
+            const titlePageTranslation = await BookComponentTranslation.insert(
+              {
+                bookComponentId: createdTitlePageBookComponent.id,
+                languageIso: 'en',
+                title: 'Title Page',
+              },
+              { trx: tr },
+            )
+
+            logger.info(
+              `${BOOK_CONTROLLER} createBook: new book component translation for Title Page created with id ${titlePageTranslation.id}`,
+            )
+
+            const newTitlePageBookComponents = division.bookComponents
+
+            newTitlePageBookComponents.push(createdTitlePageBookComponent.id)
+
+            const updatedTitlePageDivision = await Division.patchAndFetchById(
+              division.id,
+              {
+                bookComponents: newTitlePageBookComponents,
+              },
+              { trx: tr },
+            )
+
+            logger.info(
+              `${BOOK_CONTROLLER} createBook: book component Title Page  to the array of division's book components [${updatedTitlePageDivision.bookComponents}]`,
+            )
+
+            if (workflowStages) {
+              bookComponentWorkflowStages = {
+                workflowStages: map(workflowStages, stage => ({
+                  type: stage.type,
+                  label: stage.title,
+                  value: -1,
+                })),
+              }
+            }
+
+            await BookComponentState.insert(
+              assign(
+                {},
+                {
+                  bookComponentId: createdTitlePageBookComponent.id,
+                  trackChangesEnabled: false,
+                  uploading: false,
+                  includeInToc: false,
+                },
+                bookComponentWorkflowStages,
+              ),
+              { trx: tr },
+            )
+          } catch (error) {
+            logger.error(
+              `createBook: Error creating title page component: ${error}`,
+            )
+            throw new Error(error)
+          }
+        }
+
         return newBook
       },
       { trx },
