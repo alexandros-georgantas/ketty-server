@@ -17,7 +17,10 @@ const bookConstructor = require('./bookConstructor')
 
 const {
   generateContainer,
+<<<<<<< HEAD
   generateTitlePage,
+=======
+>>>>>>> 5fa4175 (feat(*): for POD client auto generate copyright page)
   generateCopyrightsPage,
 } = require('./htmlGenerators')
 
@@ -74,9 +77,13 @@ const ExporterService = async (
         false)
 
     const featurePODEnabled =
+<<<<<<< HEAD
       config.has('featurePOD') &&
       ((config.get('featurePOD') && JSON.parse(config.get('featurePOD'))) ||
         false)
+=======
+      (process.env.FEATURE_POD && JSON.parse(process.env.FEATURE_POD)) || false
+>>>>>>> 5fa4175 (feat(*): for POD client auto generate copyright page)
 
     if (fileExtension !== 'icml') {
       template = await Template.findById(templateId)
@@ -104,9 +111,12 @@ const ExporterService = async (
     }
 
     if (featurePODEnabled) {
+<<<<<<< HEAD
       const titlePageComponent = frontDivision.bookComponents.get('title-page')
       titlePageComponent.content = generateTitlePage(titlePageComponent)
 
+=======
+>>>>>>> 5fa4175 (feat(*): for POD client auto generate copyright page)
       const copyrightComponent =
         frontDivision.bookComponents.get('copyrights-page')
 
