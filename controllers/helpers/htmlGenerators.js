@@ -26,12 +26,8 @@ const featureBookStructureEnabled =
     false)
 
 const featurePODEnabled =
-<<<<<<< HEAD
   config.has('featurePOD') &&
   ((config.get('featurePOD') && JSON.parse(config.get('featurePOD'))) || false)
-=======
-  (process.env.FEATURE_POD && JSON.parse(process.env.FEATURE_POD)) || false
->>>>>>> 5fa4175 (feat(*): for POD client auto generate copyright page)
 
 const runningHeadersGenerator = (runningHeadersLeft, runningHeadersRight) => {
   if (!featureBookStructureEnabled) {
@@ -112,7 +108,6 @@ const generatePagedjsContainer = bookTitle => {
   return output.html()
 }
 
-<<<<<<< HEAD
 const generateTitlePage = (
   bookComponent,
   subtitle = undefined,
@@ -145,8 +140,6 @@ const generateTitlePage = (
   return output('body').html()
 }
 
-=======
->>>>>>> 5fa4175 (feat(*): for POD client auto generate copyright page)
 const generateCopyrightsPage = (bookComponent, podMetadata) => {
   const {
     id,
@@ -160,7 +153,6 @@ const generateCopyrightsPage = (bookComponent, podMetadata) => {
 
   const output = cheerio.load(
     `<section id="comp-number-${id}"  class="component-${division} ${componentType} ${
-<<<<<<< HEAD
       !featurePODEnabled ? paginationExtractor(pagination) : ''
     }">${runningHeadersGenerator(
       runningHeadersLeft,
@@ -168,13 +160,6 @@ const generateCopyrightsPage = (bookComponent, podMetadata) => {
     )}<header><h1 class="component-title">${
       title || 'Copyrights'
     }</h1></header></section>`,
-=======
-      !featureBookStructureEnabled ? paginationExtractor(pagination) : ''
-    }">${runningHeadersGenerator(
-      runningHeadersLeft,
-      runningHeadersRight,
-    )}<header><h1 class="component-title">${title}</h1></header></section>`,
->>>>>>> 5fa4175 (feat(*): for POD client auto generate copyright page)
   )
 
   return output.html()
@@ -183,9 +168,6 @@ const generateCopyrightsPage = (bookComponent, podMetadata) => {
 module.exports = {
   generatePagedjsContainer,
   generateContainer,
-<<<<<<< HEAD
   generateTitlePage,
-=======
->>>>>>> 5fa4175 (feat(*): for POD client auto generate copyright page)
   generateCopyrightsPage,
 }
