@@ -140,8 +140,34 @@ const generateTitlePage = (
   return output('body').html()
 }
 
+const generateCopyrightsPage = (bookComponent, podMetadata) => {
+  const {
+    id,
+    componentType,
+    division,
+    pagination,
+    runningHeadersLeft,
+    runningHeadersRight,
+    title,
+  } = bookComponent
+
+  const output = cheerio.load(
+    `<section id="comp-number-${id}"  class="component-${division} ${componentType} ${
+      !featurePODEnabled ? paginationExtractor(pagination) : ''
+    }">${runningHeadersGenerator(
+      runningHeadersLeft,
+      runningHeadersRight,
+    )}<header><h1 class="component-title">${
+      title || 'Copyrights'
+    }</h1></header></section>`,
+  )
+
+  return output.html()
+}
+
 module.exports = {
   generatePagedjsContainer,
   generateContainer,
   generateTitlePage,
+  generateCopyrightsPage,
 }
