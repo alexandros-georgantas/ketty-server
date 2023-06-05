@@ -14,7 +14,13 @@ const {
 } = require('./converters')
 
 const bookConstructor = require('./bookConstructor')
-const { generateContainer, generateTitlePage } = require('./htmlGenerators')
+
+const {
+  generateContainer,
+  generateTitlePage,
+  generateCopyrightsPage,
+} = require('./htmlGenerators')
+
 const EPUBPreparation = require('./EPUBPreparation')
 const ICMLPreparation = require('./ICMLPreparation')
 const PagedJSPreparation = require('./PagedJSPreparation')
@@ -97,12 +103,17 @@ const ExporterService = async (
       tocComponent.content = generateContainer(tocComponent, false)
     }
 
-    let endnotesComponent
-
     if (featurePODEnabled) {
       const titlePageComponent = frontDivision.bookComponents.get('title-page')
       titlePageComponent.content = generateTitlePage(titlePageComponent)
+
+      const copyrightComponent =
+        frontDivision.bookComponents.get('copyrights-page')
+
+      copyrightComponent.content = generateCopyrightsPage(copyrightComponent)
     }
+
+    let endnotesComponent
 
     if (
       templateHasEndnotes ||
