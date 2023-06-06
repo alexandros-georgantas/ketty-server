@@ -50,7 +50,6 @@ const getURL = relativePath => {
 
 const ExporterService = async (
   bookId,
-  mode,
   templateId,
   previewer,
   fileExtension,
