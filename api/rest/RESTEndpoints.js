@@ -8,12 +8,15 @@ const uploadsDir = get(config, ['pubsweet-server', 'uploads'], 'uploads')
 const { readFile } = require('../../utilities/filesystem')
 const { xsweetImagesHandler } = require('../../utilities/image')
 
-const { BookComponent, ServiceCallbackToken } = require('../../models').models
+const { BookComponent, ServiceCallbackToken, Book } =
+  require('../../models').models
 
 const {
   BOOK_COMPONENT_UPLOADING_UPDATED,
   BOOK_COMPONENT_DELETED,
 } = require('../graphql/bookComponent/constants')
+
+const { BOOK_UPDATED } = require('../graphql/book/constants')
 
 const {
   updateContent,
@@ -35,6 +38,10 @@ const RESTEndpoints = app => {
         serviceCallbackTokenId,
         error,
       } = body
+
+      res.status(200).json({
+        msg: 'ok',
+      })
 
       if (!convertedContent && error) {
         throw new Error('error in xsweet conversion')
@@ -60,14 +67,15 @@ const RESTEndpoints = app => {
 
       await updateUploading(bookComponentId, uploading)
       const updatedBookComponent = await BookComponent.findById(bookComponentId)
+      const belongingBook = await Book.findById(updatedBookComponent.bookId)
       await ServiceCallbackToken.deleteById(serviceCallbackTokenId)
 
-      await pubsub.publish(BOOK_COMPONENT_UPLOADING_UPDATED, {
+      pubsub.publish(BOOK_COMPONENT_UPLOADING_UPDATED, {
         bookComponentUploadingUpdated: updatedBookComponent,
       })
 
-      return res.status(200).json({
-        msg: 'ok',
+      pubsub.publish(BOOK_UPDATED, {
+        bookUpdated: belongingBook,
       })
     } catch (error) {
       // the service will not care if something went wrong in Ketida
@@ -75,14 +83,22 @@ const RESTEndpoints = app => {
       const { body } = req
 
       const { objectId: bookComponentId } = body
+
       res.status(200).json({
         msg: 'ok',
       })
+
       const bookComp = await getBookComponent(bookComponentId)
 
       await deleteBookComponent(bookComp)
-      await pubsub.publish(BOOK_COMPONENT_DELETED, {
+      const belongingBook = await Book.findById(bookComp.bookId)
+
+      pubsub.publish(BOOK_COMPONENT_DELETED, {
         bookComponentDeleted: { id: bookComponentId },
+      })
+
+      pubsub.publish(BOOK_UPDATED, {
+        bookUpdated: belongingBook,
       })
       // throw something which will only be displayed in server's logs
       throw new Error(error)

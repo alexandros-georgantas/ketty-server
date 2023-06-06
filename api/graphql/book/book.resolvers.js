@@ -191,19 +191,11 @@ const updatePODMetadataHandler = async (_, { bookId, metadata }, ctx) => {
 }
 
 const exportBookHandler = async (_, { input }, ctx) => {
-  const { bookId, mode, previewer, templateId, fileExtension, icmlNotes } =
-    input
+  const { bookId, previewer, templateId, fileExtension, icmlNotes } = input
 
   try {
     logger.info('book resolver: executing exportBook use case')
-    return exportBook(
-      bookId,
-      mode,
-      templateId,
-      previewer,
-      fileExtension,
-      icmlNotes,
-    )
+    return exportBook(bookId, templateId, previewer, fileExtension, icmlNotes)
   } catch (e) {
     throw new Error(e)
   }
