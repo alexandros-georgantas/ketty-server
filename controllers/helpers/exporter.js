@@ -68,7 +68,9 @@ const ExporterService = async (
         false)
 
     const featurePODEnabled =
-      (process.env.FEATURE_POD && JSON.parse(process.env.FEATURE_POD)) || false
+      config.has('featurePOD') &&
+      ((config.get('featurePOD') && JSON.parse(config.get('featurePOD'))) ||
+        false)
 
     if (fileExtension !== 'icml') {
       template = await Template.findById(templateId)
