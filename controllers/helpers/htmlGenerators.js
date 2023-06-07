@@ -26,7 +26,8 @@ const featureBookStructureEnabled =
     false)
 
 const featurePODEnabled =
-  (process.env.FEATURE_POD && JSON.parse(process.env.FEATURE_POD)) || false
+  config.has('featurePOD') &&
+  ((config.get('featurePOD') && JSON.parse(config.get('featurePOD'))) || false)
 
 const runningHeadersGenerator = (runningHeadersLeft, runningHeadersRight) => {
   if (!featureBookStructureEnabled) {
@@ -107,7 +108,11 @@ const generatePagedjsContainer = bookTitle => {
   return output.html()
 }
 
-const generateTitlePage = (bookComponent, subtitle = '', authors = '') => {
+const generateTitlePage = (
+  bookComponent,
+  subtitle = undefined,
+  authors = [],
+) => {
   const {
     id,
     componentType,
@@ -124,11 +129,12 @@ const generateTitlePage = (bookComponent, subtitle = '', authors = '') => {
     }">${runningHeadersGenerator(
       runningHeadersLeft,
       runningHeadersRight,
-    )}<header><h1 class="component-title">${title}</h1>
-      ${subtitle ? `<h2 class="component-subtitle">${subtitle}</h2>` : ''}
-      ${authors ? `<h2 class="component-subtitle">${authors}</h2>` : ''}
+    )}<header>
+        ${title ? `<h1 class="component-title">${title}</h1>` : 'Untitled'}
+        ${subtitle ? `<h2 class="component-subtitle">${subtitle}</h2>` : ''}
+        ${authors ? `<h2 class="component-subtitle">${authors}</h2>` : ''}
       </header>
-      </section>`,
+    </section>`,
   )
 
   return output('body').html()
