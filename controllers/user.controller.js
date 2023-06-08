@@ -150,7 +150,12 @@ const ketidaResendVerificationEmail = async (email, options = {}) => {
   }
 }
 
-const searchForUsers = async (search, exclude, options = {}) => {
+const searchForUsers = async (
+  search,
+  exclude,
+  exactMatch = false,
+  options = {},
+) => {
   try {
     const { trx } = options
     return useTransaction(
@@ -186,14 +191,16 @@ const searchForUsers = async (search, exclude, options = {}) => {
                     get(userClone, 'username', '').toLowerCase(),
                     searchLow,
                   ) ||
-                    startsWith(
-                      get(userClone, 'surname', '').toLowerCase(),
-                      searchLow,
-                    ) ||
-                    startsWith(
-                      get(userClone, 'email', '').toLowerCase(),
-                      searchLow,
-                    )) &&
+                  startsWith(
+                    get(userClone, 'surname', '').toLowerCase(),
+                    searchLow,
+                  ) ||
+                  exactMatch
+                    ? get(userClone, 'email', '').toLowerCase() === searchLow
+                    : startsWith(
+                        get(userClone, 'email', '').toLowerCase(),
+                        searchLow,
+                      )) &&
                   !includes(exclude, userClone.id)
                 ) {
                   logger.info(
@@ -205,11 +212,12 @@ const searchForUsers = async (search, exclude, options = {}) => {
                 (startsWith(
                   get(userClone, 'username', '').toLowerCase(),
                   searchLow,
-                ) ||
-                  startsWith(
-                    get(userClone, 'email', '').toLowerCase(),
-                    searchLow,
-                  )) &&
+                ) || exactMatch
+                  ? get(userClone, 'email', '').toLowerCase() === searchLow
+                  : startsWith(
+                      get(userClone, 'email', '').toLowerCase(),
+                      searchLow,
+                    )) &&
                 !includes(exclude, userClone.id)
               ) {
                 logger.info(
@@ -239,13 +247,15 @@ const searchForUsers = async (search, exclude, options = {}) => {
                   (get(userClone, 'username', '')
                     .toLowerCase()
                     .includes(searchLow) ||
-                    get(userClone, 'surname', '')
-                      .toLowerCase()
-                      .includes(searchLow) ||
-                    get(userClone, 'email', '')
-                      .toLowerCase()
-                      .includes(searchLow) ||
-                    fullname.toLowerCase().includes(searchLow)) &&
+                  get(userClone, 'surname', '')
+                    .toLowerCase()
+                    .includes(searchLow) ||
+                  exactMatch
+                    ? get(userClone, 'email', '').toLowerCase() === searchLow
+                    : get(userClone, 'email', '')
+                        .toLowerCase()
+                        .includes(searchLow) ||
+                      fullname.toLowerCase().includes(searchLow)) &&
                   !includes(exclude, userClone.id)
                 ) {
                   logger.info(
@@ -256,10 +266,11 @@ const searchForUsers = async (search, exclude, options = {}) => {
               } else if (
                 (get(userClone, 'username', '')
                   .toLowerCase()
-                  .includes(searchLow) ||
-                  get(userClone, 'email', '')
-                    .toLowerCase()
-                    .includes(searchLow)) &&
+                  .includes(searchLow) || exactMatch
+                  ? get(userClone, 'email', '').toLowerCase() === searchLow
+                  : get(userClone, 'email', '')
+                      .toLowerCase()
+                      .includes(searchLow)) &&
                 !includes(exclude, userClone.id)
               ) {
                 logger.info(
