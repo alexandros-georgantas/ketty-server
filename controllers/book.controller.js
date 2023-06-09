@@ -193,7 +193,7 @@ const createBook = async (data = {}) => {
           newBookData.bookStructure = defaultBookStructure
         }
 
-        // END OF SECTION
+        // END OF BOOK STRUCTURE FEATURE SECTION
 
         // SECTION FOR BOOK METADATA DEFAULT VALUES
         if (featurePODEnabled) {
@@ -217,6 +217,7 @@ const createBook = async (data = {}) => {
         }
 
         // END OF BOOK METADATA DEFAULT VALUES SECTION
+
         const newBook = await Book.insert(newBookData, { trx: tr })
 
         const { id: bookId } = newBook
@@ -254,7 +255,7 @@ const createBook = async (data = {}) => {
         }
         // END OF BOOK TRANSLATION SECTION
 
-        // END OF BOOK DIVISIONS
+        // SECTION OF BOOK DIVISIONS CREATION
         const { config: divisions } = await getApplicationParameters(
           'bookBuilder',
           'divisions',
@@ -303,7 +304,7 @@ const createBook = async (data = {}) => {
           `${BOOK_CONTROLLER} createBook: book with id ${bookId} patched with the new divisions`,
         )
 
-        // END OF BOOK DIVISIONS SECTION
+        // END OF BOOK DIVISIONS CREATION SECTION
 
         // SECTION FOR BOOK TEAMS CREATION
         if (!config.has('teams.nonGlobal')) {
@@ -397,6 +398,7 @@ const createBook = async (data = {}) => {
         const frontMatterBookComponents = frontMatterDivision.bookComponents
 
         if (featurePODEnabled) {
+          // SUB-SECTION FOR TITLE PAGE CREATION
           logger.info(
             `${BOOK_CONTROLLER} createBook: creating Title page component for the book with id ${bookId}`,
           )
@@ -419,7 +421,7 @@ const createBook = async (data = {}) => {
           )
 
           logger.info(
-            `${BOOK_CONTROLLER} createBook: new book component Title Page created with id ${createdTitlePageBookComponent.id}`,
+            `${BOOK_CONTROLLER} createBook: new book component Title page created with id ${createdTitlePageBookComponent.id}`,
           )
 
           const titlePageTranslation = await BookComponentTranslation.insert(
@@ -432,13 +434,13 @@ const createBook = async (data = {}) => {
           )
 
           logger.info(
-            `${BOOK_CONTROLLER} createBook: new book component translation for Title Page created with id ${titlePageTranslation.id}`,
+            `${BOOK_CONTROLLER} createBook: new book component translation for Title page created with id ${titlePageTranslation.id}`,
           )
 
           frontMatterBookComponents.push(createdTitlePageBookComponent.id)
 
           logger.info(
-            `${BOOK_CONTROLLER} createBook: book component Title Page will be added to the array of book components for the Front matter division`,
+            `${BOOK_CONTROLLER} createBook: book component Title page will be added to the array of book components for the Front matter division`,
           )
 
           await BookComponentState.insert(
@@ -454,6 +456,68 @@ const createBook = async (data = {}) => {
             ),
             { trx: tr },
           )
+          // END OF TITLE PAGE CREATION SUB-SECTION
+
+          // SUB-SECTION FOR COPYRIGHTS PAGE CREATION
+          logger.info(
+            `${BOOK_CONTROLLER} createBook: creating Copyrights page component for the book with id ${bookId}`,
+          )
+
+          const newCopyrightsBookComponent = {
+            bookId,
+            componentType: 'copyrights-page',
+            divisionId: frontMatterDivision.id,
+            pagination: {
+              left: false,
+              right: false,
+            },
+            archived: false,
+            deleted: false,
+          }
+
+          const createdCopyrightsBookComponent = await BookComponent.insert(
+            newCopyrightsBookComponent,
+            { trx: tr },
+          )
+
+          logger.info(
+            `${BOOK_CONTROLLER} createBook: new book component Copyrights page created with id ${createdCopyrightsBookComponent.id}`,
+          )
+
+          const copyrightsTranslation = await BookComponentTranslation.insert(
+            {
+              bookComponentId: createdCopyrightsBookComponent.id,
+              languageIso: 'en',
+              title: 'Copyrights',
+            },
+            { trx: tr },
+          )
+
+          logger.info(
+            `${BOOK_CONTROLLER} createBook: new book component translation for Copyrights page created with id ${copyrightsTranslation.id}`,
+          )
+
+          frontMatterBookComponents.push(createdCopyrightsBookComponent.id)
+
+          logger.info(
+            `${BOOK_CONTROLLER} createBook: book component Copyrights page will be added to the array of book components for the Front matter division`,
+          )
+
+          await BookComponentState.insert(
+            assign(
+              {},
+              {
+                bookComponentId: createdCopyrightsBookComponent.id,
+                trackChangesEnabled: false,
+                uploading: false,
+                includeInToc: false,
+              },
+              defaultBookComponentWorkflowStages,
+            ),
+            { trx: tr },
+          )
+
+          // END OF COPYRIGHTS PAGE CREATION SUB-SECTION
         }
 
         logger.info(
