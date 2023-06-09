@@ -14,7 +14,7 @@ const {
 } = require('./converters')
 
 const bookConstructor = require('./bookConstructor')
-const { generateContainer } = require('./htmlGenerators')
+const { generateContainer, generateTitlePage } = require('./htmlGenerators')
 const EPUBPreparation = require('./EPUBPreparation')
 const ICMLPreparation = require('./ICMLPreparation')
 const PagedJSPreparation = require('./PagedJSPreparation')
@@ -67,6 +67,11 @@ const ExporterService = async (
         JSON.parse(config.get('featureBookStructure'))) ||
         false)
 
+    const featurePODEnabled =
+      config.has('featurePOD') &&
+      ((config.get('featurePOD') && JSON.parse(config.get('featurePOD'))) ||
+        false)
+
     if (fileExtension !== 'icml') {
       template = await Template.findById(templateId)
       const { notes } = template
@@ -93,6 +98,11 @@ const ExporterService = async (
     }
 
     let endnotesComponent
+
+    if (featurePODEnabled) {
+      const titlePageComponent = frontDivision.bookComponents.get('title-page')
+      titlePageComponent.content = generateTitlePage(titlePageComponent)
+    }
 
     if (
       templateHasEndnotes ||

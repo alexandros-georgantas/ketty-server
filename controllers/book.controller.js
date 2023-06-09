@@ -157,7 +157,9 @@ const createBook = async (data = {}) => {
     const { collectionId, title, options } = data
 
     const featurePODEnabled =
-      (process.env.FEATURE_POD && JSON.parse(process.env.FEATURE_POD)) || false
+      config.has('featurePOD') &&
+      ((config.get('featurePOD') && JSON.parse(config.get('featurePOD'))) ||
+        false)
 
     let trx
     let addUserToBookTeams
@@ -177,6 +179,7 @@ const createBook = async (data = {}) => {
           newBookData.collectionId = collectionId
         }
 
+        // SECTION FOR BOOK STRUCTURE FEATURE
         if (
           config.has('featureBookStructure') &&
           ((config.get('featureBookStructure') &&
@@ -190,6 +193,9 @@ const createBook = async (data = {}) => {
           newBookData.bookStructure = defaultBookStructure
         }
 
+        // END OF SECTION
+
+        // SECTION FOR BOOK METADATA DEFAULT VALUES
         if (featurePODEnabled) {
           newBookData.podMetadata = {
             authors: '',
@@ -210,6 +216,7 @@ const createBook = async (data = {}) => {
           }
         }
 
+        // END OF BOOK METADATA DEFAULT VALUES SECTION
         const newBook = await Book.insert(newBookData, { trx: tr })
 
         const { id: bookId } = newBook
@@ -218,6 +225,7 @@ const createBook = async (data = {}) => {
           `${BOOK_CONTROLLER} createBook: new book created with id ${bookId}`,
         )
 
+        // SECTION FOR BOOK TRANSLATION
         if (title) {
           await BookTranslation.insert(
             {
@@ -244,7 +252,9 @@ const createBook = async (data = {}) => {
             `${BOOK_CONTROLLER} createBook: new book translation placeholder created for the book with id ${bookId}`,
           )
         }
+        // END OF BOOK TRANSLATION SECTION
 
+        // END OF BOOK DIVISIONS
         const { config: divisions } = await getApplicationParameters(
           'bookBuilder',
           'divisions',
@@ -263,11 +273,11 @@ const createBook = async (data = {}) => {
             label: 'Body',
           }
 
-          const division = await createDivision(divisionData, {
+          const bodyDivision = await createDivision(divisionData, {
             trx: tr,
           })
 
-          createdDivisionIds = [division.id]
+          createdDivisionIds = [bodyDivision.id]
         } else {
           const createdDivisions = await Promise.all(
             divisions.map(async division => {
@@ -293,6 +303,9 @@ const createBook = async (data = {}) => {
           `${BOOK_CONTROLLER} createBook: book with id ${bookId} patched with the new divisions`,
         )
 
+        // END OF BOOK DIVISIONS SECTION
+
+        // SECTION FOR BOOK TEAMS CREATION
         if (!config.has('teams.nonGlobal')) {
           logger.info(
             `${BOOK_CONTROLLER} createBook: You haven't declared any teams  in config`,
@@ -350,11 +363,9 @@ const createBook = async (data = {}) => {
             }),
           )
         }
+        // END OF BOOK TEAMS CREATION SECTION
 
-        logger.info(
-          `${BOOK_CONTROLLER} createBook: creating TOC component for the book with id ${bookId}`,
-        )
-
+        // SECTION FOR BOOK SPECIAL COMPONENTS CREATION
         const workflowConfig = await getApplicationParameters(
           'bookBuilder',
           'stages',
@@ -363,23 +374,96 @@ const createBook = async (data = {}) => {
           },
         )
 
-        const { config: workflowStages } = workflowConfig
+        const { config: predefinedWorkflowStages } = workflowConfig
 
-        let bookComponentWorkflowStages
+        const defaultBookComponentWorkflowStages = {
+          workflowStages: predefinedWorkflowStages
+            ? map(predefinedWorkflowStages, stage => ({
+                type: stage.type,
+                label: stage.title,
+                value: -1,
+              }))
+            : [],
+        }
 
-        const division = await Division.findOne(
+        const frontMatterDivision = await Division.findOne(
           { bookId, label: 'Frontmatter', deleted: false },
           { trx: tr },
         )
 
         logger.info(
-          `${BOOK_CONTROLLER} createBook: division which will hold the TOC found with id ${division.id}`,
+          `${BOOK_CONTROLLER} createBook: Front matter division which will hold all the special components found with id ${frontMatterDivision.id}`,
+        )
+        const frontMatterBookComponents = frontMatterDivision.bookComponents
+
+        if (featurePODEnabled) {
+          logger.info(
+            `${BOOK_CONTROLLER} createBook: creating Title page component for the book with id ${bookId}`,
+          )
+
+          const newTitlePageBookComponent = {
+            bookId,
+            componentType: 'title-page',
+            divisionId: frontMatterDivision.id,
+            pagination: {
+              left: false,
+              right: false,
+            },
+            archived: false,
+            deleted: false,
+          }
+
+          const createdTitlePageBookComponent = await BookComponent.insert(
+            newTitlePageBookComponent,
+            { trx: tr },
+          )
+
+          logger.info(
+            `${BOOK_CONTROLLER} createBook: new book component Title Page created with id ${createdTitlePageBookComponent.id}`,
+          )
+
+          const titlePageTranslation = await BookComponentTranslation.insert(
+            {
+              bookComponentId: createdTitlePageBookComponent.id,
+              languageIso: 'en',
+              title: 'Title Page',
+            },
+            { trx: tr },
+          )
+
+          logger.info(
+            `${BOOK_CONTROLLER} createBook: new book component translation for Title Page created with id ${titlePageTranslation.id}`,
+          )
+
+          frontMatterBookComponents.push(createdTitlePageBookComponent.id)
+
+          logger.info(
+            `${BOOK_CONTROLLER} createBook: book component Title Page will be added to the array of book components for the Front matter division`,
+          )
+
+          await BookComponentState.insert(
+            assign(
+              {},
+              {
+                bookComponentId: createdTitlePageBookComponent.id,
+                trackChangesEnabled: false,
+                uploading: false,
+                includeInToc: false,
+              },
+              defaultBookComponentWorkflowStages,
+            ),
+            { trx: tr },
+          )
+        }
+
+        logger.info(
+          `${BOOK_CONTROLLER} createBook: creating TOC component for the book with id ${bookId}`,
         )
 
-        const newBookComponent = {
+        const newTOCBookComponent = {
           bookId,
           componentType: 'toc',
-          divisionId: division.id,
+          divisionId: frontMatterDivision.id,
           pagination: {
             left: false,
             right: true,
@@ -388,18 +472,20 @@ const createBook = async (data = {}) => {
           deleted: false,
         }
 
-        const createdBookComponent = await BookComponent.insert(
-          newBookComponent,
-          { trx: tr },
+        const TOCBookComponent = await BookComponent.insert(
+          newTOCBookComponent,
+          {
+            trx: tr,
+          },
         )
 
         logger.info(
-          `${BOOK_CONTROLLER} createBook: new book component (TOC) created with id ${createdBookComponent.id}`,
+          `${BOOK_CONTROLLER} createBook: new book component (TOC) created with id ${TOCBookComponent.id}`,
         )
 
-        const translation = await BookComponentTranslation.insert(
+        const TOCtranslation = await BookComponentTranslation.insert(
           {
-            bookComponentId: createdBookComponent.id,
+            bookComponentId: TOCBookComponent.id,
             languageIso: 'en',
             title: 'Table of Contents',
           },
@@ -407,48 +493,41 @@ const createBook = async (data = {}) => {
         )
 
         logger.info(
-          `${BOOK_CONTROLLER} createBook: new book component translation for TOC created with id ${translation.id}`,
+          `${BOOK_CONTROLLER} createBook: new book component translation for TOC created with id ${TOCtranslation.id}`,
         )
 
-        const newBookComponents = division.bookComponents
-
-        newBookComponents.push(createdBookComponent.id)
-
-        const updatedDivision = await Division.patchAndFetchById(
-          division.id,
-          {
-            bookComponents: newBookComponents,
-          },
-          { trx: tr },
-        )
+        frontMatterBookComponents.push(TOCBookComponent.id)
 
         logger.info(
-          `${BOOK_CONTROLLER} createBook: book component TOC pushed to the array of division's book components [${updatedDivision.bookComponents}]`,
+          `${BOOK_CONTROLLER} createBook: book component Table of Contents will be added to the array of book components for the Front matter division`,
         )
-
-        if (workflowStages) {
-          bookComponentWorkflowStages = {
-            workflowStages: map(workflowStages, stage => ({
-              type: stage.type,
-              label: stage.title,
-              value: -1,
-            })),
-          }
-        }
 
         await BookComponentState.insert(
           assign(
             {},
             {
-              bookComponentId: createdBookComponent.id,
+              bookComponentId: TOCBookComponent.id,
               trackChangesEnabled: false,
               uploading: false,
               includeInToc: false,
             },
-            bookComponentWorkflowStages,
+            defaultBookComponentWorkflowStages,
           ),
           { trx: tr },
         )
+
+        await Division.patchAndFetchById(
+          frontMatterDivision.id,
+          {
+            bookComponents: frontMatterBookComponents,
+          },
+          { trx: tr },
+        )
+
+        logger.info(
+          `${BOOK_CONTROLLER} createBook: book's Front matter division updated with the special component/s `,
+        )
+        // END OF BOOK SPECIAL COMPONENTS CREATION SECTION
 
         return newBook
       },
