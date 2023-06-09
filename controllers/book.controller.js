@@ -193,7 +193,7 @@ const createBook = async (data = {}) => {
           newBookData.bookStructure = defaultBookStructure
         }
 
-        // END OF SECTION
+        // END OF BOOK STRUCTURE FEATURE SECTION
 
         // SECTION FOR BOOK METADATA DEFAULT VALUES
         if (featurePODEnabled) {
@@ -217,6 +217,7 @@ const createBook = async (data = {}) => {
         }
 
         // END OF BOOK METADATA DEFAULT VALUES SECTION
+
         const newBook = await Book.insert(newBookData, { trx: tr })
 
         const { id: bookId } = newBook
@@ -254,7 +255,7 @@ const createBook = async (data = {}) => {
         }
         // END OF BOOK TRANSLATION SECTION
 
-        // END OF BOOK DIVISIONS
+        // SECTION OF BOOK DIVISIONS CREATION
         const { config: divisions } = await getApplicationParameters(
           'bookBuilder',
           'divisions',
@@ -303,7 +304,7 @@ const createBook = async (data = {}) => {
           `${BOOK_CONTROLLER} createBook: book with id ${bookId} patched with the new divisions`,
         )
 
-        // END OF BOOK DIVISIONS SECTION
+        // END OF BOOK DIVISIONS CREATION SECTION
 
         // SECTION FOR BOOK TEAMS CREATION
         if (!config.has('teams.nonGlobal')) {
@@ -462,7 +463,7 @@ const createBook = async (data = {}) => {
             `${BOOK_CONTROLLER} createBook: creating Copyrights page component for the book with id ${bookId}`,
           )
 
-          const copyrightsBookComponent = {
+          const newCopyrightsBookComponent = {
             bookId,
             componentType: 'copyrights-page',
             divisionId: frontMatterDivision.id,
@@ -475,7 +476,7 @@ const createBook = async (data = {}) => {
           }
 
           const createdCopyrightsBookComponent = await BookComponent.insert(
-            copyrightsBookComponent,
+            newCopyrightsBookComponent,
             { trx: tr },
           )
 
