@@ -463,10 +463,10 @@
     stylelint-order "^5.0.0"
     stylelint-processor-styled-components "^1.10.0"
 
-"@coko/server@3.0.0-beta.10":
-  version "3.0.0-beta.10"
-  resolved "https://registry.yarnpkg.com/@coko/server/-/server-3.0.0-beta.10.tgz#4e990603349d435a42c1a8d8e438211a00297a1e"
-  integrity sha512-5ZAVoIJ8Ye7YYVghPkR/Zyva0dAvN0Hu3Izq1Nrwh1oshOLm28CzK3wfXa99fFCA+boLptB15xyTYkDXsfM0Mg==
+"@coko/server@3.0.0-beta.12":
+  version "3.0.0-beta.12"
+  resolved "https://registry.yarnpkg.com/@coko/server/-/server-3.0.0-beta.12.tgz#08a187542abb4db9cb2c2561c43b5e91916d8a54"
+  integrity sha512-GyKMAaRCTxb1pL7ystM2BgA/G1iOjCayKs0v8jl5+A2lcdF6ocUmqXeDUOZ6Tmm7OLoRD4KT+CgnMavI7jVkrQ==
   dependencies:
     "@pubsweet/base-model" "^4.0.10"
     "@pubsweet/component-send-email" "^0.4.13"
@@ -487,6 +487,7 @@
     fs-extra "^10.0.0"
     graphql-middleware "^4.0.2"
     graphql-shield "^7.4.1"
+    graphql-subscriptions "1.2.1"
     graphql-upload "^13.0.0"
     helmet "^3.22.1"
     http-status-codes "^1.4.0"
