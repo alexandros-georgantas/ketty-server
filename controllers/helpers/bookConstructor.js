@@ -165,6 +165,8 @@ module.exports = async bookId => {
         tempDivision.bookComponents.set('toc', bookComponent)
       } else if (bookComponent.componentType === 'endnotes') {
         tempDivision.bookComponents.set('endnotes', bookComponent)
+      } else if (bookComponent.componentType === 'title-page') {
+        tempDivision.bookComponents.set('title-page', bookComponent)
       } else {
         tempDivision.bookComponents.set(bookComponentId, bookComponent)
       }
