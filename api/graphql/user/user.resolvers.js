@@ -17,11 +17,7 @@ const searchForUsersHandler = async (
   try {
     logger.info('user resolver: executing searchForUsers use case')
 
-    if (exactMatch) {
-      return searchForUsers(search, exclude, exactMatch)
-    }
-
-    return searchForUsers(search, exclude)
+    return searchForUsers(search, exclude, exactMatch)
   } catch (e) {
     throw new Error(e)
   }
