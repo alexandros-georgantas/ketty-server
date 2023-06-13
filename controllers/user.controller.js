@@ -160,17 +160,31 @@ const searchForUsers = async (
     const { trx } = options
     return useTransaction(
       async tr => {
+        const res = []
+
         if (!search) {
-          return []
+          return res
+        }
+
+        const searchLow = search.toLowerCase()
+
+        if (exactMatch) {
+          return User.query(tr)
+            .leftJoin('identities', 'identities.user_id', 'users.id')
+            .where({
+              'users.is_active': true,
+              'identities.is_verified': true,
+              'identities.is_default': true,
+              'identities.email': searchLow,
+            })
+            .whereNotIn('users.id', exclude)
+            .skipUndefined()
         }
 
         const { result: allUsers } = await User.find(
           { isActive: true },
           { trx: tr, related: 'defaultIdentity' },
         )
-
-        const searchLow = search.toLowerCase()
-        const res = []
 
         if (searchLow.length <= 3) {
           logger.info(
@@ -191,16 +205,14 @@ const searchForUsers = async (
                     get(userClone, 'username', '').toLowerCase(),
                     searchLow,
                   ) ||
-                  startsWith(
-                    get(userClone, 'surname', '').toLowerCase(),
-                    searchLow,
-                  ) ||
-                  exactMatch
-                    ? get(userClone, 'email', '').toLowerCase() === searchLow
-                    : startsWith(
-                        get(userClone, 'email', '').toLowerCase(),
-                        searchLow,
-                      )) &&
+                    startsWith(
+                      get(userClone, 'surname', '').toLowerCase(),
+                      searchLow,
+                    ) ||
+                    startsWith(
+                      get(userClone, 'email', '').toLowerCase(),
+                      searchLow,
+                    )) &&
                   !includes(exclude, userClone.id)
                 ) {
                   logger.info(
@@ -212,12 +224,11 @@ const searchForUsers = async (
                 (startsWith(
                   get(userClone, 'username', '').toLowerCase(),
                   searchLow,
-                ) || exactMatch
-                  ? get(userClone, 'email', '').toLowerCase() === searchLow
-                  : startsWith(
-                      get(userClone, 'email', '').toLowerCase(),
-                      searchLow,
-                    )) &&
+                ) ||
+                  startsWith(
+                    get(userClone, 'email', '').toLowerCase(),
+                    searchLow,
+                  )) &&
                 !includes(exclude, userClone.id)
               ) {
                 logger.info(
@@ -247,15 +258,13 @@ const searchForUsers = async (
                   (get(userClone, 'username', '')
                     .toLowerCase()
                     .includes(searchLow) ||
-                  get(userClone, 'surname', '')
-                    .toLowerCase()
-                    .includes(searchLow) ||
-                  exactMatch
-                    ? get(userClone, 'email', '').toLowerCase() === searchLow
-                    : get(userClone, 'email', '')
-                        .toLowerCase()
-                        .includes(searchLow) ||
-                      fullname.toLowerCase().includes(searchLow)) &&
+                    get(userClone, 'surname', '')
+                      .toLowerCase()
+                      .includes(searchLow) ||
+                    get(userClone, 'email', '')
+                      .toLowerCase()
+                      .includes(searchLow) ||
+                    fullname.toLowerCase().includes(searchLow)) &&
                   !includes(exclude, userClone.id)
                 ) {
                   logger.info(
@@ -266,11 +275,10 @@ const searchForUsers = async (
               } else if (
                 (get(userClone, 'username', '')
                   .toLowerCase()
-                  .includes(searchLow) || exactMatch
-                  ? get(userClone, 'email', '').toLowerCase() === searchLow
-                  : get(userClone, 'email', '')
-                      .toLowerCase()
-                      .includes(searchLow)) &&
+                  .includes(searchLow) ||
+                  get(userClone, 'email', '')
+                    .toLowerCase()
+                    .includes(searchLow)) &&
                 !includes(exclude, userClone.id)
               ) {
                 logger.info(
