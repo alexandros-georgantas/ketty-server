@@ -844,13 +844,22 @@ const exportBook = async (
   previewer,
   fileExtension,
   icmlNotes,
+  additionalExportOptions,
   options = {},
 ) => {
   try {
     const { trx } = options
     return useTransaction(
       async tr =>
-        exporter(bookId, mode, templateId, previewer, fileExtension, icmlNotes),
+        exporter(
+          bookId,
+          mode,
+          templateId,
+          previewer,
+          fileExtension,
+          icmlNotes,
+          additionalExportOptions,
+        ),
       { trx, passedTrxOnly: true },
     )
   } catch (e) {

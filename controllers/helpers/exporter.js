@@ -60,6 +60,7 @@ const ExporterService = async (
   previewer,
   fileExtension,
   icmlNotes,
+  additionalExportOptions,
   ctx,
 ) => {
   try {
@@ -103,14 +104,28 @@ const ExporterService = async (
       tocComponent.content = generateContainer(tocComponent, false)
     }
 
-    if (featurePODEnabled) {
-      const titlePageComponent = frontDivision.bookComponents.get('title-page')
-      titlePageComponent.content = generateTitlePage(titlePageComponent)
+    if (featurePODEnabled && additionalExportOptions) {
+      if (additionalExportOptions.includeTitlePage) {
+        const titlePageComponent =
+          frontDivision.bookComponents.get('title-page')
 
-      const copyrightComponent =
-        frontDivision.bookComponents.get('copyrights-page')
+        titlePageComponent.content = generateTitlePage(titlePageComponent)
+      } else {
+        frontDivision.bookComponents.delete('title-page')
+      }
 
-      copyrightComponent.content = generateCopyrightsPage(copyrightComponent)
+      if (!additionalExportOptions.includeTOC) {
+        frontDivision.bookComponents.delete('toc')
+      }
+
+      if (additionalExportOptions.includeCopyrights) {
+        const copyrightComponent =
+          frontDivision.bookComponents.get('copyrights-page')
+
+        copyrightComponent.content = generateCopyrightsPage(copyrightComponent)
+      } else {
+        frontDivision.bookComponents.delete('copyrights-page')
+      }
     }
 
     let endnotesComponent
@@ -233,7 +248,7 @@ const ExporterService = async (
     }
 
     // Check if notes exist, else remove the book component
-    if (templateHasEndnotes) {
+    if (templateHasEndnotes && tocComponent) {
       const $endnotes = cheerio.load(endnotesComponent.content)
       const $toc = cheerio.load(tocComponent.content)
 
