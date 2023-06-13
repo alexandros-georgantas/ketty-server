@@ -17,7 +17,7 @@ module.exports = (
     bookComponent
 
   const levelClass = level ? `toc-level-${level}` : undefined
-  const toc = cheerio.load(tocComponent.content)
+  const toc = tocComponent ? cheerio.load(tocComponent.content) : undefined
   let hasMath = false
   const h2s = []
 
@@ -434,7 +434,7 @@ module.exports = (
     }
   })
 
-  if (includeInTOC) {
+  if (tocComponent && includeInTOC) {
     let subitems
 
     if (featureBookStructureEnabled) {
