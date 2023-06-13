@@ -2,6 +2,8 @@ const { logger, useTransaction } = require('@coko/server')
 const omitBy = require('lodash/omitBy')
 const isUndefined = require('lodash/isUndefined')
 
+const TeamMember = require('@coko/server/src/models/teamMember/teamMember.model')
+
 const { Team } = require('../models').models
 
 const getObjectTeam = async (
@@ -61,6 +63,39 @@ const createTeam = async (
   }
 }
 
+const updateTeamMemberStatus = async (teamId, userId, status, options = {}) => {
+  try {
+    const { trx } = options
+
+    return useTransaction(
+      async tr => {
+        const teamMember = await TeamMember.query(tr).findOne({
+          teamId,
+          userId,
+        })
+
+        if (!teamMember) {
+          throw new Error('Team member not found')
+        }
+
+        await TeamMember.query(tr).patch({ status }).where({
+          teamId,
+          userId,
+        })
+
+        logger.info(
+          `>>> team member with id ${teamMember.id} status updated to ${status}`,
+        )
+
+        return Team.query(tr).findById(teamId)
+      },
+      { trx },
+    )
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
 const deleteTeam = async (teamId, options = {}) => {
   try {
     const { trx } = options
@@ -102,4 +137,5 @@ module.exports = {
   createTeam,
   getObjectTeam,
   deleteTeam,
+  updateTeamMemberStatus,
 }
