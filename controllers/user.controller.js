@@ -150,22 +150,41 @@ const ketidaResendVerificationEmail = async (email, options = {}) => {
   }
 }
 
-const searchForUsers = async (search, exclude, options = {}) => {
+const searchForUsers = async (
+  search,
+  exclude,
+  exactMatch = false,
+  options = {},
+) => {
   try {
     const { trx } = options
     return useTransaction(
       async tr => {
+        const res = []
+
         if (!search) {
-          return []
+          return res
+        }
+
+        const searchLow = search.toLowerCase()
+
+        if (exactMatch) {
+          return User.query(tr)
+            .leftJoin('identities', 'identities.user_id', 'users.id')
+            .where({
+              'users.is_active': true,
+              'identities.is_verified': true,
+              'identities.is_default': true,
+              'identities.email': searchLow,
+            })
+            .whereNotIn('users.id', exclude)
+            .skipUndefined()
         }
 
         const { result: allUsers } = await User.find(
           { isActive: true },
           { trx: tr, related: 'defaultIdentity' },
         )
-
-        const searchLow = search.toLowerCase()
-        const res = []
 
         if (searchLow.length <= 3) {
           logger.info(
