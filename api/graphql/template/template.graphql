@@ -36,6 +36,11 @@ input CreateTemplateInput {
   exportScripts: [ExportScriptInput]!
 }
 
+input TemplatesWhereInput {
+  target: String!
+  trimSize: String
+}
+
 input ClonedTemplateInput {
   id: ID!
   bookId: ID!
@@ -76,6 +81,7 @@ extend type Query {
     notes: String
   ): [Template]!
   getTemplate(id: ID!): Template!
+  getSpecificTemplates(where: TemplatesWhereInput!): [Template!]!
 }
 
 extend type Mutation {
