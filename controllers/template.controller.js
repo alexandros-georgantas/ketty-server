@@ -96,6 +96,32 @@ const getTemplate = async (id, options = {}) => {
   }
 }
 
+const getSpecificTemplates = async (target, trimSize = null, options = {}) => {
+  try {
+    const { trx } = options
+    logger.info(
+      `>>> fetching specific templates based on target and trim size were applicable`,
+    )
+
+    return useTransaction(
+      async tr => {
+        const query = Template.query(tr)
+          .where('deleted', false)
+          .andWhere('target', target)
+
+        if (trimSize !== null) {
+          query.andWhere('trimSize', trimSize)
+        }
+
+        return query
+      },
+      { trx, passedTrxOnly: true },
+    )
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
 const createTemplate = async (
   name,
   author,
@@ -537,6 +563,7 @@ const getExportScripts = async (scope = undefined) => {
 module.exports = {
   getTemplates,
   getTemplate,
+  getSpecificTemplates,
   createTemplate,
   cloneTemplate,
   updateTemplate,

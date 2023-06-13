@@ -9,6 +9,7 @@ const {
 const {
   getTemplates,
   getTemplate,
+  getSpecificTemplates,
   createTemplate,
   cloneTemplate,
   updateTemplate,
@@ -35,6 +36,16 @@ const getTemplatesHandler = async (
 const getTemplateHandler = async (_, { id }, ctx) => {
   logger.info('template resolver: use case getTemplate')
   return getTemplate(id)
+}
+
+const getSpecificTemplatesHandler = (_, { where }, ctx) => {
+  try {
+    const { target, trimSize } = where
+    logger.info('template resolver: use case getSpecificTemplates')
+    return getSpecificTemplates(target, trimSize)
+  } catch (e) {
+    throw new Error(e)
+  }
 }
 
 const createTemplateHandler = async (_, { input }, ctx) => {
@@ -176,6 +187,7 @@ module.exports = {
   Query: {
     getTemplates: getTemplatesHandler,
     getTemplate: getTemplateHandler,
+    getSpecificTemplates: getSpecificTemplatesHandler,
     getExportScripts: getExportScriptsHandler,
   },
   Mutation: {
