@@ -74,14 +74,7 @@ const updateTeamMemberStatus = async (teamId, userId, status, options = {}) => {
           userId,
         })
 
-        if (!teamMember) {
-          throw new Error('Team member not found')
-        }
-
-        await TeamMember.query(tr).patch({ status }).where({
-          teamId,
-          userId,
-        })
+        await TeamMember.patchAndFetchById(teamMember.id, { status })
 
         logger.info(
           `>>> team member with id ${teamMember.id} status updated to ${status}`,
