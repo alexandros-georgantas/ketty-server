@@ -5,7 +5,7 @@ const {
   updateTeamMembership,
 } = require('@coko/server/src/models/team/team.controller')
 
-const { TeamMember } = require('../../../models').models
+const { getUser } = require('@coko/server/src/models/user/user.controller')
 
 const {
   updateTeamMemberStatus,
@@ -28,7 +28,11 @@ const updateKetidaTeamMembersHandler = async (
     logger.info('team resolver: executing updateTeamMembers use case')
     const updatedTeam = await updateTeamMembership(teamId, members)
 
-    await TeamMember.query().where('teamId', teamId).patch({ status })
+    await Promise.all(
+      members.map(async userId => {
+        await updateTeamMemberStatus(teamId, userId, status)
+      }),
+    )
 
     if (updatedTeam.global === true) {
       await pubsub.publish(TEAM_MEMBERS_UPDATED, {
@@ -46,8 +50,9 @@ const updateKetidaTeamMembersHandler = async (
 
     await Promise.all(
       members.map(async userId => {
+        const user = await getUser(userId)
         await pubsub.publish(USER_UPDATED, {
-          userUpdated: { userId },
+          userUpdated: { user },
         })
       }),
     )
@@ -70,13 +75,14 @@ const updateTeamMemberStatusHandler = async (
   try {
     const pubsub = await pubsubManager.getPubsub()
     const updatedTeam = await updateTeamMemberStatus(teamId, userId, status)
+    const user = await getUser(userId)
 
     pubsub.publish(TEAM_UPDATED, {
       teamUpdated: { teamId },
     })
 
     pubsub.publish(USER_UPDATED, {
-      userUpdated: { userId },
+      userUpdated: { user },
     })
     return updatedTeam
   } catch (e) {
