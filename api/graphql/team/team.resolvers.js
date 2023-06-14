@@ -2,6 +2,10 @@ const { pubsubManager } = require('@coko/server')
 const { logger } = require('@coko/server')
 
 const {
+  subscriptions: { USER_UPDATED },
+} = require('@coko/server/src/models/user/constants')
+
+const {
   updateTeamMembership,
 } = require('@coko/server/src/models/team/team.controller')
 
@@ -9,12 +13,12 @@ const { getUser } = require('@coko/server/src/models/user/user.controller')
 
 const {
   updateTeamMemberStatus,
+  updateTeamMemberStatuses,
 } = require('../../../controllers/team.controller')
 
 const {
   TEAM_MEMBERS_UPDATED,
   BOOK_PRODUCTION_EDITORS_UPDATED,
-  USER_UPDATED,
   TEAM_UPDATED,
 } = require('./constants')
 
@@ -28,14 +32,10 @@ const updateKetidaTeamMembersHandler = async (
     logger.info('team resolver: executing updateTeamMembers use case')
     const updatedTeam = await updateTeamMembership(teamId, members)
 
-    await Promise.all(
-      members.map(async userId => {
-        await updateTeamMemberStatus(teamId, userId, status)
-      }),
-    )
+    await updateTeamMemberStatuses(teamId, status)
 
     if (updatedTeam.global === true) {
-      await pubsub.publish(TEAM_MEMBERS_UPDATED, {
+      pubsub.publish(TEAM_MEMBERS_UPDATED, {
         teamMembersUpdated: updatedTeam,
       })
 
@@ -51,7 +51,7 @@ const updateKetidaTeamMembersHandler = async (
     await Promise.all(
       members.map(async userId => {
         const user = await getUser(userId)
-        await pubsub.publish(USER_UPDATED, {
+        return pubsub.publish(USER_UPDATED, {
           userUpdated: { user },
         })
       }),
