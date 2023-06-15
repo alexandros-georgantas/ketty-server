@@ -110,6 +110,7 @@ const generatePagedjsContainer = bookTitle => {
 
 const generateTitlePage = (
   bookComponent,
+  bookTitle,
   subtitle = undefined,
   authors = [],
 ) => {
@@ -120,7 +121,6 @@ const generateTitlePage = (
     pagination,
     runningHeadersLeft,
     runningHeadersRight,
-    title,
   } = bookComponent
 
   const output = cheerio.load(
@@ -130,7 +130,11 @@ const generateTitlePage = (
       runningHeadersLeft,
       runningHeadersRight,
     )}<header>
-        ${title ? `<h1 class="component-title">${title}</h1>` : 'Untitled'}
+        ${
+          bookTitle
+            ? `<h1 class="component-title">${bookTitle}</h1>`
+            : 'Untitled'
+        }
         ${subtitle ? `<h2 class="component-subtitle">${subtitle}</h2>` : ''}
         ${authors ? `<h2 class="component-subtitle">${authors}</h2>` : ''}
       </header>

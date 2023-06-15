@@ -109,7 +109,10 @@ const ExporterService = async (
         const titlePageComponent =
           frontDivision.bookComponents.get('title-page')
 
-        titlePageComponent.content = generateTitlePage(titlePageComponent)
+        titlePageComponent.content = generateTitlePage(
+          titlePageComponent,
+          book.title,
+        )
       } else {
         frontDivision.bookComponents.delete('title-page')
       }
@@ -156,6 +159,11 @@ const ExporterService = async (
         const isTheFirstInBody = division.type === 'body' && counter === 0
 
         if (componentType === 'toc') return
+
+        if (featurePODEnabled) {
+          if (componentType === 'title-page') return
+          if (componentType === 'copyrights-page') return
+        }
 
         let container
         let cleanedContent
