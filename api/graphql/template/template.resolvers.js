@@ -101,7 +101,6 @@ const cloneTemplateHandler = async (_, { input }, ctx) => {
 
     return exporter(
       bookId,
-      'preview',
       newTemplate.id,
       'pagedjs',
       undefined,
@@ -162,7 +161,6 @@ const updateTemplateCSSFileHandler = async (_, { input }, ctx) => {
 
     return exporter(
       bookId,
-      'preview',
       currentTemplate.id,
       'pagedjs',
       undefined,
