@@ -25,7 +25,6 @@ const divisionTypeMapper = {
 module.exports = async bookId => {
   const finalBook = {}
   const book = await Book.findById(bookId)
-  console.log('book', book)
 
   if (
     config.has('featureBookStructure') &&
