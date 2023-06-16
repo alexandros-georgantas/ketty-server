@@ -75,6 +75,7 @@ const xsweetImagesHandler = async (content, bookComponentId) => {
           $elem.removeAttr('src')
         }
       })
+      return $('body').html()
     }
 
     return content

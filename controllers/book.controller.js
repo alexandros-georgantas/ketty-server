@@ -839,7 +839,6 @@ const updatePODMetadata = async (bookId, metadata, options = {}) => {
 
 const exportBook = async (
   bookId,
-  mode,
   templateId,
   previewer,
   fileExtension,
@@ -853,7 +852,6 @@ const exportBook = async (
       async tr =>
         exporter(
           bookId,
-          mode,
           templateId,
           previewer,
           fileExtension,
