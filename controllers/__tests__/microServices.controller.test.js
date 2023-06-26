@@ -1,0 +1,101 @@
+const path = require('path')
+
+const {
+  connectToFileStorage,
+} = require('@coko/server/src/services/fileStorage')
+
+const crypto = require('crypto')
+const get = require('lodash/get')
+const config = require('config')
+const seedBookCollection = require('../../scripts/seeds/bookCollection')
+const { createBook } = require('../book.controller')
+const seedApplicationParameters = require('../../scripts/seeds/applicationParameters')
+const { createDivision } = require('../division.controller')
+
+const createTestFile = require('../../scripts/helpers/_createTestFile')
+const clearDb = require('../../scripts/helpers/_clearDB')
+
+const {
+  epubcheckerHandler,
+  pdfHandler,
+  xsweetHandler,
+  pagedPreviewerLink,
+  icmlHandler,
+} = require('../microServices.controller')
+
+const { addBookComponent } = require('../bookComponent.controller')
+
+const uploadsDir = get(config, ['pubsweet-server', 'uploads'], 'uploads')
+
+describe('MicroServices Controller', () => {
+  beforeEach(async () => {
+    await clearDb()
+  })
+
+  it('should check epub based on path', async () => {
+    const filePath = path.join(
+      process.cwd(),
+      'controllers',
+      '__tests__',
+      'files',
+      'test.epub',
+    )
+
+    await connectToFileStorage()
+
+    const rs = await epubcheckerHandler(filePath)
+
+    expect(epubcheckerHandler).toBeDefined()
+    expect(rs.outcome).toBe('ok')
+  }, 30000)
+
+  it('should check xsweetHandler based on book component id, filepath', async () => {
+    const newCollection = await seedBookCollection()
+    await seedApplicationParameters()
+    const title = 'Test Book'
+    const componentType = 'component'
+
+    const newBook = await createBook({ collectionId: newCollection.id, title })
+
+    const division = await createDivision({ bookId: newBook.id, label: 'body' })
+
+    const bookComponent1 = await addBookComponent(
+      division.id,
+      newBook.id,
+      componentType,
+    )
+
+    const filePath = await createTestFile()
+
+    const rs = await xsweetHandler(bookComponent1.id, filePath)
+
+    expect(xsweetHandler).toBeDefined()
+    expect(rs).toBe('ok')
+  })
+
+  it('should check pdf based on zipPath, outputPath, pdffile name', async () => {
+    const PDFFileTimestamp = `${new Date().getTime() + 2}`
+    const PDFFilename = `${crypto.randomBytes(32).toString('hex')}.pdf`
+
+    const filePath = path.join(
+      process.cwd(),
+      'controllers',
+      '__tests__',
+      'files',
+      'test.zip',
+    )
+
+    const PDFtempFolderFilePath = path.join(
+      process.cwd(),
+      uploadsDir,
+      'temp',
+      'paged',
+      PDFFileTimestamp,
+    )
+
+    const rs = await pdfHandler(filePath, PDFtempFolderFilePath, PDFFilename)
+
+    expect(pdfHandler).toBeDefined()
+    expect(rs).toBeUndefined()
+  }, 30000)
+})
