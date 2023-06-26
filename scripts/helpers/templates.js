@@ -89,85 +89,87 @@ const createTemplate = async (sourceRoot, data, cssFile, notes) => {
     const assetsRoot = path.join(sourceRoot, foundTemplate.assetsRoot)
     const areAssetsOK = await filesChecker(assetsRoot)
 
-    const transactionWrapper = async trx => {
-      logger.info('About to create a new template')
-
-      const newTemplate = await Template.insert(
-        {
-          name: `${name} (${notes})`,
-          author,
-          target,
-          notes,
-        },
-        { trx },
+    if (!areAssetsOK) {
+      throw new Error(
+        `an unsupported file exists in either ${foundTemplate.assetsRoot}/css, ${foundTemplate.assetsRoot}/fonts. The supported files are .css, .otf, .woff, .woff2, .ttf`,
       )
+    }
 
-      logger.info(`New template created with id ${newTemplate.id}`)
+    logger.info('Checking if template with that name already exists')
 
-      const fontsPath = path.join(assetsRoot, 'fonts')
+    const templateExists = await Template.findOne({
+      name: `${name} (${notes})`,
+      target,
+    })
 
-      if (fs.existsSync(fontsPath)) {
-        const contents = await dirContents(fontsPath)
-        await Promise.all(
-          contents.map(async font => {
-            const absoluteFontPath = path.join(fontsPath, font)
+    if (!templateExists) {
+      return useTransaction(
+        async trx => {
+          logger.info('About to create a new template')
 
-            return createFile(
-              fs.createReadStream(absoluteFontPath),
-              font,
+          const newTemplate = await Template.insert(
+            {
+              name: `${name} (${notes})`,
+              author,
+              target,
+              notes,
+            },
+            { trx },
+          )
+
+          logger.info(`New template created with id ${newTemplate.id}`)
+
+          const fontsPath = path.join(assetsRoot, 'fonts')
+
+          if (fs.existsSync(fontsPath)) {
+            const contents = await dirContents(fontsPath)
+
+            await Promise.all(
+              contents.map(async font => {
+                const absoluteFontPath = path.join(fontsPath, font)
+
+                return createFile(
+                  fs.createReadStream(absoluteFontPath),
+                  font,
+                  null,
+                  null,
+                  [],
+                  newTemplate.id,
+                  {
+                    trx,
+                    forceObjectKeyValue: `templates/${newTemplate.id}/${font}`,
+                  },
+                )
+              }),
+            )
+          }
+
+          const cssPath = path.join(assetsRoot, 'css')
+
+          if (fs.existsSync(cssPath)) {
+            const absoluteCSSPath = path.join(cssPath, cssFile)
+
+            await createFile(
+              fs.createReadStream(absoluteCSSPath),
+              cssFile,
               null,
               null,
               [],
               newTemplate.id,
               {
                 trx,
-                forceObjectKeyValue: `templates/${newTemplate.id}/${font}`,
+                forceObjectKeyValue: `templates/${newTemplate.id}/${cssFile}`,
               },
             )
-          }),
-        )
-      }
+          }
 
-      const cssPath = path.join(assetsRoot, 'css')
-
-      if (fs.existsSync(path.join(assetsRoot, 'css'))) {
-        const absoluteCSSPath = path.join(cssPath, cssFile)
-
-        return createFile(
-          fs.createReadStream(absoluteCSSPath),
-          cssFile,
-          null,
-          null,
-          [],
-          newTemplate.id,
-          {
-            trx,
-            forceObjectKeyValue: `templates/${newTemplate.id}/${cssFile}`,
-          },
-        )
-      }
-
-      return true
-    }
-
-    if (areAssetsOK) {
-      logger.info('Checking if template with that name already exists')
-
-      const { result: existingTemplates } = await Template.find({
-        name: `${name} (${notes})`,
-        target,
-      })
-
-      if (existingTemplates.length > 0) {
-        logger.info(`Template with name ${name} (${notes}) already exists`)
-      } else {
-        await useTransaction(transactionWrapper)
-      }
-    } else {
-      throw new Error(
-        `an unsupported file exists in either ${foundTemplate.assetsRoot}/css, ${foundTemplate.assetsRoot}/fonts. The supported files are .css, .otf, .woff, .woff2, .ttf`,
+          return true
+        },
+        { trx: undefined },
       )
     }
+
+    logger.info(`Template with name ${name} (${notes}) already exists`)
 
     return true
   } catch (e) {
@@ -177,7 +179,7 @@ const createTemplate = async (sourceRoot, data, cssFile, notes) => {
 
 const cleanTemplatesFolder = async () => {
   try {
-    await execute(`rm -rf ${path.join(__dirname, '..', '..', 'templates')}`)
+    return execute(`rm -rf ${path.join(__dirname, '..', '..', 'templates')}`)
   } catch (e) {
     throw new Error(e.message)
   }
@@ -185,13 +187,16 @@ const cleanTemplatesFolder = async () => {
 
 const getTemplates = async () => {
   try {
-    const normalizedTemplates = config.get('templates').map(t => ({
-      label: t.label.toLowerCase(),
-      url: t.url,
-      assetsRoot: t.assetsRoot.replace(/^\/+/, '').replace(/\/+$/, ''),
-    }))
+    const normalizedTemplates = config.has('templates')
+      ? config.get('templates').map(t => ({
+          label: t.label.toLowerCase(),
+          url: t.url,
+          assetsRoot: t.assetsRoot.replace(/^\/+/, '').replace(/\/+$/, ''),
+        }))
+      : []
 
     await cleanTemplatesFolder()
+
     return Promise.all(
       normalizedTemplates.map(async templateDetails => {
         const { url, label } = templateDetails

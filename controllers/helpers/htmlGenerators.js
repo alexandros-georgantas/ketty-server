@@ -112,7 +112,7 @@ const generateTitlePage = (
   bookComponent,
   bookTitle,
   subtitle = undefined,
-  authors = [],
+  authors = undefined,
 ) => {
   const {
     id,
@@ -135,16 +135,40 @@ const generateTitlePage = (
             ? `<h1 class="component-title">${bookTitle}</h1>`
             : 'Untitled'
         }
-        ${subtitle ? `<h2 class="component-subtitle">${subtitle}</h2>` : ''}
-        ${authors ? `<h2 class="component-subtitle">${authors}</h2>` : ''}
-      </header>
+        </header>
+        ${subtitle ? `<h2 class="book-subtitle">${subtitle}</h2>` : ''}
+        ${authors ? `<h2 class="book-authors">${authors}</h2>` : ''}
     </section>`,
   )
 
   return output('body').html()
 }
 
-const generateCopyrightsPage = (bookComponent, podMetadata) => {
+// const generateCopyrightsPage = (bookComponent, podMetadata) => {
+//   const {
+//     id,
+//     componentType,
+//     division,
+//     pagination,
+//     runningHeadersLeft,
+//     runningHeadersRight,
+//     title,
+//   } = bookComponent
+
+//   const output = cheerio.load(
+//     `<section id="comp-number-${id}"  class="component-${division} ${componentType} ${
+//       !featurePODEnabled ? paginationExtractor(pagination) : ''
+//     }">${runningHeadersGenerator(
+//       runningHeadersLeft,
+//       runningHeadersRight,
+//     )}<header><h1 class="component-title">${
+//       title || 'Copyrights'
+//     }</h1></header></section>`,
+//   )
+
+//   return output.html()
+// }
+const generateCopyrightsPage = (bookTitle, bookComponent, podMetadata) => {
   const {
     id,
     componentType,
@@ -155,15 +179,68 @@ const generateCopyrightsPage = (bookComponent, podMetadata) => {
     title,
   } = bookComponent
 
+  const {
+    copyrightLicense,
+    licenseTypes,
+    publicDomainType,
+    isbn,
+    topPage,
+    bottomPage,
+    ncCopyrightHolder,
+  } = podMetadata
+
+  // eslint-disable-next-line no-nested-ternary
+  const licenseText = licenseTypes.NC
+    ? 'All rights reserved. Except as permitted under the United States Copyright Act of 1976, no part of this publication may be reproduced or distributed in any form or by any means, or stored in a database or other retrieval system, without the prior written permission of the copyright holder.'
+    : // eslint-disable-next-line no-nested-ternary
+    licenseTypes.SA
+    ? 'This is licensed under Attribution-ShareAlike 4.0 International.'
+    : licenseTypes.ND
+    ? 'This is licensed under Attribution-NoDerivatives 4.0 International.'
+    : ''
+
+  const pdContent =
+    publicDomainType === 'cc0'
+      ? 'This  is marked with CC0 1.0 Universal.'
+      : 'This work is licensed under the Creative Commons Public Domain Mark 1.0 License.'
+
+  const copyrightText =
+    // eslint-disable-next-line no-nested-ternary
+    copyrightLicense === 'SCL'
+      ? `${
+          bookTitle ? `<span class="book-title">${bookTitle}</span>` : ''
+        }<span class="copyrights-symbol"> © </span>${
+          ncCopyrightHolder
+            ? `<span class="copyrights-holder">${ncCopyrightHolder}</span>`
+            : ''
+        }.All rights reserved. Except as permitted under the United States Copyright Act of 1976, no part of this publication may be reproduced or distributed in any form or by any means, or stored in a database or other retrieval system, without the prior written permission of the copyright holder.`
+      : copyrightLicense === 'CC'
+      ? licenseText
+      : pdContent
+
+  // TODO: Show year and author alongside title once it is available in podMetadata
   const output = cheerio.load(
     `<section id="comp-number-${id}"  class="component-${division} ${componentType} ${
       !featurePODEnabled ? paginationExtractor(pagination) : ''
     }">${runningHeadersGenerator(
       runningHeadersLeft,
       runningHeadersRight,
-    )}<header><h1 class="component-title">${
-      title || 'Copyrights'
-    }</h1></header></section>`,
+    )}<header><h1 class="book-title">${title}</h1></header>
+    ${topPage ? `<section class="copyright-before">${topPage}</section>` : ''}
+    ${
+      copyrightText
+        ? `<section class="book-copyrights">${
+            isbn ? `<p class="isbn">${isbn}</p>` : ''
+          }<p class="main-content">${copyrightText}</p></section>`
+        : ''
+    }
+    ${
+      bottomPage
+        ? `<section class="copyright-after">${bottomPage}</section>`
+        : ''
+    }
+    
+    </section>`,
   )
 
   return output.html()

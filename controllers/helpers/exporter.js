@@ -112,6 +112,8 @@ const ExporterService = async (
         titlePageComponent.content = generateTitlePage(
           titlePageComponent,
           book.title,
+          book.subtitle,
+          book.podMetadata.authors,
         )
       } else {
         frontDivision.bookComponents.delete('title-page')
@@ -125,7 +127,11 @@ const ExporterService = async (
         const copyrightComponent =
           frontDivision.bookComponents.get('copyrights-page')
 
-        copyrightComponent.content = generateCopyrightsPage(copyrightComponent)
+        copyrightComponent.content = generateCopyrightsPage(
+          book.title,
+          copyrightComponent,
+          book.podMetadata,
+        )
       } else {
         frontDivision.bookComponents.delete('copyrights-page')
       }

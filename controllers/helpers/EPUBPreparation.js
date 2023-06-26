@@ -408,7 +408,7 @@ const generateContentOPF = async (book, epubFolder) => {
       '@scheme': 'marc:relators',
       '@property': 'role',
       '@refines': `#creator${index}`,
-      '#text': 'aut',
+      '#text': author,
     })
   })
   metaTemp.push({
