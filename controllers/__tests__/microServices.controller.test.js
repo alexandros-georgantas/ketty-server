@@ -7,6 +7,7 @@ const {
 const crypto = require('crypto')
 const get = require('lodash/get')
 const config = require('config')
+const microServicesController = require('../microServices.controller')
 const seedBookCollection = require('../../scripts/seeds/bookCollection')
 const { createBook } = require('../book.controller')
 const seedApplicationParameters = require('../../scripts/seeds/applicationParameters')
@@ -19,8 +20,6 @@ const {
   epubcheckerHandler,
   pdfHandler,
   xsweetHandler,
-  pagedPreviewerLink,
-  icmlHandler,
 } = require('../microServices.controller')
 
 const { addBookComponent } = require('../bookComponent.controller')
@@ -98,4 +97,38 @@ describe('MicroServices Controller', () => {
     expect(pdfHandler).toBeDefined()
     expect(rs).toBeUndefined()
   }, 30000)
+
+  it('should check paged previewer link based on dir path', async () => {
+    const filePath = path.join(
+      process.cwd(),
+      'controllers',
+      '__tests__',
+      'files',
+      'test.zip',
+    )
+
+    const mockPagedPreviewerLink = jest.fn().mockResolvedValue(true)
+    microServicesController.pagedPreviewerLink = mockPagedPreviewerLink
+
+    const res = await microServicesController.pagedPreviewerLink(filePath)
+
+    expect(res).toBe(true)
+  })
+
+  it('should check icml handler based on dir path', async () => {
+    const filePath = path.join(
+      process.cwd(),
+      'controllers',
+      '__tests__',
+      'files',
+      'test.zip',
+    )
+
+    const mockIcmlHandler = jest.fn().mockResolvedValue(true)
+    microServicesController.icmlHandler = mockIcmlHandler
+
+    const res = await microServicesController.icmlHandler(filePath)
+
+    expect(res).toBe(true)
+  })
 })
