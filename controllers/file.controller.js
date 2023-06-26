@@ -41,7 +41,7 @@ const updateFiles = async (ids, data, options = {}) => {
     return useTransaction(
       async tr => {
         logger.info(`>>> updating files with ids ${ids}`)
-        return File.query(tr).patch(data).whereIn(ids)
+        return File.query(tr).patch(data).whereIn('id', ids)
       },
       { trx },
     )
@@ -76,7 +76,7 @@ const getEntityFiles = async (
           return result
         }
 
-        const { result } = File.find({ objectId: entityId }, { trx: tr })
+        const result = File.find({ objectId: entityId }, { trx: tr })
 
         return result
       },
