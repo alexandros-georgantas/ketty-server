@@ -117,6 +117,12 @@ const podMetadata = {
   },
 }
 
+const statusField = {
+  type: 'integer',
+  minimum: 0,
+  default: 0,
+}
+
 class Book extends Base {
   constructor(properties) {
     super(properties)
@@ -322,6 +328,7 @@ class Book extends Base {
         issnL: string,
         license: string,
         podMetadata,
+        status: statusField,
       },
     }
   }
