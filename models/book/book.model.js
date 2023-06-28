@@ -117,10 +117,25 @@ const podMetadata = {
   },
 }
 
-const statusField = {
+const statusFieldSchema = {
   type: 'integer',
   minimum: 0,
   default: 0,
+}
+
+const associatedTemplatesSchema = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    pagedjs: { type: ['uuid', 'null'], default: null },
+    epub: { type: ['uuid', 'null'], default: null },
+    icml: { type: ['uuid', 'null'], default: null },
+  },
+  default: {
+    pagedjs: null,
+    epub: null,
+    icml: null,
+  },
 }
 
 class Book extends Base {
@@ -328,7 +343,8 @@ class Book extends Base {
         issnL: string,
         license: string,
         podMetadata,
-        status: statusField,
+        status: statusFieldSchema,
+        associatedTemplates: associatedTemplatesSchema,
       },
     }
   }
