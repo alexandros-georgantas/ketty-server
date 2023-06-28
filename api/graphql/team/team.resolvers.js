@@ -69,21 +69,22 @@ const updateKetidaTeamMembersHandler = async (
 
 const updateTeamMemberStatusHandler = async (
   _,
-  { teamId, userId, status },
+  { teamMemberId, status },
   ctx,
 ) => {
   try {
     const pubsub = await pubsubManager.getPubsub()
-    const updatedTeam = await updateTeamMemberStatus(teamId, userId, status)
-    const user = await getUser(userId)
+    const updatedTeam = await updateTeamMemberStatus(teamMemberId, status)
+
+    // const user = await getUser(userId)
 
     pubsub.publish(TEAM_UPDATED, {
-      teamUpdated: { teamId },
+      teamUpdated: { teamId: updatedTeam.id },
     })
 
-    pubsub.publish(USER_UPDATED, {
-      userUpdated: { user },
-    })
+    // pubsub.publish(USER_UPDATED, {
+    //   userUpdated: { user },
+    // })
     return updatedTeam
   } catch (e) {
     throw new Error(e)
