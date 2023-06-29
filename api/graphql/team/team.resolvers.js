@@ -14,6 +14,7 @@ const { getUser } = require('@coko/server/src/models/user/user.controller')
 const {
   updateTeamMemberStatus,
   updateTeamMemberStatuses,
+  addTeamMembers,
 } = require('../../../controllers/team.controller')
 
 const {
@@ -91,10 +92,50 @@ const updateTeamMemberStatusHandler = async (
   }
 }
 
+const addTeamMembersHandler = async (_, { teamId, members, status }, ctx) => {
+  try {
+    const pubsub = await pubsubManager.getPubsub()
+    logger.info('team resolver: executing addTeamMembers use case')
+    const updatedTeam = await addTeamMembers(teamId, members, status)
+
+    if (updatedTeam.global === true) {
+      pubsub.publish(TEAM_MEMBERS_UPDATED, {
+        teamMembersUpdated: updatedTeam,
+      })
+
+      return updatedTeam
+    }
+
+    if (updatedTeam.role === 'productionEditor') {
+      pubsub.publish(BOOK_PRODUCTION_EDITORS_UPDATED, {
+        productionEditorsUpdated: updatedTeam,
+      })
+    }
+
+    await Promise.all(
+      members.map(async userId => {
+        const user = await getUser(userId)
+        return pubsub.publish(USER_UPDATED, {
+          userUpdated: { user },
+        })
+      }),
+    )
+
+    pubsub.publish(TEAM_MEMBERS_UPDATED, {
+      teamMembersUpdated: updatedTeam,
+    })
+    logger.info(`Update msg broadcasted`)
+    return updatedTeam
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
 module.exports = {
   Mutation: {
     updateKetidaTeamMembers: updateKetidaTeamMembersHandler,
     updateTeamMemberStatus: updateTeamMemberStatusHandler,
+    addTeamMembers: addTeamMembersHandler,
   },
   Subscription: {
     teamMembersUpdated: {
