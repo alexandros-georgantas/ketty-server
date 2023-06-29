@@ -159,10 +159,27 @@ const deleteTeam = async (teamId, options = {}) => {
   }
 }
 
+const addTeamMembers = async (teamId, members, status, options = {}) => {
+  try {
+    const { trx } = options
+
+    return useTransaction(async tr => {
+      await Promise.all(
+        members.map(userId => Team.addMember(teamId, userId, { status })),
+      )
+
+      return Team.findById(teamId, { trx })
+    })
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
 module.exports = {
   createTeam,
   getObjectTeam,
   deleteTeam,
   updateTeamMemberStatus,
   updateTeamMemberStatuses,
+  addTeamMembers,
 }

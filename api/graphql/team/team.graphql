@@ -7,9 +7,11 @@ type TeamSub {
 extend type Mutation {
   updateKetidaTeamMembers(teamId: ID!, members: [ID!]!, status: String): Team!
   updateTeamMemberStatus(teamMemberId: ID!, status: String!): Team!
+  addTeamMembers(teamId: ID!, members: [ID!]!, status: String): Team!
 }
 
 extend type Subscription {
   teamMembersUpdated: TeamSub!
   productionEditorsUpdated: TeamSub!
+  addTeamMembers: TeamSub!
 }
