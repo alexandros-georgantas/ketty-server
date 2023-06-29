@@ -29,7 +29,6 @@ describe('Division Controller', () => {
 
     const division = await createDivision({ bookId: newBook.id, label: 'body' })
 
-    expect(createDivision).toBeDefined()
     expect(division.bookId).toBe(newBook.id)
     expect(division.label).toBe('body')
   })
@@ -45,7 +44,6 @@ describe('Division Controller', () => {
 
     const fetchDivision = await getDivision(division.id)
 
-    expect(getDivision).toBeDefined()
     expect(fetchDivision.id).toBe(division.id)
     expect(fetchDivision.bookId).toBe(newBook.id)
   })
@@ -84,7 +82,6 @@ describe('Division Controller', () => {
 
     const updatedDivision = await getDivision(division.id)
 
-    expect(updateBookComponentOrder).toBeDefined()
     expect(updatedBookComponentOrder.id).toBe(newBook.id)
     expect(updatedDivision.bookComponents[0]).toBe(testBookComponents[3].id)
   })
@@ -120,7 +117,6 @@ describe('Division Controller', () => {
 
     const updatedDivision = await getDivision(division.id)
 
-    expect(updateBookComponentsOrder).toBeDefined()
     expect(updatedBookComponentsOrder.id).toBe(newBook.id)
     expect(updatedDivision.bookComponents[0]).toBe(bookComponentTwo.id)
     expect(updatedDivision.bookComponents[1]).toBe(bookComponentOne.id)

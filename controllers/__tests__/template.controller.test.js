@@ -1,3 +1,12 @@
+const fs = require('fs-extra')
+const path = require('path')
+
+const {
+  connectToFileStorage,
+} = require('@coko/server/src/services/fileStorage')
+
+const { createFile } = require('@coko/server/src/models/file/file.controller')
+const File = require('../../models/file/file.model')
 const clearDb = require('../../scripts/helpers/_clearDB')
 
 const {
@@ -18,13 +27,12 @@ describe('Template Controller', () => {
   it('should create templates based on name, author, files, target, trimSize', async () => {
     const name = 'Atla (chapterEnd)'
     const author = 'Atla Open Press'
-    const files = 1
+    const files = []
     const target = 'epub'
     const trimSize = null
 
     const template = await createTemplate(name, author, files, target, trimSize)
 
-    expect(createTemplate).toBeDefined()
     expect(template.name).toBe(name)
     expect(template.author).toBe(author)
   })
@@ -32,7 +40,7 @@ describe('Template Controller', () => {
   it('should fetch template based on id', async () => {
     const name = 'Atla (chapterEnd)'
     const author = 'Atla Open Press'
-    const files = 1
+    const files = []
     const target = 'epub'
     const trimSize = null
 
@@ -40,7 +48,6 @@ describe('Template Controller', () => {
 
     const fetchTemplate = await getTemplate(template.id)
 
-    expect(getTemplate).toBeDefined()
     expect(fetchTemplate.id).toBe(template.id)
   })
 
@@ -49,7 +56,7 @@ describe('Template Controller', () => {
     const sortKey = 'author'
     const name = 'Atla (chapterEnd)'
     const author = 'AAAOne User'
-    const files = 1
+    const files = []
     const target = 'epub'
     const trimSize = null
 
@@ -63,7 +70,7 @@ describe('Template Controller', () => {
 
     const nameTwo = 'Atla (chapterStart)'
     const authorTwo = 'BBBTwo User'
-    const filesTwo = 1
+    const filesTwo = []
     const targetTwo = 'epub'
     const trimSizeTwo = null
 
@@ -77,7 +84,6 @@ describe('Template Controller', () => {
 
     const rs = await getTemplates(ascending, sortKey, null, null)
 
-    expect(getTemplates).toBeDefined()
     expect(rs).toHaveLength(2)
     expect(rs[1].id).toBe(createdTemplateOne.id)
     expect(rs[0].id).toBe(createdTemplateTwo.id)
@@ -86,7 +92,7 @@ describe('Template Controller', () => {
   it('should delete template based on id', async () => {
     const name = 'Atla (chapterEnd)'
     const author = 'Atla Open Press'
-    const files = 1
+    const files = []
     const target = 'epub'
     const trimSize = null
 
@@ -100,7 +106,6 @@ describe('Template Controller', () => {
 
     const deletedTemplate = await deleteTemplate(createdTemplate.id)
 
-    expect(deleteTemplate).toBeDefined()
     expect(deletedTemplate.id).toBe(createdTemplate.id)
     expect(deletedTemplate.deleted).toBe(true)
   })
@@ -108,7 +113,7 @@ describe('Template Controller', () => {
   it('should update template data based on data provided', async () => {
     const name = 'Atla (chapterEnd)'
     const author = 'Atla Open Press'
-    const files = 1
+    const files = []
     const target = 'epub'
     const trimSize = null
 
@@ -124,12 +129,11 @@ describe('Template Controller', () => {
       id: createdTemplate.id,
       name: 'Atla (chapterStart)',
       deleteFiles: false,
-      files: 1,
+      files: [],
     }
 
     const updatedTemplate = await updateTemplate(data)
 
-    expect(updateTemplate).toBeDefined()
     expect(updatedTemplate.id).toBe(createdTemplate.id)
     expect(updatedTemplate.name).toBe(data.name)
   })
@@ -137,7 +141,7 @@ describe('Template Controller', () => {
   it('should fetch export scripts based on scope', async () => {
     const name = 'Atla (chapterEnd)'
     const author = 'Atla Open Press'
-    const files = 1
+    const files = []
     const target = 'epub'
     const trimSize = null
 
@@ -160,16 +164,27 @@ describe('Template Controller', () => {
 
     const exportScript = await getExportScripts(exportScripts.scope)
 
-    expect(getExportScripts).toBeDefined()
     expect(exportScript).toBeTruthy()
   })
 
   it('should clone template based on id, name', async () => {
     const name = 'Atla (chapterEnd)'
     const author = 'Atla Open Press'
-    const files = 1
+    const files = []
     const target = 'epub'
     const trimSize = null
+
+    const filePath = path.join(
+      process.cwd(),
+      'controllers',
+      '__tests__',
+      'files',
+      'test.css',
+    )
+
+    const fileStream = fs.createReadStream(filePath)
+
+    await connectToFileStorage()
 
     const createdTemplate = await createTemplate(
       name,
@@ -179,13 +194,20 @@ describe('Template Controller', () => {
       trimSize,
     )
 
+    await createFile(fileStream, 'test.css', null, null, [], createdTemplate.id)
+
     const clonedTemp = await cloneTemplate(
       createdTemplate.id,
       createdTemplate.name,
+      'test css',
     )
 
-    expect(cloneTemplate).toBeDefined()
+    const newfile = await File.find({
+      objectId: createdTemplate.id,
+    })
+
     expect(clonedTemp.referenceId).toBe(createdTemplate.id)
     expect(clonedTemp.name).toBe(createdTemplate.name)
+    expect(newfile.result[0].storedObjects[0].key).toBeTruthy()
   })
 })

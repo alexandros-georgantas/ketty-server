@@ -17,7 +17,6 @@ describe('Custom Tag Controller', () => {
 
     const customTag = await addCustomTag(label, tagType)
 
-    expect(addCustomTag).toBeDefined()
     expect(customTag.label).toBe(label)
     expect(customTag.tagType).toBe(tagType)
   })
@@ -35,7 +34,6 @@ describe('Custom Tag Controller', () => {
 
     const allCustomTags = await getCustomTags(options)
 
-    expect(getCustomTags).toBeDefined()
     expect(allCustomTags).toHaveLength(2)
     expect(allCustomTags[0].label).toBe(labelOne)
     expect(allCustomTags[1].label).toBe(labelTwo)
@@ -59,7 +57,6 @@ describe('Custom Tag Controller', () => {
 
     const updateCustomTags = await updateCustomTag(tag)
 
-    expect(updateCustomTag).toBeDefined()
     expect(updateCustomTags[0].id).toBe(customTag.id)
     expect(updateCustomTags[0].label).toBe(updatedLabel)
   })

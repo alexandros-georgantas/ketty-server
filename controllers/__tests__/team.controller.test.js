@@ -33,7 +33,6 @@ describe('Team Controller', () => {
       false,
     )
 
-    expect(createTeam).toBeDefined()
     expect(globalTeam.displayName).toBe(globalTeamDisplayName)
     expect(globalTeam.global).toBe(true)
     expect(globalTeam.role).toBe(globalRole)
@@ -52,7 +51,6 @@ describe('Team Controller', () => {
 
     const result = await getObjectTeam(role, id)
 
-    expect(getObjectTeam).toBeDefined()
     expect(result.objectId).toBe(id)
   })
 
@@ -86,7 +84,6 @@ describe('Team Controller', () => {
     const deleteGlobalTeam = await deleteTeam(globalTeam.id)
     const deleteNonGlobalTeam = await deleteTeam(nonGlobalTeam.id)
 
-    expect(deleteTeam).toBeDefined()
     expect(deleteGlobalTeam).toBe(1)
     expect(deleteNonGlobalTeam).toBe(1)
   })

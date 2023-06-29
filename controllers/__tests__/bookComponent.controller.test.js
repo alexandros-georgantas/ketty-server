@@ -47,7 +47,6 @@ describe('BOOK Collection CONTROLLER', () => {
       componentType,
     )
 
-    expect(bookComponent).toBeDefined()
     expect(bookComponent.divisionId).toBe(division.id)
     expect(bookComponent.bookId).toBe(newBook.id)
     expect(bookComponent.componentType).toBe(componentType)
@@ -71,7 +70,6 @@ describe('BOOK Collection CONTROLLER', () => {
 
     const bookComponent2 = await getBookComponent(bookComponent1.id)
 
-    expect(bookComponent2).toBeDefined()
     expect(bookComponent2.id).toBe(bookComponent1.id)
   })
 
@@ -93,7 +91,6 @@ describe('BOOK Collection CONTROLLER', () => {
 
     const deletedBookComponent = await deleteBookComponent(bookComponent)
 
-    expect(deleteBookComponent).toBeDefined()
     expect(deletedBookComponent.deleted).toBe(true)
   })
 
@@ -119,7 +116,6 @@ describe('BOOK Collection CONTROLLER', () => {
       updatedComponentType,
     )
 
-    expect(updateComponentType).toBeDefined()
     expect(updatedBookComponent.componentType).toBe(updatedComponentType)
     expect(updatedBookComponent.id).toBe(bookComponent.id)
   })
@@ -148,7 +144,6 @@ describe('BOOK Collection CONTROLLER', () => {
       languageIso,
     )
 
-    expect(updateContent).toBeDefined()
     expect(updatedContent.updatedContent.content).toBe(content)
     expect(updatedContent.updatedContent.bookComponentId).toBe(bookComponent.id)
   })
@@ -172,7 +167,6 @@ describe('BOOK Collection CONTROLLER', () => {
 
     const updateState = await updateUploading(bookComponent.id, uploading)
 
-    expect(updateUploading).toBeDefined()
     expect(updateState.uploading).toBe(uploading)
     expect(bookComponent.id).toBe(updateState.bookComponentId)
   })
@@ -199,7 +193,6 @@ describe('BOOK Collection CONTROLLER', () => {
       trackChangesEnabled,
     )
 
-    expect(updateUploading).toBeDefined()
     expect(updateState.trackChangesEnabled).toBe(trackChangesEnabled)
     expect(bookComponent.id).toBe(updateState.bookComponentId)
   })
@@ -225,7 +218,6 @@ describe('BOOK Collection CONTROLLER', () => {
       pagination,
     )
 
-    expect(updatePagination).toBeDefined()
     expect(updatePaginationOrder.pagination).toEqual(pagination)
   })
 
@@ -259,7 +251,6 @@ describe('BOOK Collection CONTROLLER', () => {
       foreignId: bookComponent.id,
     })
 
-    expect(getBookComponentAndAcquireLock).toBeDefined()
     expect(locks.result).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -298,7 +289,7 @@ describe('BOOK Collection CONTROLLER', () => {
     expect(updatedComponentType.componentType).toBe(patch.componentType)
   })
 
-  it('should include toggleIncludeInToc in book component state', async () => {
+  it('should check change in value for includeInToc when toggleIncludeInToc is called', async () => {
     const newCollection = await seedBookCollection()
     await seedApplicationParameters()
     const title = 'Test Book'
@@ -316,7 +307,6 @@ describe('BOOK Collection CONTROLLER', () => {
 
     const toc = await toggleIncludeInTOC(bookComponent.id)
 
-    expect(toggleIncludeInTOC).toBeDefined()
     expect(toc).toHaveProperty('includeInToc')
   })
 
@@ -346,7 +336,6 @@ describe('BOOK Collection CONTROLLER', () => {
       languageIso,
     )
 
-    expect(renameBookComponent).toBeDefined()
     expect(rename.title).toBe(updatedTitle)
   })
 
@@ -380,7 +369,6 @@ describe('BOOK Collection CONTROLLER', () => {
 
     const unlockComponent = await unlockBookComponent(bookComponent.id, user.id)
 
-    expect(unlockBookComponent).toBeDefined()
     expect(unlockComponent).toBe(1)
   })
 
@@ -422,7 +410,7 @@ describe('BOOK Collection CONTROLLER', () => {
     expect(lockComponent.userId).toBe(user.id)
   })
 
-  it('should update workFlow state of book component id based on', async () => {
+  it('should update workFlow state of book component id based on workflowStages', async () => {
     const newCollection = await seedBookCollection()
     await seedApplicationParameters()
     const title = 'Test Book'

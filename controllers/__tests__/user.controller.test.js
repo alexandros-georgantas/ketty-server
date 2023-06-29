@@ -12,6 +12,8 @@ const {
   ketidaResendVerificationEmail,
 } = require('../user.controller')
 
+jest.mock('@coko/server/src//services/notify.js')
+
 describe('User Controller', () => {
   beforeEach(async () => {
     await clearDb()
@@ -38,7 +40,6 @@ describe('User Controller', () => {
     const checkAdminUser = await isAdmin(adminUser.id)
     const checkNonAdminUser = await isAdmin(regularUser.id)
 
-    expect(isAdmin).toBeDefined()
     expect(checkAdminUser).toBe(true)
     expect(checkNonAdminUser).toBe(false)
   })
@@ -60,7 +61,6 @@ describe('User Controller', () => {
       password: 'password',
     })
 
-    expect(ketidaLogin).toBeDefined()
     expect(ketidalogin.token).toBeTruthy()
     expect(ketidalogin.user.id).toBe(user.id)
   })
@@ -85,7 +85,6 @@ describe('User Controller', () => {
     const checkNonGlobalUser = await isGlobal(nonGlobalUser.id, false)
     const checkGlobalUser = await isGlobal(globalUser.id, true)
 
-    expect(isGlobal).toBeDefined()
     expect(checkNonGlobalUser).toBe(false)
     expect(checkGlobalUser).toBe(true)
   })
@@ -112,7 +111,6 @@ describe('User Controller', () => {
 
     const searchResult = await searchForUsers(search, exclude)
 
-    expect(searchForUsers).toBeDefined()
     expect(searchResult[0].id).toBe(user.id)
     expect(searchResult[0].username).toBe(user.username)
   })
@@ -132,7 +130,6 @@ describe('User Controller', () => {
       identity.email,
     )
 
-    expect(ketidaResendVerificationEmail).toBeDefined()
     expect(resendVerificationEmail).toBe(true)
   })
 })

@@ -135,7 +135,6 @@ describe('Application Parameter Controller', () => {
       config,
     )
 
-    expect(applicationParameter).toBeDefined()
     expect(applicationParameter.config).toEqual(config)
     expect(applicationParameter.context).toBe(context)
     expect(applicationParameter.area).toBe(area)
