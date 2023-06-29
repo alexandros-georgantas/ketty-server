@@ -44,7 +44,6 @@ describe('MicroServices Controller', () => {
 
     const rs = await epubcheckerHandler(filePath)
 
-    expect(epubcheckerHandler).toBeDefined()
     expect(rs.outcome).toBe('ok')
   }, 30000)
 
@@ -68,7 +67,6 @@ describe('MicroServices Controller', () => {
 
     const rs = await xsweetHandler(bookComponent1.id, filePath)
 
-    expect(xsweetHandler).toBeDefined()
     expect(rs).toBe('ok')
   })
 
@@ -94,7 +92,6 @@ describe('MicroServices Controller', () => {
 
     const rs = await pdfHandler(filePath, PDFtempFolderFilePath, PDFFilename)
 
-    expect(pdfHandler).toBeDefined()
     expect(rs).toBeUndefined()
   }, 30000)
 

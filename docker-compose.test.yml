@@ -12,7 +12,6 @@ services:
       - xsweet
       - epubchecker
       - pagedjs
-      - icml
     entrypoint: ['sh', 'scripts/setupTestServer.sh']
     command: ['node_modules/.bin/jest', 'controllers']
     ports:
@@ -106,32 +105,6 @@ services:
       ]
     command: ['node', 'server/startServer.js']
 
-  icml:
-    depends_on:
-      - db-icml
-    image: cokoapps/icml:1.2.1
-    ports:
-      - ${SERVICE_ICML_PORT:-3002}:${SERVICE_ICML_PORT:-3002}
-    environment:
-      - PUBSWEET_SECRET=icml_dev_secret
-      - POSTGRES_USER=icml_user_dev
-      - POSTGRES_PASSWORD=icml_user_password
-      - POSTGRES_HOST=db-icml
-      - POSTGRES_DB=icml_dev
-      - POSTGRES_PORT=5432
-      - SERVER_PORT=${SERVICE_ICML_PORT:-3002}
-      - NODE_ENV=development
-    entrypoint:
-      [
-        'sh',
-        'scripts/wait-for-it',
-        'db-icml:5432',
-        '--',
-        'sh',
-        'scripts/setupDevServer.sh',
-      ]
-    command: ['node', 'server/startServer.js']
-
   pagedjs:
     depends_on:
       - db-pagedjs
@@ -206,15 +179,6 @@ services:
       - POSTGRES_USER=epubchecker_user_dev
       - POSTGRES_DB=epubchecker_dev
       - POSTGRES_PASSWORD=epubchecker_user_password
-    volumes:
-      - ./scripts/init-pgboss.sql:/docker-entrypoint-initdb.d/init-pgboss.sql
-
-  db-icml:
-    image: postgres:14.4-alpine
-    environment:
-      - POSTGRES_USER=icml_user_dev
-      - POSTGRES_DB=icml_dev
-      - POSTGRES_PASSWORD=icml_user_password
     volumes:
       - ./scripts/init-pgboss.sql:/docker-entrypoint-initdb.d/init-pgboss.sql
 

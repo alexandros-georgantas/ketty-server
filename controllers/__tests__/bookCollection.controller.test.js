@@ -23,7 +23,6 @@ describe('Book Collection Controller', () => {
       collectionId: bookCollection.id,
     })
 
-    expect(bookCollection).toBeDefined()
     expect(bookCollectionTranslation.collectionId).toBe(bookCollection.id)
     expect(bookCollectionTranslation.title).toBe(title)
     expect(bookCollectionTranslation.languageIso).toBe(languageIso)
@@ -33,7 +32,6 @@ describe('Book Collection Controller', () => {
     const newCollection = await seedBookCollection()
     const bookCollection = await getBookCollection(newCollection.id)
 
-    expect(bookCollection).toBeDefined()
     expect(bookCollection.id).toEqual(newCollection.id)
   })
 
@@ -46,7 +44,6 @@ describe('Book Collection Controller', () => {
     const options = {}
     const allBookCollection = await getBookCollections(options)
 
-    expect(allBookCollection).toBeDefined()
     expect(allBookCollection[0].id).toEqual(bookCollection1.id)
     expect(allBookCollection[1].id).toEqual(bookCollection2.id)
   })

@@ -46,7 +46,6 @@ describe('File Controller', () => {
 
     const newFile = await createFile(fileStream, 'test.jpg')
 
-    expect(newFile).toBeDefined()
     expect(newFile.storedObjects).toHaveLength(3)
     expect(newFile.name).toEqual('test.jpg')
   })
@@ -70,7 +69,6 @@ describe('File Controller', () => {
 
     const update = await updateFile(newFile.id, { name: updatedName })
 
-    expect(updateFile).toBeDefined()
     expect(update.id).toBe(newFile.id)
     expect(update.name).toBe(updatedName)
   })
@@ -105,7 +103,6 @@ describe('File Controller', () => {
       alt: 'img',
     })
 
-    expect(updateFiles).toBeDefined()
     expect(updatedFiles).toBe(2)
   })
 
@@ -126,7 +123,6 @@ describe('File Controller', () => {
 
     const fetchFile = await getFile(newFile.id)
 
-    expect(getFile).toBeDefined()
     expect(fetchFile.id).toBe(newFile.id)
   })
 
@@ -156,7 +152,6 @@ describe('File Controller', () => {
 
     const fetchAllFiles = await getFiles()
 
-    expect(getFiles).toBeDefined()
     expect(fetchAllFiles).toHaveLength(2)
   })
 
@@ -189,7 +184,6 @@ describe('File Controller', () => {
       newFiles[1].id,
     ])
 
-    expect(getSpecificFiles).toBeDefined()
     expect(specificFiles).toHaveLength(2)
   })
 
@@ -210,7 +204,6 @@ describe('File Controller', () => {
 
     const url = await getFileURL(newFile.id)
 
-    expect(getFileURL).toBeDefined()
     expect(url).toMatch(/^https?:\/\/.*/)
   })
 
@@ -231,7 +224,6 @@ describe('File Controller', () => {
 
     const objectKey = await getObjectKey(newFile.id)
 
-    expect(getObjectKey).toBeDefined()
     expect(objectKey).toBe(newFile.storedObjects[0].key)
   })
 
@@ -259,7 +251,6 @@ describe('File Controller', () => {
 
     const rs = await getEntityFiles('98f7187c-f5f6-4b87-98e6-5c7f1911d1e8')
 
-    expect(getEntityFiles).toBeDefined()
     expect(rs.result[0].id).toBe(newFile.id)
   })
 
@@ -289,7 +280,6 @@ describe('File Controller', () => {
 
     const contents = await getContentFiles([newFiles[0].id, newFiles[1].id])
 
-    expect(getContentFiles).toBeDefined()
     expect(contents).toHaveLength(2)
   })
 
@@ -315,7 +305,6 @@ describe('File Controller', () => {
 
     const checkFileUse = await isFileInUse(newBook.id, newFile.id)
 
-    expect(isFileInUse).toBeDefined()
     expect(checkFileUse).toBeTruthy()
   })
 })
