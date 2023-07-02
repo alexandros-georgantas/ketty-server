@@ -221,7 +221,11 @@ extend type Mutation {
   updateShowWelcome(bookId: ID!): Book!
   finalizeBookStructure(bookId: ID!): ID!
   exportBook(input: ExportBookInput!): ExportResult!
-  setAssociatedTemplate(bookId: ID!, templateScope: String!, templateId: ID): Book!
+  setAssociatedTemplate(
+    bookId: ID!
+    templateScope: String!
+    templateId: ID
+  ): Book!
 }
 
 extend type Subscription {
