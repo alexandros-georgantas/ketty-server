@@ -1325,6 +1325,52 @@ const getBookTitle = async (bookId, options = {}) => {
   }
 }
 
+const setAssociatedTemplate = async (
+  bookId,
+  templateScope,
+  templateId,
+  options = {},
+) => {
+  try {
+    const { trx } = options
+    return useTransaction(
+      async tr => {
+        const book = await Book.findById(bookId, { trx: tr })
+
+        // Check if associatedTemplates property exists and is an object
+        // If not, initialize it as an empti object
+        if (
+          !book.associatedTemplates ||
+          typeof book.associatedTemplates !== 'object'
+        ) {
+          book.associatedTemplates = {}
+        }
+
+        // Update the appropriate scope with the new templateId
+        book.associatedTemplates[templateScope] = templateId
+
+        const updatedBook = await Book.patchAndFetchById(
+          bookId,
+          {
+            associatedTemplates: book.associatedTemplates,
+          },
+          { trx: tr },
+        )
+
+        logger.info(
+          `${BOOK_CONTROLLER} setAssociatedTemplate: associated template set for book with id ${bookId}`,
+        )
+
+        return updatedBook
+      },
+      { trx },
+    )
+  } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} setAssociatedTemplate: ${e.message}`)
+    throw new Error(e)
+  }
+}
+
 module.exports = {
   getBook,
   getBooks,
@@ -1343,4 +1389,5 @@ module.exports = {
   updateShowWelcome,
   finalizeBookStructure,
   getBookTitle,
+  setAssociatedTemplate,
 }
