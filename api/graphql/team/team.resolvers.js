@@ -11,6 +11,8 @@ const {
 
 const { getUser } = require('@coko/server/src/models/user/user.controller')
 
+const TeamMember = require('@coko/server/src/models/teamMember/teamMember.model')
+
 const {
   updateTeamMemberStatus,
   updateTeamMemberStatuses,
@@ -77,15 +79,16 @@ const updateTeamMemberStatusHandler = async (
     const pubsub = await pubsubManager.getPubsub()
     const updatedTeam = await updateTeamMemberStatus(teamMemberId, status)
 
-    // const user = await getUser(userId)
+    const teamMember = await TeamMember.findOne({ id: teamMemberId })
+    const user = await getUser(teamMember.userId)
 
     pubsub.publish(TEAM_UPDATED, {
-      teamUpdated: { teamId: updatedTeam.id },
+      teamUpdated: updatedTeam,
     })
 
-    // pubsub.publish(USER_UPDATED, {
-    //   userUpdated: { user },
-    // })
+    pubsub.publish(USER_UPDATED, {
+      userUpdated: user,
+    })
     return updatedTeam
   } catch (e) {
     throw new Error(e)
@@ -148,6 +151,12 @@ module.exports = {
       subscribe: async () => {
         const pubsub = await pubsubManager.getPubsub()
         return pubsub.asyncIterator(BOOK_PRODUCTION_EDITORS_UPDATED)
+      },
+    },
+    teamUpdated: {
+      subscribe: async () => {
+        const pubsub = await pubsubManager.getPubsub()
+        return pubsub.asyncIterator(TEAM_UPDATED)
       },
     },
   },

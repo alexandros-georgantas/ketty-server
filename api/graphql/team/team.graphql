@@ -1,7 +1,9 @@
 type TeamSub {
+  id: ID!
   role: String
   global: Boolean
   objectId: String
+  members: [TeamMember!]
 }
 
 extend type Mutation {
@@ -13,4 +15,5 @@ extend type Mutation {
 extend type Subscription {
   teamMembersUpdated: TeamSub!
   productionEditorsUpdated: TeamSub!
+  teamUpdated: TeamSub!
 }
