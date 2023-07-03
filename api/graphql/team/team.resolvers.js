@@ -116,7 +116,7 @@ const addTeamMembersHandler = async (_, { teamId, members, status }, ctx) => {
       members.map(async userId => {
         const user = await getUser(userId)
         return pubsub.publish(USER_UPDATED, {
-          userUpdated: { user },
+          userUpdated: user,
         })
       }),
     )
