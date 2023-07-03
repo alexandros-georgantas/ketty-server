@@ -13,5 +13,4 @@ extend type Mutation {
 extend type Subscription {
   teamMembersUpdated: TeamSub!
   productionEditorsUpdated: TeamSub!
-  addTeamMembers: TeamSub!
 }
