@@ -39,6 +39,7 @@ const {
   finalizeBookStructure,
   getBookTitle,
   setAssociatedTemplate,
+  updateBookStatus,
 } = require('../../../controllers/book.controller')
 
 const setAssociatedTemplateHandler = async (
@@ -62,6 +63,24 @@ const setAssociatedTemplateHandler = async (
     pubsub.publish(BOOK_UPDATED, {
       bookUpdated: updatedBook,
     })
+
+    return updatedBook
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
+const updateBookStatusHandler = async (_, { bookId, status }, ctx) => {
+  try {
+    logger.info('book resolver: executing updateBookStatus use case')
+
+    const pubsub = await pubsubManager.getPubsub()
+
+    const updatedBook = await updateBookStatus(bookId, status)
+
+    logger.info('book resolver: broadcasting updated book to clients')
+
+    pubsub.publish(BOOK_UPDATED, { bookUpdated: updatedBook.id })
 
     return updatedBook
   } catch (e) {
@@ -416,6 +435,7 @@ module.exports = {
     updateShowWelcome: updateShowWelcomeHandler,
     finalizeBookStructure: finalizeBookStructureHandler,
     setAssociatedTemplate: setAssociatedTemplateHandler,
+    updateBookStatus: updateBookStatusHandler,
   },
   Book: {
     async title(book, _, ctx) {
