@@ -1338,7 +1338,7 @@ const setAssociatedTemplate = async (
         const book = await Book.findById(bookId, { trx: tr })
 
         // Check if associatedTemplates property exists and is an object
-        // If not, initialize it as an empti object
+        // If not, initialize it as an empty object
         if (
           !book.associatedTemplates ||
           typeof book.associatedTemplates !== 'object'
@@ -1371,6 +1371,36 @@ const setAssociatedTemplate = async (
   }
 }
 
+const updateBookStatus = async (id, status, options = {}) => {
+  try {
+    const { trx } = options
+    logger.info(
+      `${BOOK_CONTROLLER} updateBookStatus: updating book with id ${id}`,
+    )
+    return useTransaction(
+      async tr => {
+        const book = await Book.findById(id, { trx: tr })
+
+        if (!book) {
+          throw new Error(`book with id: ${id} does not exist`)
+        }
+
+        const updatedBook = await Book.patchAndFetchById(
+          id,
+          { status },
+          { trx: tr },
+        )
+
+        return updatedBook
+      },
+      { trx, passedTrxOnly: true },
+    )
+  } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} updateBookStatus: ${e.message}`)
+    throw new Error(e)
+  }
+}
+
 module.exports = {
   getBook,
   getBooks,
@@ -1390,4 +1420,5 @@ module.exports = {
   finalizeBookStructure,
   getBookTitle,
   setAssociatedTemplate,
+  updateBookStatus,
 }

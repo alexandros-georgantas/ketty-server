@@ -19,6 +19,7 @@ type Book {
   title: String
   podMetadata: PODMetadata
   associatedTemplates: AssociatedTemplates
+  status: Int
 }
 
 type AssociatedTemplates {
@@ -226,6 +227,7 @@ extend type Mutation {
     templateScope: String!
     templateId: ID
   ): Book!
+  updateBookStatus(bookId: ID!, status: Int!): Book!
 }
 
 extend type Subscription {
