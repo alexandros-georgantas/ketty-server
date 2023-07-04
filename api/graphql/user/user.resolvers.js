@@ -8,10 +8,16 @@ const {
   isGlobal,
 } = require('../../../controllers/user.controller')
 
-const searchForUsersHandler = async (_, { search, exclude }, ctx, info) => {
+const searchForUsersHandler = async (
+  _,
+  { search, exclude, exactMatch },
+  ctx,
+  info,
+) => {
   try {
     logger.info('user resolver: executing searchForUsers use case')
-    return searchForUsers(search, exclude)
+
+    return searchForUsers(search, exclude, exactMatch)
   } catch (e) {
     throw new Error(e)
   }

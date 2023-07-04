@@ -14,7 +14,13 @@ const {
 } = require('./converters')
 
 const bookConstructor = require('./bookConstructor')
-const { generateContainer } = require('./htmlGenerators')
+
+const {
+  generateContainer,
+  generateTitlePage,
+  generateCopyrightsPage,
+} = require('./htmlGenerators')
+
 const EPUBPreparation = require('./EPUBPreparation')
 const ICMLPreparation = require('./ICMLPreparation')
 const PagedJSPreparation = require('./PagedJSPreparation')
@@ -50,11 +56,11 @@ const getURL = relativePath => {
 
 const ExporterService = async (
   bookId,
-  mode,
   templateId,
   previewer,
   fileExtension,
   icmlNotes,
+  additionalExportOptions,
   ctx,
 ) => {
   try {
@@ -66,6 +72,11 @@ const ExporterService = async (
       config.has('featureBookStructure') &&
       ((config.get('featureBookStructure') &&
         JSON.parse(config.get('featureBookStructure'))) ||
+        false)
+
+    const featurePODEnabled =
+      config.has('featurePOD') &&
+      ((config.get('featurePOD') && JSON.parse(config.get('featurePOD'))) ||
         false)
 
     if (fileExtension !== 'icml') {
@@ -91,6 +102,39 @@ const ExporterService = async (
       tocComponent.content = generateContainer(tocComponent, false, 'one')
     } else {
       tocComponent.content = generateContainer(tocComponent, false)
+    }
+
+    if (featurePODEnabled && additionalExportOptions) {
+      if (additionalExportOptions.includeTitlePage) {
+        const titlePageComponent =
+          frontDivision.bookComponents.get('title-page')
+
+        titlePageComponent.content = generateTitlePage(
+          titlePageComponent,
+          book.title,
+          book.subtitle,
+          book.podMetadata.authors,
+        )
+      } else {
+        frontDivision.bookComponents.delete('title-page')
+      }
+
+      if (!additionalExportOptions.includeTOC) {
+        frontDivision.bookComponents.delete('toc')
+      }
+
+      if (additionalExportOptions.includeCopyrights) {
+        const copyrightComponent =
+          frontDivision.bookComponents.get('copyrights-page')
+
+        copyrightComponent.content = generateCopyrightsPage(
+          book.title,
+          copyrightComponent,
+          book.podMetadata,
+        )
+      } else {
+        frontDivision.bookComponents.delete('copyrights-page')
+      }
     }
 
     let endnotesComponent
@@ -121,6 +165,11 @@ const ExporterService = async (
         const isTheFirstInBody = division.type === 'body' && counter === 0
 
         if (componentType === 'toc') return
+
+        if (featurePODEnabled) {
+          if (componentType === 'title-page') return
+          if (componentType === 'copyrights-page') return
+        }
 
         let container
         let cleanedContent
@@ -213,7 +262,7 @@ const ExporterService = async (
     }
 
     // Check if notes exist, else remove the book component
-    if (templateHasEndnotes) {
+    if (templateHasEndnotes && tocComponent) {
       const $endnotes = cheerio.load(endnotesComponent.content)
       const $toc = cheerio.load(tocComponent.content)
 

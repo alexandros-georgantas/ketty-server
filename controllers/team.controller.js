@@ -2,6 +2,8 @@ const { logger, useTransaction } = require('@coko/server')
 const omitBy = require('lodash/omitBy')
 const isUndefined = require('lodash/isUndefined')
 
+const TeamMember = require('@coko/server/src/models/teamMember/teamMember.model')
+
 const { Team } = require('../models').models
 
 const getObjectTeam = async (
@@ -61,6 +63,65 @@ const createTeam = async (
   }
 }
 
+const updateTeamMemberStatus = async (teamMemberId, status, options = {}) => {
+  try {
+    const { trx } = options
+
+    return useTransaction(
+      async tr => {
+        logger.info(
+          `>>> team member with id ${teamMemberId} status updated to ${status}`,
+        )
+
+        const updatedTeamMember = await TeamMember.patchAndFetchById(
+          teamMemberId,
+          { status },
+          { trx: tr },
+        )
+
+        return Team.findById(updatedTeamMember.teamId, { trx: tr })
+      },
+      { trx },
+    )
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
+const updateTeamMemberStatuses = async (teamId, status, options = {}) => {
+  try {
+    const { trx } = options
+
+    return useTransaction(
+      async tr => {
+        logger.info(
+          `>>> setting status of ${status} to all team member of team with id ${teamId}`,
+        )
+
+        const { result: teamMembers } = await TeamMember.find(
+          { teamId },
+          { trx: tr },
+        )
+
+        await Promise.all(
+          teamMembers.map(async teamMember =>
+            TeamMember.patchAndFetchById(
+              teamMember.id,
+              { status },
+              { trx: tr },
+            ),
+          ),
+        )
+
+        return Team.findById(teamId, { trx: tr })
+      },
+      { trx },
+    )
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
 const deleteTeam = async (teamId, options = {}) => {
   try {
     const { trx } = options
@@ -98,8 +159,27 @@ const deleteTeam = async (teamId, options = {}) => {
   }
 }
 
+const addTeamMembers = async (teamId, members, status, options = {}) => {
+  try {
+    const { trx } = options
+
+    return useTransaction(async tr => {
+      await Promise.all(
+        members.map(userId => Team.addMember(teamId, userId, { status })),
+      )
+
+      return Team.findById(teamId, { trx })
+    })
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
 module.exports = {
   createTeam,
   getObjectTeam,
   deleteTeam,
+  updateTeamMemberStatus,
+  updateTeamMemberStatuses,
+  addTeamMembers,
 }

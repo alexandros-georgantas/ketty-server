@@ -65,13 +65,19 @@ input CreateBookInput {
   addUserToBookTeams: [String!]
 }
 
+input AdditionalExportOptionsInput {
+  includeTOC: Boolean
+  includeCopyrights: Boolean
+  includeTitlePage: Boolean
+}
+
 input ExportBookInput {
   bookId: ID!
-  mode: String!
   templateId: ID
   previewer: String
   fileExtension: String
   icmlNotes: String
+  additionalExportOptions: AdditionalExportOptionsInput
 }
 
 type ContentStructure {

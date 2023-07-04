@@ -10,6 +10,7 @@ const team = require('./team')
 const user = require('./user')
 const template = require('./template')
 const file = require('./file')
+const systemInfo = require('./systemInfo')
 
 module.exports = {
   typeDefs: [
@@ -24,6 +25,7 @@ module.exports = {
     team.typeDefs,
     user.typeDefs,
     template.typeDefs,
+    systemInfo.typeDefs,
   ].join(' '),
   resolvers: merge(
     {},
@@ -38,5 +40,6 @@ module.exports = {
     team.resolvers,
     template.resolvers,
     user.resolvers,
+    systemInfo.resolvers,
   ),
 }

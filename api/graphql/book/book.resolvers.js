@@ -1,5 +1,6 @@
 const { withFilter } = require('graphql-subscriptions')
 const { pubsubManager, logger } = require('@coko/server')
+const { getUser } = require('@coko/server/src/models/user/user.controller')
 const map = require('lodash/map')
 const isEmpty = require('lodash/isEmpty')
 
@@ -67,6 +68,7 @@ const createBookHandler = async (_, { input }, ctx) => {
 
     const { collectionId, title, addUserToBookTeams } = input
     const pubsub = await pubsubManager.getPubsub()
+
     let newBook
 
     if (addUserToBookTeams && !isEmpty(addUserToBookTeams)) {
@@ -78,6 +80,10 @@ const createBookHandler = async (_, { input }, ctx) => {
           userId: ctx.user,
         },
       })
+
+      const updatedUser = await getUser(ctx.user)
+
+      pubsub.publish('USER_UPDATED', { userUpdated: updatedUser })
     } else {
       newBook = await createBook({ collectionId, title })
     }
@@ -191,18 +197,24 @@ const updatePODMetadataHandler = async (_, { bookId, metadata }, ctx) => {
 }
 
 const exportBookHandler = async (_, { input }, ctx) => {
-  const { bookId, mode, previewer, templateId, fileExtension, icmlNotes } =
-    input
+  const {
+    bookId,
+    previewer,
+    templateId,
+    fileExtension,
+    icmlNotes,
+    additionalExportOptions = {},
+  } = input
 
   try {
     logger.info('book resolver: executing exportBook use case')
     return exportBook(
       bookId,
-      mode,
       templateId,
       previewer,
       fileExtension,
       icmlNotes,
+      additionalExportOptions,
     )
   } catch (e) {
     throw new Error(e)
