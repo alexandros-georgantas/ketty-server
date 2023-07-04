@@ -54,8 +54,9 @@ const updateKetidaTeamMembersHandler = async (
     await Promise.all(
       members.map(async userId => {
         const user = await getUser(userId)
+
         return pubsub.publish(USER_UPDATED, {
-          userUpdated: { user },
+          userUpdated: user,
         })
       }),
     )
@@ -118,6 +119,7 @@ const addTeamMembersHandler = async (_, { teamId, members, status }, ctx) => {
     await Promise.all(
       members.map(async userId => {
         const user = await getUser(userId)
+
         return pubsub.publish(USER_UPDATED, {
           userUpdated: user,
         })
