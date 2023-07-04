@@ -11,9 +11,12 @@ const {
 
 const { getUser } = require('@coko/server/src/models/user/user.controller')
 
+const TeamMember = require('@coko/server/src/models/teamMember/teamMember.model')
+
 const {
   updateTeamMemberStatus,
   updateTeamMemberStatuses,
+  addTeamMembers,
 } = require('../../../controllers/team.controller')
 
 const {
@@ -51,8 +54,9 @@ const updateKetidaTeamMembersHandler = async (
     await Promise.all(
       members.map(async userId => {
         const user = await getUser(userId)
+
         return pubsub.publish(USER_UPDATED, {
-          userUpdated: { user },
+          userUpdated: user,
         })
       }),
     )
@@ -69,21 +73,63 @@ const updateKetidaTeamMembersHandler = async (
 
 const updateTeamMemberStatusHandler = async (
   _,
-  { teamId, userId, status },
+  { teamMemberId, status },
   ctx,
 ) => {
   try {
     const pubsub = await pubsubManager.getPubsub()
-    const updatedTeam = await updateTeamMemberStatus(teamId, userId, status)
-    const user = await getUser(userId)
+    const updatedTeam = await updateTeamMemberStatus(teamMemberId, status)
+
+    const teamMember = await TeamMember.findOne({ id: teamMemberId })
+    const user = await getUser(teamMember.userId)
 
     pubsub.publish(TEAM_UPDATED, {
-      teamUpdated: { teamId },
+      teamUpdated: updatedTeam,
     })
 
     pubsub.publish(USER_UPDATED, {
-      userUpdated: { user },
+      userUpdated: user,
     })
+    return updatedTeam
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
+const addTeamMembersHandler = async (_, { teamId, members, status }, ctx) => {
+  try {
+    const pubsub = await pubsubManager.getPubsub()
+    logger.info('team resolver: executing addTeamMembers use case')
+    const updatedTeam = await addTeamMembers(teamId, members, status)
+
+    if (updatedTeam.global === true) {
+      pubsub.publish(TEAM_MEMBERS_UPDATED, {
+        teamMembersUpdated: updatedTeam,
+      })
+
+      return updatedTeam
+    }
+
+    if (updatedTeam.role === 'productionEditor') {
+      pubsub.publish(BOOK_PRODUCTION_EDITORS_UPDATED, {
+        productionEditorsUpdated: updatedTeam,
+      })
+    }
+
+    await Promise.all(
+      members.map(async userId => {
+        const user = await getUser(userId)
+
+        return pubsub.publish(USER_UPDATED, {
+          userUpdated: user,
+        })
+      }),
+    )
+
+    pubsub.publish(TEAM_MEMBERS_UPDATED, {
+      teamMembersUpdated: updatedTeam,
+    })
+    logger.info(`Update msg broadcasted`)
     return updatedTeam
   } catch (e) {
     throw new Error(e)
@@ -94,6 +140,7 @@ module.exports = {
   Mutation: {
     updateKetidaTeamMembers: updateKetidaTeamMembersHandler,
     updateTeamMemberStatus: updateTeamMemberStatusHandler,
+    addTeamMembers: addTeamMembersHandler,
   },
   Subscription: {
     teamMembersUpdated: {
@@ -106,6 +153,12 @@ module.exports = {
       subscribe: async () => {
         const pubsub = await pubsubManager.getPubsub()
         return pubsub.asyncIterator(BOOK_PRODUCTION_EDITORS_UPDATED)
+      },
+    },
+    teamUpdated: {
+      subscribe: async () => {
+        const pubsub = await pubsubManager.getPubsub()
+        return pubsub.asyncIterator(TEAM_UPDATED)
       },
     },
   },
