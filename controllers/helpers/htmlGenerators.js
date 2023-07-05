@@ -111,8 +111,8 @@ const generatePagedjsContainer = bookTitle => {
 const generateTitlePage = (
   bookComponent,
   bookTitle,
+  authors,
   subtitle = undefined,
-  authors = undefined,
 ) => {
   const {
     id,
@@ -137,37 +137,17 @@ const generateTitlePage = (
         }
         </header>
         ${subtitle ? `<h2 class="book-subtitle">${subtitle}</h2>` : ''}
-        ${authors ? `<h2 class="book-authors">${authors}</h2>` : ''}
+        ${
+          authors && authors.length > 0
+            ? `<h2 class="book-authors">${authors.toString()}</h2>`
+            : ''
+        }
     </section>`,
   )
 
   return output('body').html()
 }
 
-// const generateCopyrightsPage = (bookComponent, podMetadata) => {
-//   const {
-//     id,
-//     componentType,
-//     division,
-//     pagination,
-//     runningHeadersLeft,
-//     runningHeadersRight,
-//     title,
-//   } = bookComponent
-
-//   const output = cheerio.load(
-//     `<section id="comp-number-${id}"  class="component-${division} ${componentType} ${
-//       !featurePODEnabled ? paginationExtractor(pagination) : ''
-//     }">${runningHeadersGenerator(
-//       runningHeadersLeft,
-//       runningHeadersRight,
-//     )}<header><h1 class="component-title">${
-//       title || 'Copyrights'
-//     }</h1></header></section>`,
-//   )
-
-//   return output.html()
-// }
 const generateCopyrightsPage = (bookTitle, bookComponent, podMetadata) => {
   const {
     id,
