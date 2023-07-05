@@ -135,7 +135,10 @@ module.exports = async bookId => {
     )
 
     if (featurePODEnabled) {
-      authors.push(book.podMetadata.authors)
+      if (book.podMetadata.authors) {
+        const deconstructAuthors = book.podMetadata.authors.split(',')
+        forEach(deconstructAuthors, author => authors.push(author))
+      }
 
       finalBook.podMetadata = book.podMetadata
     } else {
@@ -159,7 +162,7 @@ module.exports = async bookId => {
       issn: book.issn,
       issnL: book.issnL,
       license: book.license,
-      authors: authors.length > 0 ? authors : null,
+      authors,
     }
 
     const bookDivisions = new Map()
