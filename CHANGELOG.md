@@ -1,3 +1,10 @@
+## [1.8.1](https://gitlab.coko.foundation/ketida/server/compare/v1.8.0...v1.8.1) (2023-07-05)
+
+
+### Bug Fixes
+
+* passing authors consistently for the case of epub ([9b996cf](https://gitlab.coko.foundation/ketida/server/commit/9b996cf818879b3455938bd6ad91ead71657c6bb))
+
 # [1.8.0](https://gitlab.coko.foundation/ketida/server/compare/v1.7.0...v1.8.0) (2023-07-04)
 
 
