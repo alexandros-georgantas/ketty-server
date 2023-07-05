@@ -80,6 +80,18 @@ class BookComponentState extends Base {
   getBookComponent() {
     return this.$relatedQuery('bookComponent')
   }
+
+  static patchByBookComponentId(options, status, bookComponentId) {
+    const { trx } = options
+
+    return BookComponentState.query(trx)
+      .patch({ status })
+      .where({ bookComponentId })
+  }
+
+  static patchById(data, id) {
+    return BookComponentState.query().patch(data).where('bookComponentId', id)
+  }
 }
 
 module.exports = BookComponentState
