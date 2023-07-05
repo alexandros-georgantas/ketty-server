@@ -112,8 +112,8 @@ const ExporterService = async (
         titlePageComponent.content = generateTitlePage(
           titlePageComponent,
           book.title,
+          book.metadata.authors,
           book.subtitle,
-          book.podMetadata.authors,
         )
       } else {
         frontDivision.bookComponents.delete('title-page')

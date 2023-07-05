@@ -403,14 +403,17 @@ const generateContentOPF = async (book, epubFolder) => {
 
   const metaTemp = []
 
-  map(authors, (author, index) => {
-    metaTemp.push({
-      '@scheme': 'marc:relators',
-      '@property': 'role',
-      '@refines': `#creator${index}`,
-      '#text': author,
+  if (authors.length > 0) {
+    map(authors, (author, index) => {
+      metaTemp.push({
+        '@scheme': 'marc:relators',
+        '@property': 'role',
+        '@refines': `#creator${index}`,
+        '#text': author,
+      })
     })
-  })
+  }
+
   metaTemp.push({
     '@property': 'dcterms:modified',
     '#text': updated.toISOString().replace(/\.\d+Z$/, 'Z'),
@@ -511,10 +514,6 @@ const generateContentOPF = async (book, epubFolder) => {
         '@xmlns:ibooks': 'http://apple.com/ibooks/html-extensions',
         'dc:title': { '#text': title },
         'dc:language': { '#text': 'en' },
-        'dc:creator': map(authors, (author, index) => ({
-          '@id': `creator${index}`,
-          '#text': author,
-        })),
 
         meta: metaTemp,
       },
@@ -524,6 +523,16 @@ const generateContentOPF = async (book, epubFolder) => {
         itemref: spineData,
       },
     },
+  }
+
+  if (authors.length > 0) {
+    contentOPF.package.metadata['dc:creator'] = map(
+      authors,
+      (author, index) => ({
+        '@id': `creator${index}`,
+        '#text': author,
+      }),
+    )
   }
 
   if (identifier) {
