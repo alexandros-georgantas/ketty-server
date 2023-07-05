@@ -133,9 +133,7 @@ const addBookComponent = async (
     const { trx } = options
     return useTransaction(
       async tr => {
-        const applicationParameters = await ApplicationParameter.query(
-          tr,
-        ).findOne({
+        const applicationParameters = await ApplicationParameter.findOne({
           context: 'bookBuilder',
           area: 'stages',
         })
@@ -187,13 +185,11 @@ const addBookComponent = async (
           `new book component translation created with id ${translation.id}`,
         )
 
-        await Division.query(tr)
-          .where('id', divisionId)
-          .patch({
-            book_components: raw(
-              `book_components || '"${createdBookComponent.id}"'`,
-            ),
-          })
+        await Division.addBookComponentToDivision(
+          { trx: tr },
+          divisionId,
+          createdBookComponent.id,
+        )
 
         if (workflowStages) {
           bookComponentWorkflowStages = {
@@ -531,15 +527,17 @@ const unlockBookComponent = async (
         logger.info(
           `multiple locks found for book component with id ${bookComponentId} and deleted `,
         )
-        await BookComponentState.query(tr)
-          .patch({ status })
-          .where({ bookComponentId })
+        await BookComponentState.patchByBookComponentId(
+          { trx: tr },
+          status,
+          bookComponentId,
+        )
 
-        return Lock.query(tr).delete().where({
-          foreignId: bookComponentId,
-          foreignType: 'bookComponent',
+        return Lock.deleteByIdAndType(
+          { trx: tr, type: 'bookComponent' },
+          bookComponentId,
           serverIdentifier,
-        })
+        )
       }
 
       logger.info(`lock for book component with id ${bookComponentId} deleted `)
@@ -552,15 +550,17 @@ const unlockBookComponent = async (
         }
       }
 
-      await BookComponentState.query(tr)
-        .patch({ status })
-        .where({ bookComponentId })
+      await BookComponentState.patchByBookComponentId(
+        { trx: tr },
+        status,
+        bookComponentId,
+      )
 
-      return Lock.query(tr).delete().where({
-        foreignId: bookComponentId,
-        foreignType: 'bookComponent',
+      return Lock.deleteByIdAndType(
+        { trx: tr, type: 'bookComponent' },
+        bookComponentId,
         serverIdentifier,
-      })
+      )
     }, {})
   } catch (e) {
     logger.error(e.message)
@@ -622,9 +622,11 @@ const lockBookComponent = async (bookComponentId, tabId, userAgent, userId) => {
 
     const status = 200
 
-    await BookComponentState.query()
-      .patch({ status })
-      .where({ bookComponentId })
+    await BookComponentState.patchByBookComponentId(
+      { trx: '' },
+      status,
+      bookComponentId,
+    )
 
     logger.info(
       `lock acquired for book component with id ${bookComponentId} for the user with id ${userId}`,
@@ -696,13 +698,16 @@ const updateWorkflowState = async (bookComponentId, workflowStages, ctx) => {
         .then(param => true)
         .catch(async e => {
           // this means that the user no longer has edit permission
-          await Lock.query().delete().where({
-            foreignId: bookComponentId,
-            foreignType: 'bookComponent',
-          })
-          return BookComponentState.query()
-            .patch({ status: 105 })
-            .where({ bookComponentId })
+          await Lock.deleteByIdAndType(
+            { trx: '', type: 'bookComponent' },
+            bookComponentId,
+          )
+
+          return BookComponentState.patchByBookComponentId(
+            { trx: '' },
+            105,
+            bookComponentId,
+          )
         })
     }
 
@@ -734,16 +739,18 @@ const deleteBookComponent = async bookComponent => {
       deleted: true,
     })
 
-    await BookComponentState.query()
-      .patch({
+    await BookComponentState.patchById(
+      {
         deleted: true,
-      })
-      .where('bookComponentId', id)
-    await BookComponentTranslation.query()
-      .patch({
+      },
+      id,
+    )
+    await BookComponentTranslation.patchById(
+      {
         deleted: true,
-      })
-      .where('bookComponentId', id)
+      },
+      id,
+    )
 
     logger.info(`book component with id ${deletedBookComponent.id} deleted`)
 

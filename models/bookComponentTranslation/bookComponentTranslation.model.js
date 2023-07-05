@@ -60,6 +60,12 @@ class BookComponentTranslation extends Translation {
   getBookComponent() {
     return this.$relatedQuery('bookComponent')
   }
+
+  static patchById(data, bookComponentId) {
+    return BookComponentTranslation.query()
+      .patch(data)
+      .where('bookComponentId', bookComponentId)
+  }
 }
 
 module.exports = BookComponentTranslation

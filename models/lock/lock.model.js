@@ -36,6 +36,16 @@ class Lock extends Base {
       },
     }
   }
+
+  static deleteByIdAndType(options, bookComponentId, serverIdentifier) {
+    const { trx, type } = options
+
+    return Lock.query(trx).delete().where({
+      foreignId: bookComponentId,
+      foreignType: type,
+      serverIdentifier,
+    })
+  }
 }
 
 module.exports = Lock

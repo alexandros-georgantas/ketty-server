@@ -15,9 +15,10 @@ const getApplicationParameters = async (context, area, options = {}) => {
             `${APPLICATION_PARAMETERS_CONTROLLER} getApplicationParameters: fetching application parameters for ${context} - ${area}`,
           )
 
-          const ap = await ApplicationParameter.query(tr)
-            .skipUndefined()
-            .where({ context, area })
+          const ap = await ApplicationParameter.findByContextAndArea(
+            context,
+            area,
+          )
 
           return ap[0]
         }
@@ -26,9 +27,7 @@ const getApplicationParameters = async (context, area, options = {}) => {
           `${APPLICATION_PARAMETERS_CONTROLLER} getApplicationParameters: fetching application parameters`,
         )
 
-        return ApplicationParameter.query(tr)
-          .skipUndefined()
-          .where({ context, area })
+        return ApplicationParameter.findByContextAndArea(context, area)
       },
       { trx, passedTrxOnly: true },
     )
