@@ -58,6 +58,7 @@ input LicenseTypesInput {
 
 type PODMetadata {
   authors: String
+  subtitle: String
   bottomPage: String
   copyrightLicense: String
   isbn: String
@@ -72,6 +73,7 @@ type PODMetadata {
 
 input PODMetadataInput {
   authors: String
+  subtitle: String
   bottomPage: String
   copyrightLicense: String
   isbn: String
