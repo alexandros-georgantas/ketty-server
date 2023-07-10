@@ -90,6 +90,7 @@ const podMetadata = {
   additionalProperties: false,
   properties: {
     authors: string,
+    subtitle: string,
     bottomPage: string,
     copyrightLicense: string,
     isbn: string,
