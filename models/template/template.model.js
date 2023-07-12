@@ -83,6 +83,29 @@ class Template extends Base {
 
     return null
   }
+
+  static getTemplatesByTargetAndNotEndnotes(options, target) {
+    const { trx } = options
+
+    return Template.query(trx)
+      .where('deleted', false)
+      .andWhere('target', target)
+      .whereNot('notes', 'endnotes')
+  }
+
+  static deleteByTarget(options, target) {
+    const { trx } = options
+    return Template.query(trx)
+      .where('deleted', false)
+      .andWhere('target', target)
+  }
+
+  // eslint-disable-next-line no-shadow
+  static updateThumbnailIdAndGetTemplate(options, id) {
+    const { trx, thumbnailId } = options
+
+    return Template.query(trx).patch({ thumbnailId }).findById(id)
+  }
 }
 
 module.exports = Template

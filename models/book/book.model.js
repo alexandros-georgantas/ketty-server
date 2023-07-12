@@ -422,6 +422,12 @@ class Book extends Base {
     super.$beforeUpdate()
     this.ensureIds()
   }
+
+  static patchDivisionId(createdDivisionIds, bookId) {
+    return Book.query()
+      .patch({ divisions: createdDivisionIds })
+      .where({ id: bookId })
+  }
 }
 
 module.exports = Book

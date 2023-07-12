@@ -48,6 +48,12 @@ class File extends FileBase {
   getTemplate() {
     return this.$relatedQuery('template')
   }
+
+  static patchById(options, data, ids) {
+    const { trx } = options
+
+    return File.query(trx).patch(data).whereIn('id', ids)
+  }
 }
 
 module.exports = File

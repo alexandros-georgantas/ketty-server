@@ -71,10 +71,7 @@ const getTemplates = async (
           return result
         }
 
-        return Template.query(tr)
-          .where('deleted', false)
-          .andWhere('target', target)
-          .whereNot('notes', 'endnotes')
+        return Template.getTemplatesByTargetAndNotEndnotes({ trx: tr }, target)
       },
       { trx, passedTrxOnly: true },
     )
@@ -105,9 +102,7 @@ const getSpecificTemplates = async (target, trimSize = null, options = {}) => {
 
     return useTransaction(
       async tr => {
-        const query = Template.query(tr)
-          .where('deleted', false)
-          .andWhere('target', target)
+        const query = Template.deleteByTarget({ trx: tr }, target)
 
         if (trimSize !== null) {
           query.andWhere('trimSize', trimSize)
@@ -346,7 +341,10 @@ const updateTemplate = async (data, options = {}) => {
             logger.info(`>>> file with id ${deleteThumbnail} was deleted`)
           }
 
-          await Template.query(tr).patch({ thumbnailId: null }).findById(id)
+          await Template.updateThumbnailIdAndGetTemplate(
+            { trx: tr, thumbnailId: null },
+            id,
+          )
           logger.info('>>> template thumbnailId property updated')
         }
 
@@ -410,9 +408,10 @@ const updateTemplate = async (data, options = {}) => {
           logger.info(
             `>>> thumbnail representation created on the db with file id ${newThumbnail.id}`,
           )
-          await Template.query(tr)
-            .patch({ thumbnailId: newThumbnail.id })
-            .findById(id)
+          await Template.updateThumbnailIdAndGetTemplate(
+            { trx: tr, thumbnailId: newThumbnail.id },
+            id,
+          )
         }
 
         const updatedTemplate = await Template.patchAndFetchById(
