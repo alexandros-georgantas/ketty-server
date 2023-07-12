@@ -303,10 +303,14 @@ const updateBookOutlineHandler = async (_, { bookId, outline }, ctx) => {
   }
 }
 
-const getPagedPreviewerLinkHandler = async (_, { hash }, ctx) => {
+const getPagedPreviewerLinkHandler = async (
+  _,
+  { hash, previewerOptions },
+  ctx,
+) => {
   try {
     logger.info('book resolver: executing getPreviewerLink use case')
-    return pagedPreviewerLink(hash)
+    return pagedPreviewerLink(hash, previewerOptions)
   } catch (e) {
     throw new Error(e)
   }

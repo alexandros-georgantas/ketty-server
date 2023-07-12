@@ -177,6 +177,12 @@ input RunningHeadersInput {
   runningHeadersLeft: String
 }
 
+input PagedPreviewerOptions {
+  doublePageSpread: Boolean
+  backgroundColor: String
+  zoomPercentage: Float
+}
+
 type ExportResult {
   path: String!
   validationResult: String
@@ -184,7 +190,10 @@ type ExportResult {
 
 extend type Query {
   getBook(id: ID!): Book!
-  getPagedPreviewerLink(hash: String!): PagedPreviewerLink!
+  getPagedPreviewerLink(
+    hash: String!
+    previewerOptions: PagedPreviewerOptions
+  ): PagedPreviewerLink!
   getBooks(options: BookPageInput!): BookResponse!
 }
 
