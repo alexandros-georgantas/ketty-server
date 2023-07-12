@@ -169,16 +169,11 @@ const searchForUsers = async (
         const searchLow = search.toLowerCase()
 
         if (exactMatch) {
-          return User.query(tr)
-            .leftJoin('identities', 'identities.user_id', 'users.id')
-            .where({
-              'users.is_active': true,
-              'identities.is_verified': true,
-              'identities.is_default': true,
-              'identities.email': searchLow,
-            })
-            .whereNotIn('users.id', exclude)
-            .skipUndefined()
+          return User.searchActiveVerifiedUsersWithEmail(
+            { trx: tr },
+            searchLow,
+            exclude,
+          )
         }
 
         const { result: allUsers } = await User.find(
