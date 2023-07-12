@@ -18,7 +18,15 @@ type Book {
   publicationDate: Date
   title: String
   podMetadata: PODMetadata
+  associatedTemplates: AssociatedTemplates
 }
+
+type AssociatedTemplates {
+  pagedjs: ID
+  epub: ID
+  icml: ID
+}
+
 type LicenseTypes {
   NC: Boolean
   SA: Boolean
@@ -213,6 +221,11 @@ extend type Mutation {
   updateShowWelcome(bookId: ID!): Book!
   finalizeBookStructure(bookId: ID!): ID!
   exportBook(input: ExportBookInput!): ExportResult!
+  setAssociatedTemplate(
+    bookId: ID!
+    templateScope: String!
+    templateId: ID
+  ): Book!
 }
 
 extend type Subscription {
