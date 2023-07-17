@@ -1325,6 +1325,82 @@ const getBookTitle = async (bookId, options = {}) => {
   }
 }
 
+const setAssociatedTemplate = async (
+  bookId,
+  templateScope,
+  templateId,
+  options = {},
+) => {
+  try {
+    const { trx } = options
+    return useTransaction(
+      async tr => {
+        const book = await Book.findById(bookId, { trx: tr })
+
+        // Check if associatedTemplates property exists and is an object
+        // If not, initialize it as an empty object
+        if (
+          !book.associatedTemplates ||
+          typeof book.associatedTemplates !== 'object'
+        ) {
+          book.associatedTemplates = {}
+        }
+
+        // Update the appropriate scope with the new templateId
+        book.associatedTemplates[templateScope] = templateId
+
+        const updatedBook = await Book.patchAndFetchById(
+          bookId,
+          {
+            associatedTemplates: book.associatedTemplates,
+          },
+          { trx: tr },
+        )
+
+        logger.info(
+          `${BOOK_CONTROLLER} setAssociatedTemplate: associated template set for book with id ${bookId}`,
+        )
+
+        return updatedBook
+      },
+      { trx },
+    )
+  } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} setAssociatedTemplate: ${e.message}`)
+    throw new Error(e)
+  }
+}
+
+const updateBookStatus = async (id, status, options = {}) => {
+  try {
+    const { trx } = options
+    logger.info(
+      `${BOOK_CONTROLLER} updateBookStatus: updating book with id ${id}`,
+    )
+    return useTransaction(
+      async tr => {
+        const book = await Book.findById(id, { trx: tr })
+
+        if (!book) {
+          throw new Error(`book with id: ${id} does not exist`)
+        }
+
+        const updatedBook = await Book.patchAndFetchById(
+          id,
+          { status },
+          { trx: tr },
+        )
+
+        return updatedBook
+      },
+      { trx, passedTrxOnly: true },
+    )
+  } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} updateBookStatus: ${e.message}`)
+    throw new Error(e)
+  }
+}
+
 module.exports = {
   getBook,
   getBooks,
@@ -1343,4 +1419,6 @@ module.exports = {
   updateShowWelcome,
   finalizeBookStructure,
   getBookTitle,
+  setAssociatedTemplate,
+  updateBookStatus,
 }

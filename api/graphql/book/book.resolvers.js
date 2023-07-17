@@ -38,7 +38,55 @@ const {
   updateShowWelcome,
   finalizeBookStructure,
   getBookTitle,
+  setAssociatedTemplate,
+  updateBookStatus,
 } = require('../../../controllers/book.controller')
+
+const setAssociatedTemplateHandler = async (
+  _,
+  { bookId, templateScope, templateId },
+  ctx,
+) => {
+  try {
+    logger.info('book resolver: executing setAssociatedTemplate use case')
+
+    const pubsub = await pubsubManager.getPubsub()
+
+    const updatedBook = await setAssociatedTemplate(
+      bookId,
+      templateScope,
+      templateId,
+    )
+
+    logger.info('book resolver: broadcasting updated book to clients')
+
+    pubsub.publish(BOOK_UPDATED, {
+      bookUpdated: updatedBook,
+    })
+
+    return updatedBook
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
+const updateBookStatusHandler = async (_, { bookId, status }, ctx) => {
+  try {
+    logger.info('book resolver: executing updateBookStatus use case')
+
+    const pubsub = await pubsubManager.getPubsub()
+
+    const updatedBook = await updateBookStatus(bookId, status)
+
+    logger.info('book resolver: broadcasting updated book to clients')
+
+    pubsub.publish(BOOK_UPDATED, { bookUpdated: updatedBook.id })
+
+    return updatedBook
+  } catch (e) {
+    throw new Error(e)
+  }
+}
 
 const getBookHandler = async (_, { id }, ctx, info) => {
   try {
@@ -303,10 +351,14 @@ const updateBookOutlineHandler = async (_, { bookId, outline }, ctx) => {
   }
 }
 
-const getPagedPreviewerLinkHandler = async (_, { hash }, ctx) => {
+const getPagedPreviewerLinkHandler = async (
+  _,
+  { hash, previewerOptions },
+  ctx,
+) => {
   try {
     logger.info('book resolver: executing getPreviewerLink use case')
-    return pagedPreviewerLink(hash)
+    return pagedPreviewerLink(hash, previewerOptions)
   } catch (e) {
     throw new Error(e)
   }
@@ -382,6 +434,8 @@ module.exports = {
     updateLevelContentStructure: updateLevelContentStructureHandler,
     updateShowWelcome: updateShowWelcomeHandler,
     finalizeBookStructure: finalizeBookStructureHandler,
+    setAssociatedTemplate: setAssociatedTemplateHandler,
+    updateBookStatus: updateBookStatusHandler,
   },
   Book: {
     async title(book, _, ctx) {

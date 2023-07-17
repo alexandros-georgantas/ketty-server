@@ -266,13 +266,18 @@ const xsweetHandler = async (bookComponentId, filePath) => {
   }
 }
 
-const pagedPreviewerLink = async dirPath => {
+const pagedPreviewerLink = async (dirPath, previewerOptions = undefined) => {
   try {
     const zipPath = await zipper(
       path.join(`${process.cwd()}`, uploadsDir, 'temp', 'previewer', dirPath),
     )
 
     const form = new FormData()
+
+    if (previewerOptions) {
+      form.append('options', JSON.stringify(previewerOptions))
+    }
+
     form.append('zip', fs.createReadStream(`${zipPath}`))
 
     return new Promise((resolve, reject) => {

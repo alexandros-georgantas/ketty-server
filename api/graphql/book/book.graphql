@@ -18,7 +18,16 @@ type Book {
   publicationDate: Date
   title: String
   podMetadata: PODMetadata
+  associatedTemplates: AssociatedTemplates
+  status: Int
 }
+
+type AssociatedTemplates {
+  pagedjs: ID
+  epub: ID
+  icml: ID
+}
+
 type LicenseTypes {
   NC: Boolean
   SA: Boolean
@@ -177,6 +186,12 @@ input RunningHeadersInput {
   runningHeadersLeft: String
 }
 
+input PagedPreviewerOptions {
+  doublePageSpread: Boolean
+  backgroundColor: String
+  zoomPercentage: Float
+}
+
 type ExportResult {
   path: String!
   validationResult: String
@@ -184,7 +199,10 @@ type ExportResult {
 
 extend type Query {
   getBook(id: ID!): Book!
-  getPagedPreviewerLink(hash: String!): PagedPreviewerLink!
+  getPagedPreviewerLink(
+    hash: String!
+    previewerOptions: PagedPreviewerOptions
+  ): PagedPreviewerLink!
   getBooks(options: BookPageInput!): BookResponse!
 }
 
@@ -204,6 +222,12 @@ extend type Mutation {
   updateShowWelcome(bookId: ID!): Book!
   finalizeBookStructure(bookId: ID!): ID!
   exportBook(input: ExportBookInput!): ExportResult!
+  setAssociatedTemplate(
+    bookId: ID!
+    templateScope: String!
+    templateId: ID
+  ): Book!
+  updateBookStatus(bookId: ID!, status: Int!): Book!
 }
 
 extend type Subscription {
