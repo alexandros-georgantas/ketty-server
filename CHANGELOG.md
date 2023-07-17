@@ -1,3 +1,12 @@
+# [1.9.0](https://gitlab.coko.foundation/ketida/server/compare/v1.8.1...v1.9.0) (2023-07-17)
+
+
+### Features
+
+* Add mutation for setting book status ([3197dd8](https://gitlab.coko.foundation/ketida/server/commit/3197dd855729e4d10605c41f686e52e96c874aa5))
+* add options for controlling pagedjs microservice ([93db614](https://gitlab.coko.foundation/ketida/server/commit/93db614a67bf559a94faaca2224eebd0ddf6689d))
+* Implement setAssociatedTemplate mutation for books ([1fe56d8](https://gitlab.coko.foundation/ketida/server/commit/1fe56d85a904afc3b2e95458d280a5ce07df1d17))
+
 ## [1.8.1](https://gitlab.coko.foundation/ketida/server/compare/v1.8.0...v1.8.1) (2023-07-05)
 
 
