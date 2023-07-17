@@ -70,7 +70,7 @@ const createTemplate = async (sourceRoot, data, cssFile, notes) => {
       assetsRoot: t.assetsRoot.replace(/^\/+/, '').replace(/\/+$/, ''),
     }))
 
-    const { name, author, target } = data
+    const { name, author, target, trimSize } = data
 
     const foundTemplate = find(normalizedTemplates, {
       label: name.toLowerCase(),
@@ -100,6 +100,7 @@ const createTemplate = async (sourceRoot, data, cssFile, notes) => {
     const templateExists = await Template.findOne({
       name: `${name} (${notes})`,
       target,
+      trimSize,
     })
 
     if (!templateExists) {
@@ -112,6 +113,7 @@ const createTemplate = async (sourceRoot, data, cssFile, notes) => {
               name: `${name} (${notes})`,
               author,
               target,
+              trimSize,
               notes,
             },
             { trx },
