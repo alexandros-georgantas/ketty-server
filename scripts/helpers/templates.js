@@ -97,11 +97,20 @@ const createTemplate = async (sourceRoot, data, cssFile, notes) => {
 
     logger.info('Checking if template with that name already exists')
 
-    const templateExists = await Template.findOne({
-      name: `${name} (${notes})`,
-      target,
-      trimSize,
-    })
+    let templateExists
+
+    if (trimSize) {
+      templateExists = await Template.findOne({
+        name: `${name} (${notes})`,
+        target,
+        trimSize,
+      })
+    } else {
+      templateExists = await Template.findOne({
+        name: `${name} (${notes})`,
+        target,
+      })
+    }
 
     if (!templateExists) {
       return useTransaction(
