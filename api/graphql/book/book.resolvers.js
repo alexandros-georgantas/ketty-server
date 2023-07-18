@@ -26,6 +26,7 @@ const {
   archiveBook,
   createBook,
   renameBook,
+  updateSubtitle,
   deleteBook,
   exportBook,
   updateMetadata,
@@ -40,6 +41,7 @@ const {
   getBookTitle,
   updateAssociatedTemplates,
   updateBookStatus,
+  getBookSubtitle,
 } = require('../../../controllers/book.controller')
 
 const updateAssociatedTemplateHandler = async (
@@ -162,6 +164,26 @@ const renameBookHandler = async (_, { id, title }, ctx) => {
     })
 
     return renamedBook
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
+const updateSubtitleHandler = async (_, { id, subtitle }, ctx) => {
+  try {
+    logger.info('book resolver: executing updateSubtitle use case')
+
+    const pubsub = await pubsubManager.getPubsub()
+
+    const updatedBook = await updateSubtitle(id, subtitle)
+
+    logger.info('book resolver: broadcasting updated book subtitle to clients')
+
+    pubsub.publish(BOOK_UPDATED, {
+      bookUpdated: updatedBook,
+    })
+
+    return updatedBook
   } catch (e) {
     throw new Error(e)
   }
@@ -420,6 +442,7 @@ module.exports = {
     archiveBook: archiveBookHandler,
     createBook: createBookHandler,
     renameBook: renameBookHandler,
+    updateSubtitle: updateSubtitleHandler,
     deleteBook: deleteBookHandler,
     exportBook: exportBookHandler,
     updateMetadata: updateMetadataHandler,
@@ -445,6 +468,17 @@ module.exports = {
       /* eslint-enable no-prototype-builtins */
 
       return title
+    },
+    async subtitle(book, _, ctx) {
+      let { subtitle } = book
+
+      /* eslint-disable no-prototype-builtins */
+      if (!book.hasOwnProperty('subtitle')) {
+        subtitle = await getBookSubtitle(book.id)
+      }
+      /* eslint-enable no-prototype-builtins */
+
+      return subtitle
     },
     divisions(book, _, ctx) {
       return book.divisions
