@@ -62,12 +62,6 @@ const seedTemplates = async () => {
 
         logger.info('******* Create Templates script is starting ********')
 
-        const pagedData = {
-          name,
-          author,
-          target: 'pagedjs',
-        }
-
         if (
           !templateConfig.supportedNoteTypes ||
           templateConfig.supportedNoteTypes.length === 0
@@ -82,14 +76,22 @@ const seedTemplates = async () => {
         logger.info('PagedJS Templates')
 
         await Promise.all(
-          supportedNoteTypes.map(async noteType =>
-            createTemplate(
-              sourceRoot,
-              pagedData,
-              get(target, 'pagedjs.file'),
-              noteType,
-            ),
-          ),
+          supportedNoteTypes.map(async noteType => {
+            return Promise.all(
+              target.pagedjs.map(async data => {
+                const { trimSize, file } = data
+
+                const pagedData = {
+                  name: name.toLowerCase(),
+                  author,
+                  target: 'pagedjs',
+                  trimSize,
+                }
+
+                return createTemplate(sourceRoot, pagedData, file, noteType)
+              }),
+            )
+          }),
         )
 
         if (get(target, 'epub.file')) {
