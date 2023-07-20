@@ -1,3 +1,15 @@
+# [1.10.0](https://gitlab.coko.foundation/ketida/server/compare/v1.9.0...v1.10.0) (2023-07-20)
+
+
+### Bug Fixes
+
+* cover case with no trim size ([3ed5494](https://gitlab.coko.foundation/ketida/server/commit/3ed5494af03830a06038dcf97c1cb8f2336a2648))
+
+
+### Features
+
+* store template defaults and filter by trim size ([aeb7583](https://gitlab.coko.foundation/ketida/server/commit/aeb758376975e4d4418f86f5f68f2e64fde90778))
+
 # [1.9.0](https://gitlab.coko.foundation/ketida/server/compare/v1.8.1...v1.9.0) (2023-07-17)
 
 
