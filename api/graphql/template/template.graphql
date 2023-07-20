@@ -39,6 +39,7 @@ input CreateTemplateInput {
 input TemplatesWhereInput {
   target: String!
   trimSize: String
+  name: String
 }
 
 input ClonedTemplateInput {

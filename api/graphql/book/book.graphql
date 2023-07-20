@@ -23,9 +23,25 @@ type Book {
 }
 
 type AssociatedTemplates {
-  pagedjs: ID
-  epub: ID
-  icml: ID
+  pagedjs: [PreviewerConfiguration!]
+  epub: PreviewerConfiguration
+}
+
+type PreviewerConfiguration {
+  templateId: ID
+  trimSize: String
+  additionalExportOptions: AdditionalExportOptions
+}
+
+input AssociatedTemplatesInput {
+  pagedjs: [PreviewerConfigurationInput!]
+  epub: PreviewerConfigurationInput
+}
+
+input PreviewerConfigurationInput {
+  templateId: ID!
+  trimSize: String
+  additionalExportOptions: AdditionalExportOptionsInput!
 }
 
 type LicenseTypes {
@@ -72,6 +88,12 @@ input CreateBookInput {
   collectionId: ID
   title: String
   addUserToBookTeams: [String!]
+}
+
+type AdditionalExportOptions {
+  includeTOC: Boolean
+  includeCopyrights: Boolean
+  includeTitlePage: Boolean
 }
 
 input AdditionalExportOptionsInput {
@@ -222,10 +244,9 @@ extend type Mutation {
   updateShowWelcome(bookId: ID!): Book!
   finalizeBookStructure(bookId: ID!): ID!
   exportBook(input: ExportBookInput!): ExportResult!
-  setAssociatedTemplate(
+  updateAssociatedTemplates(
     bookId: ID!
-    templateScope: String!
-    templateId: ID
+    associatedTemplates: AssociatedTemplatesInput!
   ): Book!
   updateBookStatus(bookId: ID!, status: Int!): Book!
 }

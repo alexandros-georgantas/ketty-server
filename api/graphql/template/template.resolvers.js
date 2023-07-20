@@ -40,9 +40,9 @@ const getTemplateHandler = async (_, { id }, ctx) => {
 
 const getSpecificTemplatesHandler = (_, { where }, ctx) => {
   try {
-    const { target, trimSize } = where
+    const { target, trimSize, name } = where
     logger.info('template resolver: use case getSpecificTemplates')
-    return getSpecificTemplates(target, trimSize)
+    return getSpecificTemplates(target, trimSize, name)
   } catch (e) {
     throw new Error(e)
   }
