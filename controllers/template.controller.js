@@ -96,7 +96,12 @@ const getTemplate = async (id, options = {}) => {
   }
 }
 
-const getSpecificTemplates = async (target, trimSize = null, options = {}) => {
+const getSpecificTemplates = async (
+  target,
+  trimSize = null,
+  name = null,
+  options = {},
+) => {
   try {
     const { trx } = options
     logger.info(
@@ -112,6 +117,12 @@ const getSpecificTemplates = async (target, trimSize = null, options = {}) => {
         if (trimSize !== null) {
           query.andWhere('trimSize', trimSize)
         }
+
+        if (name !== null) {
+          query.andWhere('name', name)
+        }
+
+        query.orderByRaw(`LOWER(name) ASC NULLS LAST`)
 
         return query
       },

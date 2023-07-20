@@ -123,16 +123,35 @@ const statusFieldSchema = {
   default: 0,
 }
 
+const previewerConfiguration = {
+  type: ['object', 'null'],
+  additionalProperties: false,
+  properties: {
+    additionalProperties: false,
+    templateId: { type: ['string', 'null'], format: 'uuid', default: null },
+    trimSize: { type: ['string', 'null'], default: null },
+    additionalExportOptions: {
+      includeTOC: { type: 'boolean', default: true },
+      includeCopyrights: { type: 'boolean', default: true },
+      includeTitlePage: { type: 'boolean', default: true },
+    },
+  },
+}
+
 const associatedTemplatesSchema = {
   type: 'object',
   additionalProperties: false,
   properties: {
-    pagedjs: { type: ['uuid', 'null'], default: null },
-    epub: { type: ['uuid', 'null'], default: null },
-    icml: { type: ['uuid', 'null'], default: null },
+    pagedjs: {
+      type: 'array',
+      additionalProperties: false,
+      items: previewerConfiguration,
+    },
+    epub: previewerConfiguration,
+    icml: previewerConfiguration,
   },
   default: {
-    pagedjs: null,
+    pagedjs: [],
     epub: null,
     icml: null,
   },
