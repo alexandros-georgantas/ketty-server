@@ -3,7 +3,7 @@ const { Book } = require('@pubsweet/models')
 
 exports.up = async knex => {
   try {
-    const defaultAssociatedTemplates = { pagedjs: null, epub: null, icml: null }
+    const defaultAssociatedTemplates = { pagedjs: [], epub: null, icml: null }
     await knex.schema.table('book', table => {
       table.jsonb('associatedTemplates').defaultTo(defaultAssociatedTemplates)
     })
