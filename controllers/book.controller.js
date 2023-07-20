@@ -42,6 +42,8 @@ const { createDivision } = require('./division.controller')
 
 const { createTeam, getObjectTeam, deleteTeam } = require('./team.controller')
 
+const { getSpecificTemplates } = require('./template.controller')
+
 const toCamelCase = string =>
   string
     .split(/[^a-zA-Z0-9]/g)
@@ -593,6 +595,90 @@ const createBook = async (data = {}) => {
         )
         // END OF BOOK SPECIAL COMPONENTS CREATION SECTION
 
+        // SECTION FOR SETTING DEFAULT TEMPLATE
+        if (featurePODEnabled) {
+          const additionalExportOptions = {
+            includeTOC: true,
+            includeCopyrights: true,
+            includeTitlePage: true,
+          }
+
+          const pagedjs = []
+
+          const pagedjsTrimA4 = await getSpecificTemplates(
+            'pagedjs',
+            '8.5x11',
+            null,
+            {
+              trx: tr,
+            },
+          )
+
+          if (pagedjsTrimA4[0]) {
+            pagedjs.push({
+              templateId: pagedjsTrimA4[0].id,
+              trimSize: pagedjsTrimA4[0].trimSize,
+              additionalExportOptions,
+            })
+          }
+
+          const pagedjsTrimA5 = await getSpecificTemplates(
+            'pagedjs',
+            '5.5x8.5',
+            pagedjsTrimA4[0].name,
+            {
+              trx: tr,
+            },
+          )
+
+          if (pagedjsTrimA5[0]) {
+            pagedjs.push({
+              templateId: pagedjsTrimA5[0].id,
+              trimSize: pagedjsTrimA5[0].trimSize,
+              additionalExportOptions,
+            })
+          }
+
+          const pagedjsTrimTrade = await getSpecificTemplates(
+            'pagedjs',
+            '6x9',
+            pagedjsTrimA4[0].name,
+            {
+              trx: tr,
+            },
+          )
+
+          if (pagedjsTrimTrade[0]) {
+            pagedjs.push({
+              templateId: pagedjsTrimTrade[0].id,
+              trimSize: pagedjsTrimTrade[0].trimSize,
+              additionalExportOptions,
+            })
+          }
+
+          const epubTemplate = await getSpecificTemplates('epub', null, null, {
+            trx: tr,
+          })
+
+          const epub = epubTemplate[0]
+            ? { templateId: epubTemplate[0].id, additionalExportOptions }
+            : null
+
+          const associatedTemplates = {
+            pagedjs,
+            epub,
+          }
+
+          await Book.patchAndFetchById(
+            newBook.id,
+            {
+              associatedTemplates,
+            },
+            { trx: tr },
+          )
+        }
+
+        // END OF BOOK DEFAULT TEMPLATE CREATION SECTION
         return newBook
       },
       { trx },
@@ -1325,40 +1411,31 @@ const getBookTitle = async (bookId, options = {}) => {
   }
 }
 
-const setAssociatedTemplate = async (
+const updateAssociatedTemplates = async (
   bookId,
-  templateScope,
-  templateId,
+  associatedTemplates,
   options = {},
 ) => {
   try {
     const { trx } = options
     return useTransaction(
       async tr => {
-        const book = await Book.findById(bookId, { trx: tr })
+        const book = await Book.query().findById(bookId)
 
-        // Check if associatedTemplates property exists and is an object
-        // If not, initialize it as an empty object
-        if (
-          !book.associatedTemplates ||
-          typeof book.associatedTemplates !== 'object'
-        ) {
-          book.associatedTemplates = {}
+        if (!book) {
+          throw new Error('Book not found')
         }
-
-        // Update the appropriate scope with the new templateId
-        book.associatedTemplates[templateScope] = templateId
 
         const updatedBook = await Book.patchAndFetchById(
           bookId,
           {
-            associatedTemplates: book.associatedTemplates,
+            associatedTemplates,
           },
           { trx: tr },
         )
 
         logger.info(
-          `${BOOK_CONTROLLER} setAssociatedTemplate: associated template set for book with id ${bookId}`,
+          `${BOOK_CONTROLLER} updateAssociatedTemplates: book with id ${updatedBook.id} has updated associated templates`,
         )
 
         return updatedBook
@@ -1366,7 +1443,7 @@ const setAssociatedTemplate = async (
       { trx },
     )
   } catch (e) {
-    logger.error(`${BOOK_CONTROLLER} setAssociatedTemplate: ${e.message}`)
+    logger.error(`${BOOK_CONTROLLER} updateAssociatedTemplates: ${e.message}`)
     throw new Error(e)
   }
 }
@@ -1419,6 +1496,6 @@ module.exports = {
   updateShowWelcome,
   finalizeBookStructure,
   getBookTitle,
-  setAssociatedTemplate,
+  updateAssociatedTemplates,
   updateBookStatus,
 }
