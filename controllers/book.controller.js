@@ -14,7 +14,7 @@ const {
 } = require('@coko/server/src/models/team/team.controller')
 
 const {
-  hasMembershipInTeams,
+  hasMembershipInGlobalTeams,
 } = require('../config/permissions/helpers/helpers')
 
 const {
@@ -109,14 +109,14 @@ const getBook = async (id, options = {}) => {
 
 const getBooks = async ({ collectionId, userId, options }) => {
   try {
-    const getAllBooksTeams =
+    const allowToGetAllBooksGlobalTeams =
       config.has('filters.getBooks.all') && config.get('filters.getBooks.all')
 
     const { trx, page, pageSize, orderBy, showArchived } = options
 
-    const isEligibleForAll = await hasMembershipInTeams(
+    const isEligibleForAll = await hasMembershipInGlobalTeams(
       userId,
-      getAllBooksTeams,
+      allowToGetAllBooksGlobalTeams,
     )
 
     logger.info(

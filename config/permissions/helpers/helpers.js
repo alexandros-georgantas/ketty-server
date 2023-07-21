@@ -32,7 +32,7 @@ const isAdmin = async userId => {
   }
 }
 
-const hasMembershipInTeams = async (userId, teams) => {
+const hasMembershipInGlobalTeams = async (userId, teams) => {
   /* eslint-disable global-require */
   const config = require('config')
   const globalTeams = config.get('teams.global')
@@ -46,6 +46,14 @@ const hasMembershipInTeams = async (userId, teams) => {
   )
 
   return isGlobalList.some(global => global)
+}
+
+const hasMembershipInTeam = async (userId, teamId) => {
+  /* eslint-disable global-require */
+  const TeamMember = require('../../../models/teamMember/teamMember.model')
+  /* eslint-enable global-require */
+
+  return TeamMember.findOne({ teamId, userId })
 }
 
 const isGlobal = async (userId, includeAdmin = false) => {
@@ -122,11 +130,38 @@ const hasEditAccessBasedOnRoleAndStage = async (
   }
 }
 
+const getUserStatus = async (teamId, userId) => {
+  try {
+    // eslint-disable-next-line global-require
+    const TeamMember = require('../../../models/teamMember/teamMember.model')
+
+    const teamMember = await TeamMember.findOne({ teamId, userId })
+
+    return teamMember?.status
+  } catch (e) {
+    throw new Error(e.message)
+  }
+}
+
+const getBookSpecificTeam = async (bookId, role) => {
+  try {
+    // eslint-disable-next-line global-require
+    const Team = require('../../../models/team/team.model')
+
+    return Team.findOne({ objectId: bookId, role })
+  } catch (e) {
+    throw new Error(e.message)
+  }
+}
+
 module.exports = {
   isAuthenticated,
   isAdmin,
   isGlobal,
   isGlobalSpecific,
   hasEditAccessBasedOnRoleAndStage,
-  hasMembershipInTeams,
+  hasMembershipInGlobalTeams,
+  hasMembershipInTeam,
+  getUserStatus,
+  getBookSpecificTeam,
 }

@@ -31,17 +31,17 @@ const featurePODEnabled =
   (process.env.FEATURE_POD && JSON.parse(process.env.FEATURE_POD)) || false
 
 let bookBuilder
-let permissions = vanillaPermissions
+let flavorPermissions = vanillaPermissions
 
 if (!featureBookStructureEnabled) {
   if (flavour === 'BOOKSPRINTS') {
     bookBuilder = bbBooksprints
-    permissions = booksprintPermissions
+    flavorPermissions = booksprintPermissions
   } else {
     bookBuilder = bbVanilla
   }
 } else {
-  permissions = oenPermissions
+  flavorPermissions = oenPermissions
   bookBuilder = bbOEN
 }
 
@@ -55,7 +55,7 @@ let filters = vanillaFilters
 
 if (featurePODEnabled) {
   flavorTeams = podTeams
-  permissions = podPermissions
+  flavorPermissions = podPermissions
   filters = podFilters
 }
 
@@ -68,7 +68,7 @@ module.exports = {
   featureBookStructure: false,
   flavour,
   featureUploadDOCXFiles: true,
-  permissions,
+  permissions: flavorPermissions,
   filters,
   pubsweet: {
     components,
