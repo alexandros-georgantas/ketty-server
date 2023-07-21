@@ -239,9 +239,6 @@ const exportBookRule = rule()(
         throw new Error('book id should be provided')
       }
 
-      console.log('ti fasi', fileExtension)
-      // const isOwnerUser = await isOwner(userId, bookId)
-
       if (!fileExtension) {
         return canInteractWithBookAndRelevantAssets(userId, bookId)
       }
