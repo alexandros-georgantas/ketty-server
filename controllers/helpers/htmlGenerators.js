@@ -167,7 +167,12 @@ const generateCopyrightsPage = (bookTitle, bookComponent, podMetadata) => {
     topPage,
     bottomPage,
     ncCopyrightHolder,
+    ncCopyrightYear,
   } = podMetadata
+
+  const year = ncCopyrightYear
+    ? new Date(ncCopyrightYear).getFullYear()
+    : undefined
 
   // eslint-disable-next-line no-nested-ternary
   const licenseText = licenseTypes.NC
@@ -190,8 +195,10 @@ const generateCopyrightsPage = (bookTitle, bookComponent, podMetadata) => {
       ? `${
           bookTitle ? `<span class="book-title">${bookTitle}</span>` : ''
         }<span class="copyrights-symbol"> © </span>${
+          year ? `<span class="copyrights-year">${year} </span>` : ''
+        }${
           ncCopyrightHolder
-            ? `<span class="copyrights-holder">${ncCopyrightHolder}</span>`
+            ? `<span class="copyrights-holder">by ${ncCopyrightHolder}</span>`
             : ''
         }.All rights reserved. Except as permitted under the United States Copyright Act of 1976, no part of this publication may be reproduced or distributed in any form or by any means, or stored in a database or other retrieval system, without the prior written permission of the copyright holder.`
       : copyrightLicense === 'CC'
