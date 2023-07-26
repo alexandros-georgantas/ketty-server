@@ -462,7 +462,7 @@ module.exports = {
       const { title } = book
 
       if (!title) {
-        title = await getBookTitle(book.id)
+        return getBookTitle(book.id)
       }
 
       return title
@@ -471,7 +471,7 @@ module.exports = {
       const { subtitle } = book
 
       if (!subtitle) {
-        subtitle = await getBookSubtitle(book.id)
+        return getBookSubtitle(book.id)
       }
 
       return subtitle
