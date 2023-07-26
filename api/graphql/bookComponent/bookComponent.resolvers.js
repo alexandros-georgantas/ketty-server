@@ -101,6 +101,7 @@ const ingestWordFileHandler = async (_, { bookComponentFiles }, ctx) => {
   try {
     const pubsub = await pubsubManager.getPubsub()
     const bookComponents = []
+    let bookIdToFetch
     await BPromise.mapSeries(bookComponentFiles, async bookComponentFile => {
       const {
         file,
@@ -109,6 +110,8 @@ const ingestWordFileHandler = async (_, { bookComponentFiles }, ctx) => {
         componentType: forceComponentType,
         divisionLabel: forceDivisionLabel,
       } = await bookComponentFile
+
+      bookIdToFetch = bookId
 
       const { createReadStream, filename } = await file
       const title = filename.split('.')[0]
@@ -193,6 +196,11 @@ const ingestWordFileHandler = async (_, { bookComponentFiles }, ctx) => {
 
       // await useCaseXSweet(componentId, `${tempFilePath}/${randomFilename}`)
       return xsweetHandler(componentId, `${tempFilePath}/${randomFilename}`)
+    })
+    const updatedBook = await getBook(bookIdToFetch)
+
+    pubsub.publish(`BOOK_UPDATED`, {
+      bookUpdated: updatedBook,
     })
     return bookComponents
   } catch (e) {
