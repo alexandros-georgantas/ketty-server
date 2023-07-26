@@ -707,12 +707,7 @@ const renameBook = async (bookId, title, options = {}) => {
           `${BOOK_CONTROLLER} renameBook: title updated for book with id ${bookId}`,
         )
 
-        const book = await Book.findOne(
-          { id: bookId, deleted: false },
-          { trx: tr },
-        )
-
-        return book
+        return Book.findOne({ id: bookId, deleted: false }, { trx: tr })
       },
       { trx },
     )
@@ -740,12 +735,7 @@ const updateSubtitle = async (bookId, subtitle, options = {}) => {
           `${BOOK_CONTROLLER} updateSubtitle: subtitle updated for book with id ${bookId}`,
         )
 
-        const book = await Book.findOne(
-          { id: bookId, deleted: false },
-          { trx: tr },
-        )
-
-        return book
+        return Book.findOne({ id: bookId, deleted: false }, { trx: tr })
       },
       { trx },
     )

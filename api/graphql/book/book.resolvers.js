@@ -459,24 +459,20 @@ module.exports = {
   },
   Book: {
     async title(book, _, ctx) {
-      let { title } = book
+      const { title } = book
 
-      /* eslint-disable no-prototype-builtins */
-      if (!book.hasOwnProperty('title')) {
+      if (!title) {
         title = await getBookTitle(book.id)
       }
-      /* eslint-enable no-prototype-builtins */
 
       return title
     },
     async subtitle(book, _, ctx) {
-      let { subtitle } = book
+      const { subtitle } = book
 
-      /* eslint-disable no-prototype-builtins */
-      if (!book.hasOwnProperty('subtitle')) {
+      if (!subtitle) {
         subtitle = await getBookSubtitle(book.id)
       }
-      /* eslint-enable no-prototype-builtins */
 
       return subtitle
     },
