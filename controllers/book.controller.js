@@ -707,17 +707,40 @@ const renameBook = async (bookId, title, options = {}) => {
           `${BOOK_CONTROLLER} renameBook: title updated for book with id ${bookId}`,
         )
 
-        const book = await Book.findOne(
-          { id: bookId, deleted: false },
-          { trx: tr },
-        )
-
-        return book
+        return Book.findOne({ id: bookId, deleted: false }, { trx: tr })
       },
       { trx },
     )
   } catch (e) {
     logger.error(`${BOOK_CONTROLLER} renameBook: ${e.message}`)
+    throw new Error(e)
+  }
+}
+
+const updateSubtitle = async (bookId, subtitle, options = {}) => {
+  try {
+    const { trx } = options
+    return useTransaction(
+      async tr => {
+        const bookTranslation = await BookTranslation.findOne(
+          { bookId, languageIso: 'en' },
+          { trx: tr },
+        )
+
+        await BookTranslation.query(tr)
+          .patch({ subtitle })
+          .where({ id: bookTranslation.id })
+
+        logger.info(
+          `${BOOK_CONTROLLER} updateSubtitle: subtitle updated for book with id ${bookId}`,
+        )
+
+        return Book.findOne({ id: bookId, deleted: false }, { trx: tr })
+      },
+      { trx },
+    )
+  } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} updateSubtitle: ${e.message}`)
     throw new Error(e)
   }
 }
@@ -1478,12 +1501,33 @@ const updateBookStatus = async (id, status, options = {}) => {
   }
 }
 
+const getBookSubtitle = async (bookId, options = {}) => {
+  try {
+    const bookTranslation = await BookTranslation.findOne({
+      bookId,
+      languageIso: 'en',
+    })
+
+    if (!bookTranslation) {
+      throw new Error(
+        `book with id ${bookId} does not have a translation entry`,
+      )
+    }
+
+    return bookTranslation.subtitle
+  } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} getBooksubtitle: ${e.message}`)
+    throw new Error(e)
+  }
+}
+
 module.exports = {
   getBook,
   getBooks,
   archiveBook,
   createBook,
   renameBook,
+  updateSubtitle,
   deleteBook,
   exportBook,
   updateMetadata,
@@ -1498,4 +1542,5 @@ module.exports = {
   getBookTitle,
   updateAssociatedTemplates,
   updateBookStatus,
+  getBookSubtitle,
 }

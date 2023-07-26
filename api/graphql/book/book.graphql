@@ -17,6 +17,7 @@ type Book {
   productionEditors: [String]
   publicationDate: Date
   title: String
+  subtitle: String
   podMetadata: PODMetadata
   associatedTemplates: AssociatedTemplates
   status: Int
@@ -232,6 +233,7 @@ extend type Mutation {
   archiveBook(id: ID!, archive: Boolean!): Book!
   createBook(input: CreateBookInput!): Book!
   renameBook(id: ID!, title: String!): Book!
+  updateSubtitle(id: ID!, subtitle: String): Book!
   deleteBook(id: ID!): Book!
   updateMetadata(input: MetadataInput!): Book!
   updatePODMetadata(bookId: ID!, metadata: PODMetadataInput!): Book!
