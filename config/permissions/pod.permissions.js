@@ -517,6 +517,16 @@ const renameBookRule = rule()(async (parent, { id: bookId }, ctx, info) => {
   }
 })
 
+const updateSubtitleRule = rule()(async (parent, { id: bookId }, ctx, info) => {
+  try {
+    const { user: userId } = ctx
+
+    return canEditBookAndRelevantAssets(userId, bookId)
+  } catch (e) {
+    throw new Error(e.message)
+  }
+})
+
 const teamRule = rule()(async (parent, { id: teamId }, ctx, info) => {
   try {
     const { user: userId } = ctx
@@ -590,6 +600,7 @@ const permissions = {
     updateTeamMemberStatus: updateTeamMemberStatusRule,
     createBook: createBookRule,
     renameBook: renameBookRule,
+    updateSubtitle: updateSubtitleRule,
     deleteBook: modifyBooksInDashboardRule,
     updatePODMetadata: updateMetadataRule,
     exportBook: exportBookRule,
