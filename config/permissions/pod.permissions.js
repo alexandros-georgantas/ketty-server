@@ -284,7 +284,7 @@ const addBookComponentRule = rule()(
 )
 
 const deleteBookComponentRule = rule()(
-  async (parent, { id: bookComponentId }, ctx, info) => {
+  async (parent, { input: { id: bookComponentId } }, ctx, info) => {
     try {
       const { user: userId } = ctx
 
