@@ -21,6 +21,8 @@ type Book {
   podMetadata: PODMetadata
   associatedTemplates: AssociatedTemplates
   status: Int
+  thumbnailId: ID
+  thumbnailURL: String
 }
 
 type AssociatedTemplates {
@@ -251,6 +253,7 @@ extend type Mutation {
     associatedTemplates: AssociatedTemplatesInput!
   ): Book!
   updateBookStatus(bookId: ID!, status: Int!): Book!
+  uploadBookThumbnail(bookId: ID!, file: Upload!): Book!
 }
 
 extend type Subscription {

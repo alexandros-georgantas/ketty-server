@@ -575,6 +575,17 @@ const getObjectTeamsRule = rule()(async (parent, { objectId }, ctx, info) => {
   }
 })
 
+const uploadBookThumbnailRule = rule()(
+  async (parent, { bookId }, ctx, info) => {
+    try {
+      const { user: userId } = ctx
+      return canEditBookAndRelevantAssets(userId, bookId)
+    } catch (e) {
+      throw new Error(e.message)
+    }
+  },
+)
+
 const permissions = {
   Query: {
     '*': deny,
@@ -617,6 +628,7 @@ const permissions = {
     uploadFiles: uploadFilesRules,
     removeTeamMember: isAuthenticatedRule,
     searchForUsers: isAuthenticatedRule,
+    uploadBookThumbnail: uploadBookThumbnailRule,
   },
 }
 
