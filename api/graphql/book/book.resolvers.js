@@ -12,7 +12,6 @@ const {
   BOOK_ARCHIVED,
   BOOK_METADATA_UPDATED,
   BOOK_RUNNING_HEADERS_UPDATED,
-  BOOK_THUMBNAIL_UPLOADED,
 } = require('./constants')
 
 const { getObjectTeam } = require('../../../controllers/team.controller')
@@ -446,8 +445,8 @@ const uploadBookThumbnailHandler = async (_, { bookId, file }, cx) => {
 
     const updatedBook = await uploadBookThumbnail(bookId, file)
 
-    pubsub.publish(BOOK_THUMBNAIL_UPLOADED, {
-      bookThumbnailUploaded: updatedBook.id,
+    pubsub.publish(BOOK_UPDATED, {
+      bookUpdated: updatedBook,
     })
 
     return updatedBook

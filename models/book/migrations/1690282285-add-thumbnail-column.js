@@ -4,20 +4,10 @@ const { Book } = require('@pubsweet/models')
 exports.up = async knex => {
   try {
     await knex.schema.table('book', table => {
-      table.uuid('thumbnailId').nullable()
+      table.uuid('thumbnailId').nullable().defaultTo(null)
     })
 
-    const books = await Book.query().select('id')
-
-    const updates = books.map(book => {
-      return Book.query()
-        .patch({
-          thumbnailId: null,
-        })
-        .where('id', book.id)
-    })
-
-    return updates
+    return Book.query().patch({ thumbnailId: null })
   } catch (e) {
     logger.error(e)
     throw new Error(`Migration: Book: adding thumbnailId column failed`)
