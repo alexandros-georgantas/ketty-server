@@ -1,5 +1,5 @@
 const { withFilter } = require('graphql-subscriptions')
-const { pubsubManager, logger } = require('@coko/server')
+const { pubsubManager, logger, fileStorage } = require('@coko/server')
 const { getUser } = require('@coko/server/src/models/user/user.controller')
 const map = require('lodash/map')
 const isEmpty = require('lodash/isEmpty')
@@ -16,9 +16,13 @@ const {
 
 const { getObjectTeam } = require('../../../controllers/team.controller')
 
+const { getURL } = fileStorage
+
 const {
   pagedPreviewerLink,
 } = require('../../../controllers/microServices.controller')
+
+const File = require('../../../models/file/file.model')
 
 const {
   getBook,
@@ -42,6 +46,7 @@ const {
   updateAssociatedTemplates,
   updateBookStatus,
   getBookSubtitle,
+  uploadBookThumbnail,
 } = require('../../../controllers/book.controller')
 
 const updateAssociatedTemplateHandler = async (
@@ -432,6 +437,24 @@ const updateShowWelcomeHandler = async (_, { bookId }, cx) => {
   }
 }
 
+const uploadBookThumbnailHandler = async (_, { bookId, file }, cx) => {
+  try {
+    logger.info('book resolver: uploading book thumbnail')
+
+    const pubsub = await pubsubManager.getPubsub()
+
+    const updatedBook = await uploadBookThumbnail(bookId, file)
+
+    pubsub.publish(BOOK_UPDATED, {
+      bookUpdated: updatedBook,
+    })
+
+    return updatedBook
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
 module.exports = {
   Query: {
     getBook: getBookHandler,
@@ -456,6 +479,7 @@ module.exports = {
     finalizeBookStructure: finalizeBookStructureHandler,
     updateAssociatedTemplates: updateAssociatedTemplateHandler,
     updateBookStatus: updateBookStatusHandler,
+    uploadBookThumbnail: uploadBookThumbnailHandler,
   },
   Book: {
     async title(book, _, ctx) {
@@ -528,6 +552,21 @@ module.exports = {
       }
 
       return productionEditors
+    },
+    async thumbnailURL(book, _, ctx) {
+      if (book.thumbnailId) {
+        const thumbnailFile = await File.findById(book.thumbnailId)
+
+        if (thumbnailFile) {
+          const thumbnailURL = getURL(
+            thumbnailFile.getStoredObjectBasedOnType('small').key,
+          )
+
+          return thumbnailURL
+        }
+      }
+
+      return null
     },
   },
   Subscription: {

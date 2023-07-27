@@ -364,6 +364,7 @@ class Book extends Base {
         podMetadata,
         status: statusFieldSchema,
         associatedTemplates: associatedTemplatesSchema,
+        thumbnailId: id,
       },
     }
   }

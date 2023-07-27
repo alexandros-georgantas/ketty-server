@@ -13,6 +13,8 @@ const {
   updateTeamMembership,
 } = require('@coko/server/src/models/team/team.controller')
 
+const { createFile, deleteFiles } = require('./file.controller')
+
 const {
   hasMembershipInGlobalTeams,
 } = require('../config/permissions/helpers/helpers')
@@ -1521,6 +1523,40 @@ const getBookSubtitle = async (bookId, options = {}) => {
   }
 }
 
+const uploadBookThumbnail = async (bookId, file, options = {}) => {
+  try {
+    const { createReadStream, filename } = await file
+
+    const book = await Book.findById(bookId)
+    const existingThumbnailId = book.thumbnailId
+
+    if (existingThumbnailId) {
+      await deleteFiles([existingThumbnailId], true)
+    }
+
+    const fileStream = createReadStream()
+
+    const uploadedFile = await createFile(
+      fileStream,
+      filename,
+      null,
+      null,
+      [],
+      bookId,
+    )
+
+    const thumbnailId = uploadedFile.id
+
+    const updatedBook = await Book.patchAndFetchById(bookId, {
+      thumbnailId,
+    })
+
+    return updatedBook
+  } catch (error) {
+    throw new Error('Something went wrong while uploading the book thumbnail.')
+  }
+}
+
 module.exports = {
   getBook,
   getBooks,
@@ -1543,4 +1579,5 @@ module.exports = {
   updateAssociatedTemplates,
   updateBookStatus,
   getBookSubtitle,
+  uploadBookThumbnail,
 }
