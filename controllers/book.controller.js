@@ -13,7 +13,7 @@ const {
   updateTeamMembership,
 } = require('@coko/server/src/models/team/team.controller')
 
-const { createFile } = require('@coko/server/src/models/file/file.controller')
+const { createFile, deleteFiles } = require('./file.controller')
 
 const {
   hasMembershipInGlobalTeams,
@@ -1526,6 +1526,13 @@ const getBookSubtitle = async (bookId, options = {}) => {
 const uploadBookThumbnail = async (bookId, file, options = {}) => {
   try {
     const { createReadStream, filename } = await file
+
+    const book = await Book.findById(bookId)
+    const existingThumbnailId = book.thumbnailId
+
+    if (existingThumbnailId) {
+      await deleteFiles([existingThumbnailId], true)
+    }
 
     const fileStream = createReadStream()
 
