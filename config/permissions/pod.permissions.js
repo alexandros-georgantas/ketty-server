@@ -173,6 +173,32 @@ const modifyBooksInDashboardRule = rule()(
   },
 )
 
+const updateAssociatedTemplatesRule = rule()(
+  async (parent, { bookId }, ctx, info) => {
+    try {
+      const { user: userId } = ctx
+
+      const isAuthenticatedUser = await isAuthenticated(userId)
+
+      if (!isAuthenticatedUser) {
+        return false
+      }
+
+      const belongsToAdminTeam = await isAdmin(userId)
+
+      if (belongsToAdminTeam) {
+        return true
+      }
+
+      const belongsToBookOwnerTeam = await isOwner(userId, bookId)
+
+      return belongsToBookOwnerTeam
+    } catch (e) {
+      throw new Error(e.message)
+    }
+  },
+)
+
 const getBookRule = rule()(async (parent, { id: bookId }, ctx, info) => {
   try {
     const { user: userId } = ctx
@@ -350,26 +376,28 @@ const updateBookComponentOrderRule = rule()(
   },
 )
 
-const unlockBookComponentRule = rule()(async (parent, { lock }, ctx, info) => {
-  try {
-    const { user: userId } = ctx
+const unlockBookComponentRule = rule()(
+  async (parent, { input: { id: bookComponentId, lock } }, ctx, info) => {
+    try {
+      const { user: userId } = ctx
 
-    const belongsToAdminTeam = await isAdmin(userId)
+      const belongsToAdminTeam = await isAdmin(userId)
 
-    if (belongsToAdminTeam) {
-      return true
+      if (belongsToAdminTeam) {
+        return true
+      }
+
+      if (!lock) {
+        throw new Error('no lock info provided')
+      }
+
+      const isAuthenticatedUser = await isAuthenticated(userId)
+      return isAuthenticatedUser && userId === lock.userId
+    } catch (e) {
+      throw new Error(e.message)
     }
-
-    if (!lock) {
-      throw new Error('no lock info provided')
-    }
-
-    const isAuthenticatedUser = await isAuthenticated(userId)
-    return isAuthenticatedUser && userId === lock.userId
-  } catch (e) {
-    throw new Error(e.message)
-  }
-})
+  },
+)
 
 const updateContentRule = rule()(
   async (parent, { input: { id } }, ctx, info) => {
@@ -624,7 +652,7 @@ const permissions = {
     updateTrackChanges: updateTrackChangesRule,
     updateContent: updateContentRule,
     updateBookComponentsOrder: updateBookComponentOrderRule,
-    updateAssociatedTemplates: modifyBooksInDashboardRule,
+    updateAssociatedTemplates: updateAssociatedTemplatesRule,
     uploadFiles: uploadFilesRules,
     removeTeamMember: isAuthenticatedRule,
     searchForUsers: isAuthenticatedRule,

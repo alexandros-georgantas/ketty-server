@@ -1,4 +1,4 @@
-const { useTransaction, logger } = require('@coko/server')
+const { useTransaction, logger, pubsubManager } = require('@coko/server')
 const map = require('lodash/map')
 const indexOf = require('lodash/indexOf')
 const findIndex = require('lodash/findIndex')
@@ -13,6 +13,7 @@ const {
   updateTeamMembership,
 } = require('@coko/server/src/models/team/team.controller')
 
+const { getUser } = require('@coko/server/src/models/user/user.controller')
 const { createFile, deleteFiles } = require('./file.controller')
 
 const {
@@ -34,6 +35,7 @@ const {
   BookComponent,
   Division,
   BookComponentTranslation,
+  TeamMember,
 } = require('../models').models
 
 const {
@@ -821,7 +823,26 @@ const deleteBook = async (bookId, options = {}) => {
           },
         )
 
+        const pubsub = await pubsubManager.getPubsub()
+
         if (associatedTeams.length > 0) {
+          await Promise.all(
+            map(associatedTeams, async team => {
+              const { result: teamMembers } = await TeamMember.find({
+                teamId: team.id,
+              })
+
+              await Promise.all(
+                teamMembers.map(async teamMember => {
+                  const updatedUser = await getUser(teamMember.userId)
+
+                  return pubsub.publish('USER_UPDATED', {
+                    userUpdated: updatedUser,
+                  })
+                }),
+              )
+            }),
+          )
           await Promise.all(
             map(associatedTeams, async team =>
               deleteTeam(team.id, { trx: tr }),
