@@ -236,6 +236,7 @@ class Book extends Base {
           'book.archived',
           'book.bookStructure',
           'book.divisions',
+          'book.thumbnailId',
           'book_translation.title',
         ])
         .groupBy('book.id', 'book_translation.title')
