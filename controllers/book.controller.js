@@ -629,7 +629,7 @@ const createBook = async (data = {}) => {
           const pagedjsTrimA5 = await getSpecificTemplates(
             'pagedjs',
             '5.5x8.5',
-            pagedjsTrimA4[0].name,
+            pagedjsTrimA4[0]?.name,
             {
               trx: tr,
             },
@@ -646,7 +646,7 @@ const createBook = async (data = {}) => {
           const pagedjsTrimTrade = await getSpecificTemplates(
             'pagedjs',
             '6x9',
-            pagedjsTrimA4[0].name,
+            pagedjsTrimA4[0]?.name,
             {
               trx: tr,
             },
