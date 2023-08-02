@@ -1,4 +1,4 @@
-const { useTransaction, logger } = require('@coko/server')
+const { useTransaction, logger, pubsubManager } = require('@coko/server')
 const map = require('lodash/map')
 const indexOf = require('lodash/indexOf')
 const findIndex = require('lodash/findIndex')
@@ -13,8 +13,11 @@ const {
   updateTeamMembership,
 } = require('@coko/server/src/models/team/team.controller')
 
+const { getUser } = require('@coko/server/src/models/user/user.controller')
+const { createFile, deleteFiles } = require('./file.controller')
+
 const {
-  hasMembershipInTeams,
+  hasMembershipInGlobalTeams,
 } = require('../config/permissions/helpers/helpers')
 
 const {
@@ -32,6 +35,7 @@ const {
   BookComponent,
   Division,
   BookComponentTranslation,
+  TeamMember,
 } = require('../models').models
 
 const {
@@ -109,14 +113,14 @@ const getBook = async (id, options = {}) => {
 
 const getBooks = async ({ collectionId, userId, options }) => {
   try {
-    const getAllBooksTeams =
+    const allowToGetAllBooksGlobalTeams =
       config.has('filters.getBooks.all') && config.get('filters.getBooks.all')
 
     const { trx, page, pageSize, orderBy, showArchived } = options
 
-    const isEligibleForAll = await hasMembershipInTeams(
+    const isEligibleForAll = await hasMembershipInGlobalTeams(
       userId,
-      getAllBooksTeams,
+      allowToGetAllBooksGlobalTeams,
     )
 
     logger.info(
@@ -625,7 +629,7 @@ const createBook = async (data = {}) => {
           const pagedjsTrimA5 = await getSpecificTemplates(
             'pagedjs',
             '5.5x8.5',
-            pagedjsTrimA4[0].name,
+            pagedjsTrimA4[0]?.name,
             {
               trx: tr,
             },
@@ -642,7 +646,7 @@ const createBook = async (data = {}) => {
           const pagedjsTrimTrade = await getSpecificTemplates(
             'pagedjs',
             '6x9',
-            pagedjsTrimA4[0].name,
+            pagedjsTrimA4[0]?.name,
             {
               trx: tr,
             },
@@ -707,17 +711,40 @@ const renameBook = async (bookId, title, options = {}) => {
           `${BOOK_CONTROLLER} renameBook: title updated for book with id ${bookId}`,
         )
 
-        const book = await Book.findOne(
-          { id: bookId, deleted: false },
-          { trx: tr },
-        )
-
-        return book
+        return Book.findOne({ id: bookId, deleted: false }, { trx: tr })
       },
       { trx },
     )
   } catch (e) {
     logger.error(`${BOOK_CONTROLLER} renameBook: ${e.message}`)
+    throw new Error(e)
+  }
+}
+
+const updateSubtitle = async (bookId, subtitle, options = {}) => {
+  try {
+    const { trx } = options
+    return useTransaction(
+      async tr => {
+        const bookTranslation = await BookTranslation.findOne(
+          { bookId, languageIso: 'en' },
+          { trx: tr },
+        )
+
+        await BookTranslation.query(tr)
+          .patch({ subtitle })
+          .where({ id: bookTranslation.id })
+
+        logger.info(
+          `${BOOK_CONTROLLER} updateSubtitle: subtitle updated for book with id ${bookId}`,
+        )
+
+        return Book.findOne({ id: bookId, deleted: false }, { trx: tr })
+      },
+      { trx },
+    )
+  } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} updateSubtitle: ${e.message}`)
     throw new Error(e)
   }
 }
@@ -796,7 +823,26 @@ const deleteBook = async (bookId, options = {}) => {
           },
         )
 
+        const pubsub = await pubsubManager.getPubsub()
+
         if (associatedTeams.length > 0) {
+          await Promise.all(
+            map(associatedTeams, async team => {
+              const { result: teamMembers } = await TeamMember.find({
+                teamId: team.id,
+              })
+
+              await Promise.all(
+                teamMembers.map(async teamMember => {
+                  const updatedUser = await getUser(teamMember.userId)
+
+                  return pubsub.publish('USER_UPDATED', {
+                    userUpdated: updatedUser,
+                  })
+                }),
+              )
+            }),
+          )
           await Promise.all(
             map(associatedTeams, async team =>
               deleteTeam(team.id, { trx: tr }),
@@ -1478,12 +1524,67 @@ const updateBookStatus = async (id, status, options = {}) => {
   }
 }
 
+const getBookSubtitle = async (bookId, options = {}) => {
+  try {
+    const bookTranslation = await BookTranslation.findOne({
+      bookId,
+      languageIso: 'en',
+    })
+
+    if (!bookTranslation) {
+      throw new Error(
+        `book with id ${bookId} does not have a translation entry`,
+      )
+    }
+
+    return bookTranslation.subtitle
+  } catch (e) {
+    logger.error(`${BOOK_CONTROLLER} getBooksubtitle: ${e.message}`)
+    throw new Error(e)
+  }
+}
+
+const uploadBookThumbnail = async (bookId, file, options = {}) => {
+  try {
+    const { createReadStream, filename } = await file
+
+    const book = await Book.findById(bookId)
+    const existingThumbnailId = book.thumbnailId
+
+    if (existingThumbnailId) {
+      await deleteFiles([existingThumbnailId], true)
+    }
+
+    const fileStream = createReadStream()
+
+    const uploadedFile = await createFile(
+      fileStream,
+      filename,
+      null,
+      null,
+      [],
+      bookId,
+    )
+
+    const thumbnailId = uploadedFile.id
+
+    const updatedBook = await Book.patchAndFetchById(bookId, {
+      thumbnailId,
+    })
+
+    return updatedBook
+  } catch (error) {
+    throw new Error('Something went wrong while uploading the book thumbnail.')
+  }
+}
+
 module.exports = {
   getBook,
   getBooks,
   archiveBook,
   createBook,
   renameBook,
+  updateSubtitle,
   deleteBook,
   exportBook,
   updateMetadata,
@@ -1498,4 +1599,6 @@ module.exports = {
   getBookTitle,
   updateAssociatedTemplates,
   updateBookStatus,
+  getBookSubtitle,
+  uploadBookThumbnail,
 }

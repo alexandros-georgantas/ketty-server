@@ -1,5 +1,5 @@
 const { withFilter } = require('graphql-subscriptions')
-const { pubsubManager, logger } = require('@coko/server')
+const { pubsubManager, logger, fileStorage } = require('@coko/server')
 const { getUser } = require('@coko/server/src/models/user/user.controller')
 const map = require('lodash/map')
 const isEmpty = require('lodash/isEmpty')
@@ -16,9 +16,13 @@ const {
 
 const { getObjectTeam } = require('../../../controllers/team.controller')
 
+const { getURL } = fileStorage
+
 const {
   pagedPreviewerLink,
 } = require('../../../controllers/microServices.controller')
+
+const File = require('../../../models/file/file.model')
 
 const {
   getBook,
@@ -26,6 +30,7 @@ const {
   archiveBook,
   createBook,
   renameBook,
+  updateSubtitle,
   deleteBook,
   exportBook,
   updateMetadata,
@@ -40,6 +45,8 @@ const {
   getBookTitle,
   updateAssociatedTemplates,
   updateBookStatus,
+  getBookSubtitle,
+  uploadBookThumbnail,
 } = require('../../../controllers/book.controller')
 
 const updateAssociatedTemplateHandler = async (
@@ -162,6 +169,26 @@ const renameBookHandler = async (_, { id, title }, ctx) => {
     })
 
     return renamedBook
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
+const updateSubtitleHandler = async (_, { id, subtitle }, ctx) => {
+  try {
+    logger.info('book resolver: executing updateSubtitle use case')
+
+    const pubsub = await pubsubManager.getPubsub()
+
+    const updatedBook = await updateSubtitle(id, subtitle)
+
+    logger.info('book resolver: broadcasting updated book subtitle to clients')
+
+    pubsub.publish(BOOK_UPDATED, {
+      bookUpdated: updatedBook,
+    })
+
+    return updatedBook
   } catch (e) {
     throw new Error(e)
   }
@@ -410,6 +437,24 @@ const updateShowWelcomeHandler = async (_, { bookId }, cx) => {
   }
 }
 
+const uploadBookThumbnailHandler = async (_, { bookId, file }, cx) => {
+  try {
+    logger.info('book resolver: uploading book thumbnail')
+
+    const pubsub = await pubsubManager.getPubsub()
+
+    const updatedBook = await uploadBookThumbnail(bookId, file)
+
+    pubsub.publish(BOOK_UPDATED, {
+      bookUpdated: updatedBook,
+    })
+
+    return updatedBook
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
 module.exports = {
   Query: {
     getBook: getBookHandler,
@@ -420,6 +465,7 @@ module.exports = {
     archiveBook: archiveBookHandler,
     createBook: createBookHandler,
     renameBook: renameBookHandler,
+    updateSubtitle: updateSubtitleHandler,
     deleteBook: deleteBookHandler,
     exportBook: exportBookHandler,
     updateMetadata: updateMetadataHandler,
@@ -433,18 +479,26 @@ module.exports = {
     finalizeBookStructure: finalizeBookStructureHandler,
     updateAssociatedTemplates: updateAssociatedTemplateHandler,
     updateBookStatus: updateBookStatusHandler,
+    uploadBookThumbnail: uploadBookThumbnailHandler,
   },
   Book: {
     async title(book, _, ctx) {
-      let { title } = book
+      const { title } = book
 
-      /* eslint-disable no-prototype-builtins */
-      if (!book.hasOwnProperty('title')) {
-        title = await getBookTitle(book.id)
+      if (!title) {
+        return getBookTitle(book.id)
       }
-      /* eslint-enable no-prototype-builtins */
 
       return title
+    },
+    async subtitle(book, _, ctx) {
+      const { subtitle } = book
+
+      if (!subtitle) {
+        return getBookSubtitle(book.id)
+      }
+
+      return subtitle
     },
     divisions(book, _, ctx) {
       return book.divisions
@@ -498,6 +552,21 @@ module.exports = {
       }
 
       return productionEditors
+    },
+    async thumbnailURL(book, _, ctx) {
+      if (book.thumbnailId) {
+        const thumbnailFile = await File.findById(book.thumbnailId)
+
+        if (thumbnailFile) {
+          const thumbnailURL = getURL(
+            thumbnailFile.getStoredObjectBasedOnType('small').key,
+          )
+
+          return thumbnailURL
+        }
+      }
+
+      return null
     },
   },
   Subscription: {

@@ -19,7 +19,7 @@ type Lock {
   foreignType: String
   surname: String
   tabId: ID!
-  userAgent: String!
+  userAgent: String
   userId: ID
   id: ID!
 }
@@ -33,7 +33,7 @@ input LockInput {
   foreignType: String
   surname: String
   tabId: ID!
-  userAgent: String!
+  userAgent: String
   userId: ID
   id: ID!
 }
