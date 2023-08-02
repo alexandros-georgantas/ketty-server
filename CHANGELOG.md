@@ -1,3 +1,25 @@
+# [1.11.0](https://gitlab.coko.foundation/ketida/server/compare/v1.10.0...v1.11.0) (2023-08-02)
+
+
+### Bug Fixes
+
+* added missing permission and metadata field ([716affe](https://gitlab.coko.foundation/ketida/server/commit/716affe1a086c1ea7b5716d91ddf165f4a4824d4))
+* **api/graphql:** add missing subtitle field to book metadata schema ([9094941](https://gitlab.coko.foundation/ketida/server/commit/90949419635fd7eb0917ef17e2d987d651487db3))
+* correction of permissions for delete component and broadcasting book updated ([706da21](https://gitlab.coko.foundation/ketida/server/commit/706da210fec9920163794437d0c6e0156e1d52d4))
+* include thumbnailID in user books response ([f989ef4](https://gitlab.coko.foundation/ketida/server/commit/f989ef487aec9c479f4e9d4402958040c6058fc0))
+* minor fixes for 716 ([ed6d9bb](https://gitlab.coko.foundation/ketida/server/commit/ed6d9bb1e8321644036644cbb04d474c1ee805db))
+* remove console statement ([a7a622d](https://gitlab.coko.foundation/ketida/server/commit/a7a622dbf003e8ab892ab8781c7736c705c5f382))
+* thumbnail fix and templates fix ([0bb35d2](https://gitlab.coko.foundation/ketida/server/commit/0bb35d2918684b2dadfb288ecf06160f172e919f))
+* update subtitle handler ([aec708c](https://gitlab.coko.foundation/ketida/server/commit/aec708cbb9db66e33bfe0e989eff79ea7b4a5c64))
+* various fixes needed for permissions ([0ad79d3](https://gitlab.coko.foundation/ketida/server/commit/0ad79d34e177ab53aea8ab4491a484d3e1fc735c))
+
+
+### Features
+
+* added upload book thumbnail backend ([b518b2a](https://gitlab.coko.foundation/ketida/server/commit/b518b2a59d2f62992a1af1347ef7d71f30032cfe))
+* permissions for pod ([9489eab](https://gitlab.coko.foundation/ketida/server/commit/9489eabf6250d446ce5001af4a3eeda0046f8683))
+* replace existing thumbnail if exists ([3f7cf2f](https://gitlab.coko.foundation/ketida/server/commit/3f7cf2f3f80178f5e002ecdc20cd3de75df8a29a))
+
 # [1.10.0](https://gitlab.coko.foundation/ketida/server/compare/v1.9.0...v1.10.0) (2023-07-20)
 
 
