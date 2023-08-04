@@ -1,3 +1,11 @@
+## [1.11.1](https://gitlab.coko.foundation/ketida/server/compare/v1.11.0...v1.11.1) (2023-08-04)
+
+
+### Bug Fixes
+
+* fix for permissions ([b96acc0](https://gitlab.coko.foundation/ketida/server/commit/b96acc0ff23337d05287d5ac13ca8617858cad0c))
+* fix in permissions when user undefined ([8278ef7](https://gitlab.coko.foundation/ketida/server/commit/8278ef74de30c46ece30d1fdf0e0c1cc8cf9e0a3))
+
 # [1.11.0](https://gitlab.coko.foundation/ketida/server/compare/v1.10.0...v1.11.0) (2023-08-02)
 
 
