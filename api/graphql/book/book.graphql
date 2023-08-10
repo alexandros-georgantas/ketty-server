@@ -263,5 +263,5 @@ extend type Subscription {
   bookRenamed: ID!
   bookMetadataUpdated: ID!
   bookRunningHeadersUpdated: ID!
-  bookUpdated(id: ID!): Book!
+  bookUpdated(id: ID!): ID!
 }

@@ -40,6 +40,6 @@ extend type Mutation {
 }
 extend type Subscription {
   filesUploaded: Boolean
-  fileUpdated: File!
+  fileUpdated: ID!
   filesDeleted: Boolean
 }

@@ -27,5 +27,5 @@ extend type Mutation {
 }
 
 extend type Subscription {
-  updateApplicationParameters: [applicationParameter!]!
+  updateApplicationParameters: ID!
 }

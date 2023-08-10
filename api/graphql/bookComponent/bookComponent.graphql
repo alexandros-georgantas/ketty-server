@@ -141,6 +141,7 @@ extend type Mutation {
   updatePagination(input: UpdateBookComponentInput): BookComponent!
   unlockBookComponent(input: UpdateBookComponentInput): BookComponent!
   lockBookComponent(id: ID!, tabId: ID!, userAgent: String!): BookComponent!
+  podLockBookComponent(id: ID!, tabId: ID!, userAgent: String!): Book!
   updateTrackChanges(input: UpdateBookComponentInput): BookComponent!
   updateContent(input: UpdateBookComponentInput): BookComponent!
   updateComponentType(input: UpdateBookComponentInput): BookComponent!
@@ -149,17 +150,17 @@ extend type Mutation {
 }
 
 extend type Subscription {
-  bookComponentAdded: BookComponent!
-  bookComponentUpdated(id: ID!): BookComponent!
-  bookComponentDeleted: BookComponent!
-  bookComponentWorkflowUpdated: BookComponent!
-  bookComponentPaginationUpdated: BookComponent!
-  bookComponentTrackChangesUpdated: BookComponent!
-  bookComponentLockUpdated: BookComponent!
-  bookComponentsLockUpdated: [BookComponent!]!
-  bookComponentTitleUpdated: BookComponent!
-  bookComponentContentUpdated: BookComponent!
-  bookComponentTypeUpdated: BookComponent!
-  bookComponentUploadingUpdated: BookComponent!
-  bookComponentTOCToggled: BookComponent!
+  bookComponentAdded: ID!
+  bookComponentUpdated(id: ID!): ID!
+  bookComponentDeleted: ID!
+  bookComponentWorkflowUpdated: ID!
+  bookComponentPaginationUpdated: ID!
+  bookComponentTrackChangesUpdated: ID!
+  bookComponentLockUpdated: ID!
+  bookComponentsLockUpdated: [ID!]!
+  bookComponentTitleUpdated: ID!
+  bookComponentContentUpdated: ID!
+  bookComponentTypeUpdated: ID!
+  bookComponentUploadingUpdated: ID!
+  bookComponentTOCToggled: ID!
 }
