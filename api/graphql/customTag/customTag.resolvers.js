@@ -24,9 +24,12 @@ const addCustomTagHandler = async (_, { input }, ctx) => {
 
     const newCustomTag = await addCustomTag(label, tagType)
     const updatedCustomTags = await getCustomTags()
+    const subPayload = []
+
+    updatedCustomTags.forEach(tag => subPayload.push(tag.id))
 
     pubsub.publish(CUSTOM_TAGS_UPDATED, {
-      customTagsUpdated: updatedCustomTags,
+      customTagsUpdated: subPayload,
     })
     logger.info('custom tags resolver: broadcasting new custom tag to clients')
     return newCustomTag

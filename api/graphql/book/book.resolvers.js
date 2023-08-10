@@ -5,6 +5,10 @@ const map = require('lodash/map')
 const isEmpty = require('lodash/isEmpty')
 
 const {
+  subscriptions: { USER_UPDATED },
+} = require('@coko/server/src/models/user/constants')
+
+const {
   BOOK_CREATED,
   BOOK_DELETED,
   BOOK_UPDATED,
@@ -65,7 +69,7 @@ const updateAssociatedTemplateHandler = async (
     )
 
     pubsub.publish(BOOK_UPDATED, {
-      bookUpdated: updatedBook,
+      bookUpdated: updatedBook.id,
     })
 
     return updatedBook
@@ -135,7 +139,7 @@ const createBookHandler = async (_, { input }, ctx) => {
 
       const updatedUser = await getUser(ctx.user)
 
-      pubsub.publish('USER_UPDATED', { userUpdated: updatedUser })
+      pubsub.publish(USER_UPDATED, { userUpdated: updatedUser })
     } else {
       newBook = await createBook({ collectionId, title })
     }
@@ -161,7 +165,7 @@ const renameBookHandler = async (_, { id, title }, ctx) => {
     logger.info('book resolver: broadcasting renamed book to clients')
 
     pubsub.publish(BOOK_UPDATED, {
-      bookUpdated: renamedBook,
+      bookUpdated: renamedBook.id,
     })
 
     pubsub.publish(BOOK_RENAMED, {
@@ -185,7 +189,7 @@ const updateSubtitleHandler = async (_, { id, subtitle }, ctx) => {
     logger.info('book resolver: broadcasting updated book subtitle to clients')
 
     pubsub.publish(BOOK_UPDATED, {
-      bookUpdated: updatedBook,
+      bookUpdated: updatedBook.id,
     })
 
     return updatedBook
@@ -314,14 +318,8 @@ const updateRunningHeadersHandler = async (_, { input, bookId }, ctx) => {
 const changeLevelLabelHandler = async (_, { bookId, levelId, label }, ctx) => {
   try {
     logger.info('book resolver: executing changeLevelLabel use case')
-    // const pubsub = await pubsubManager.getPubsub()
+
     const updatedLevel = await changeLevelLabel(bookId, levelId, label)
-
-    // logger.info('book resolver: broadcasting updated book to clients')
-
-    // pubsub.publish(BOOK_RUNNING_HEADERS_UPDATED, {
-    //   bookRunningHeadersUpdated: updatedBook,
-    // })
 
     return updatedLevel
   } catch (e) {
@@ -339,17 +337,10 @@ const changeNumberOfLevelsHandler = async (
       'book resolver: executing changeBookStructureLevelNumber use case',
     )
 
-    // const pubsub = await pubsubManager.getPubsub()
     const updatedBookStructure = await changeNumberOfLevels(
       bookId,
       levelsNumber,
     )
-
-    // logger.info('book resolver: broadcasting updated book to clients')
-
-    // pubsub.publish(BOOK_RUNNING_HEADERS_UPDATED, {
-    //   bookRunningHeadersUpdated: updatedBook,
-    // })
 
     return updatedBookStructure
   } catch (e) {
@@ -360,14 +351,8 @@ const changeNumberOfLevelsHandler = async (
 const updateBookOutlineHandler = async (_, { bookId, outline }, ctx) => {
   try {
     logger.info('book resolver: executing updateBookOutline use case')
-    // const pubsub = await pubsubManager.getPubsub()
+
     const updatedOutline = await updateBookOutline(bookId, outline)
-
-    // logger.info('book resolver: broadcasting updated book to clients')
-
-    // pubsub.publish(BOOK_RUNNING_HEADERS_UPDATED, {
-    //   bookRunningHeadersUpdated: updatedBook,
-    // })
 
     return updatedOutline
   } catch (e) {
@@ -446,7 +431,7 @@ const uploadBookThumbnailHandler = async (_, { bookId, file }, cx) => {
     const updatedBook = await uploadBookThumbnail(bookId, file)
 
     pubsub.publish(BOOK_UPDATED, {
-      bookUpdated: updatedBook,
+      bookUpdated: updatedBook.id,
     })
 
     return updatedBook
@@ -584,11 +569,11 @@ module.exports = {
           () => {
             return pubsub.asyncIterator(BOOK_UPDATED)
           },
-          (payload, variables) => {
+          (payload, variables, ctx) => {
             const { id: bookId } = variables
-            const { bookUpdated } = payload
-            const { id } = bookUpdated
-            return bookId === id
+            const { bookUpdated: updatedBookId } = payload
+
+            return bookId === updatedBookId
           },
         )(...args)
       },

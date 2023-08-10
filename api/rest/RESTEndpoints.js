@@ -71,11 +71,11 @@ const RESTEndpoints = app => {
       await ServiceCallbackToken.deleteById(serviceCallbackTokenId)
 
       pubsub.publish(BOOK_COMPONENT_UPLOADING_UPDATED, {
-        bookComponentUploadingUpdated: updatedBookComponent,
+        bookComponentUploadingUpdated: updatedBookComponent.id,
       })
 
       pubsub.publish(BOOK_UPDATED, {
-        bookUpdated: belongingBook,
+        bookUpdated: belongingBook.id,
       })
     } catch (error) {
       // the service will not care if something went wrong in Ketida
@@ -94,11 +94,11 @@ const RESTEndpoints = app => {
       const belongingBook = await Book.findById(bookComp.bookId)
 
       pubsub.publish(BOOK_COMPONENT_DELETED, {
-        bookComponentDeleted: { id: bookComponentId },
+        bookComponentDeleted: bookComponentId,
       })
 
       pubsub.publish(BOOK_UPDATED, {
-        bookUpdated: belongingBook,
+        bookUpdated: belongingBook.id,
       })
       // throw something which will only be displayed in server's logs
       throw new Error(error)

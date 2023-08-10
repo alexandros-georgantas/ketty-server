@@ -2,6 +2,8 @@ const { pubsubManager, logger } = require('@coko/server')
 
 const { BOOK_COMPONENT_ORDER_UPDATED } = require('./constants')
 
+const { BOOK_UPDATED } = require('../book/constants')
+
 const {
   updateBookComponentOrder,
   updateBookComponentsOrder,
@@ -25,12 +27,12 @@ const updateBookComponentOrderHandler = async (
       index,
     )
 
-    pubsub.publish(`BOOK_UPDATED`, {
-      bookUpdated: book,
+    pubsub.publish(BOOK_COMPONENT_ORDER_UPDATED, {
+      bookComponentOrderUpdated: book.id,
     })
 
-    pubsub.publish(BOOK_COMPONENT_ORDER_UPDATED, {
-      bookComponentOrderUpdated: book,
+    pubsub.publish(BOOK_UPDATED, {
+      bookUpdated: book.id,
     })
 
     return book
@@ -55,12 +57,12 @@ const updateBookComponentsOrderHandler = async (
       bookComponents,
     )
 
-    pubsub.publish(`BOOK_UPDATED`, {
-      bookUpdated: book,
+    pubsub.publish(BOOK_COMPONENT_ORDER_UPDATED, {
+      bookComponentOrderUpdated: book.id,
     })
 
-    pubsub.publish(BOOK_COMPONENT_ORDER_UPDATED, {
-      bookComponentOrderUpdated: book,
+    pubsub.publish(BOOK_UPDATED, {
+      bookUpdated: book.id,
     })
 
     return book

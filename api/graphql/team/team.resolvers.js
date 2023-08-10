@@ -39,7 +39,7 @@ const updateKetidaTeamMembersHandler = async (
 
     if (updatedTeam.global === true) {
       pubsub.publish(TEAM_MEMBERS_UPDATED, {
-        teamMembersUpdated: updatedTeam,
+        teamMembersUpdated: updatedTeam.id,
       })
 
       return updatedTeam
@@ -47,7 +47,7 @@ const updateKetidaTeamMembersHandler = async (
 
     if (updatedTeam.role === 'productionEditor') {
       pubsub.publish(BOOK_PRODUCTION_EDITORS_UPDATED, {
-        productionEditorsUpdated: updatedTeam,
+        productionEditorsUpdated: updatedTeam.id,
       })
     }
 
@@ -62,7 +62,7 @@ const updateKetidaTeamMembersHandler = async (
     )
 
     pubsub.publish(TEAM_MEMBERS_UPDATED, {
-      teamMembersUpdated: updatedTeam,
+      teamMembersUpdated: updatedTeam.id,
     })
     logger.info(`Update msg broadcasted`)
     return updatedTeam
@@ -84,7 +84,7 @@ const updateTeamMemberStatusHandler = async (
     const user = await getUser(teamMember.userId)
 
     pubsub.publish(TEAM_UPDATED, {
-      teamUpdated: updatedTeam,
+      teamUpdated: updatedTeam.id,
     })
 
     pubsub.publish(USER_UPDATED, {
@@ -104,7 +104,7 @@ const addTeamMembersHandler = async (_, { teamId, members, status }, ctx) => {
 
     if (updatedTeam.global === true) {
       pubsub.publish(TEAM_MEMBERS_UPDATED, {
-        teamMembersUpdated: updatedTeam,
+        teamMembersUpdated: updatedTeam.id,
       })
 
       return updatedTeam
@@ -112,7 +112,7 @@ const addTeamMembersHandler = async (_, { teamId, members, status }, ctx) => {
 
     if (updatedTeam.role === 'productionEditor') {
       pubsub.publish(BOOK_PRODUCTION_EDITORS_UPDATED, {
-        productionEditorsUpdated: updatedTeam,
+        productionEditorsUpdated: updatedTeam.id,
       })
     }
 
@@ -127,7 +127,7 @@ const addTeamMembersHandler = async (_, { teamId, members, status }, ctx) => {
     )
 
     pubsub.publish(TEAM_MEMBERS_UPDATED, {
-      teamMembersUpdated: updatedTeam,
+      teamMembersUpdated: updatedTeam.id,
     })
     logger.info(`Update msg broadcasted`)
     return updatedTeam
