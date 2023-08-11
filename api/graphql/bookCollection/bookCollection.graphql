@@ -23,5 +23,5 @@ extend type Mutation {
 }
 
 extend type Subscription {
-  collectionAdded: BookCollection
+  collectionAdded: ID!
 }

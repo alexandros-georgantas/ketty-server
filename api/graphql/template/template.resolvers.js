@@ -77,7 +77,7 @@ const createTemplateHandler = async (_, { input }, ctx) => {
     )
 
     pubsub.publish(TEMPLATE_CREATED, {
-      templateCreated: newTemplate,
+      templateCreated: newTemplate.id,
     })
 
     logger.info('New template created msg broadcasted')
@@ -95,7 +95,7 @@ const cloneTemplateHandler = async (_, { input }, ctx) => {
     const newTemplate = await cloneTemplate(id, name, cssFile, hashed)
 
     pubsub.publish(TEMPLATE_CREATED, {
-      templateCreated: updateTemplate,
+      templateCreated: updateTemplate.id,
     })
     logger.info('New template created msg broadcasted')
 
@@ -119,7 +119,7 @@ const updateTemplateHandler = async (_, { input }, ctx) => {
     const updatedTemplate = await updateTemplate(input)
 
     pubsub.publish(TEMPLATE_UPDATED, {
-      templateUpdated: updatedTemplate,
+      templateUpdated: updatedTemplate.id,
     })
 
     logger.info('Template updated msg broadcasted')
@@ -137,7 +137,7 @@ const deleteTemplateHandler = async (_, { id }, ctx) => {
     const deletedTemplate = await deleteTemplate(id)
 
     pubsub.publish(TEMPLATE_DELETED, {
-      templateDeleted: deletedTemplate,
+      templateDeleted: deletedTemplate.id,
     })
     logger.info('Template deleted msg broadcasted')
     return id
@@ -155,7 +155,7 @@ const updateTemplateCSSFileHandler = async (_, { input }, ctx) => {
     const currentTemplate = await updateTemplateCSSFile(id, data, hashed)
 
     pubsub.publish(TEMPLATE_UPDATED, {
-      templateUpdated: currentTemplate,
+      templateUpdated: currentTemplate.id,
     })
     logger.info('Template updated msg broadcasted')
 

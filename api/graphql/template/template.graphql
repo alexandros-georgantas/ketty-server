@@ -94,7 +94,7 @@ extend type Mutation {
 }
 
 extend type Subscription {
-  templateCreated: Template!
-  templateDeleted: Template!
-  templateUpdated: Template!
+  templateCreated: ID!
+  templateDeleted: ID!
+  templateUpdated: ID!
 }

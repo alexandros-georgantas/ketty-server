@@ -674,6 +674,7 @@ const permissions = {
     podDeleteBookComponent: deleteBookComponentRule,
     unlockBookComponent: unlockBookComponentRule,
     lockBookComponent: interactWithBookComponentRule,
+    podLockBookComponent: interactWithBookComponentRule,
     updateTrackChanges: updateTrackChangesRule,
     updateContent: updateContentRule,
     updateBookComponentsOrder: updateBookComponentOrderRule,

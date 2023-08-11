@@ -1,8 +1,14 @@
 const { pubsubManager, useTransaction, logger } = require('@coko/server')
 const config = require('config')
 
-const { Book, BookComponent, Lock, BookComponentState } =
-  require('../models').models
+const { BookComponent, Lock, BookComponentState } = require('../models').models
+
+const { BOOK_UPDATED } = require('../api/graphql/book/constants')
+
+const {
+  BOOK_COMPONENT_LOCK_UPDATED,
+  BOOK_COMPONENT_UPDATED,
+} = require('../api/graphql/bookComponent/constants')
 
 const unlockBookComponent = async (bookComponentId, userId, tabId) => {
   try {
@@ -26,17 +32,16 @@ const unlockBookComponent = async (bookComponentId, userId, tabId) => {
       return BookComponent.findById(bookComponentId, { trx: tr })
     }, {})
 
-    const updatedBook = await Book.findById(updatedBookComponent.bookId)
-    pubsub.publish('BOOK_COMPONENT_UPDATED', {
-      bookComponentUpdated: updatedBookComponent,
+    pubsub.publish(BOOK_COMPONENT_UPDATED, {
+      bookComponentUpdated: updatedBookComponent.id,
     })
 
-    pubsub.publish('BOOK_COMPONENT_LOCK_UPDATED', {
-      bookComponentLockUpdated: updatedBookComponent,
+    pubsub.publish(BOOK_COMPONENT_LOCK_UPDATED, {
+      bookComponentLockUpdated: updatedBookComponent.id,
     })
 
-    pubsub.publish('BOOK_UPDATED', {
-      bookUpdated: updatedBook,
+    pubsub.publish(BOOK_UPDATED, {
+      bookUpdated: updatedBookComponent.bookId,
     })
     return true
   } catch (e) {
@@ -94,20 +99,15 @@ const unlockOrphanLocks = async bookComponentIdsWithLock => {
               { trx: tr },
             )
 
-            const updatedBook = await Book.findById(
-              updatedBookComponent.bookId,
-              { trx: tr },
-            )
-
             logger.info(`broadcasting unlocked event`)
-            pubsub.publish('BOOK_COMPONENT_UPDATED', {
-              bookComponentUpdated: updatedBookComponent,
+            pubsub.publish(BOOK_COMPONENT_UPDATED, {
+              bookComponentUpdated: updatedBookComponent.id,
             })
-            pubsub.publish('BOOK_COMPONENT_LOCK_UPDATED', {
-              bookComponentLockUpdated: updatedBookComponent,
+            pubsub.publish(BOOK_COMPONENT_LOCK_UPDATED, {
+              bookComponentLockUpdated: updatedBookComponent.id,
             })
-            pubsub.publish('BOOK_UPDATED', {
-              bookUpdated: updatedBook,
+            pubsub.publish(BOOK_UPDATED, {
+              bookUpdated: updatedBookComponent.bookId,
             })
 
             return true
@@ -199,20 +199,15 @@ const cleanUpLocks = async (immediate = false) => {
               { trx: tr },
             )
 
-            const updatedBook = await Book.findById(
-              updatedBookComponent.bookId,
-              { trx: tr },
-            )
-
             logger.info(`broadcasting unlocked event`)
-            pubsub.publish('BOOK_COMPONENT_UPDATED', {
-              bookComponentUpdated: updatedBookComponent,
+            pubsub.publish(BOOK_COMPONENT_UPDATED, {
+              bookComponentUpdated: updatedBookComponent.id,
             })
-            pubsub.publish('BOOK_UPDATED', {
-              bookUpdated: updatedBook,
+            pubsub.publish(BOOK_COMPONENT_LOCK_UPDATED, {
+              bookComponentLockUpdated: updatedBookComponent.id,
             })
-            pubsub.publish('BOOK_COMPONENT_LOCK_UPDATED', {
-              bookComponentLockUpdated: updatedBookComponent,
+            pubsub.publish(BOOK_UPDATED, {
+              bookUpdated: updatedBookComponent.bookId,
             })
 
             return true

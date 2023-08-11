@@ -40,6 +40,8 @@ const {
   BOOK_COMPONENT_UPDATED,
 } = require('./constants')
 
+const { BOOK_UPDATED } = require('../book/constants')
+
 const {
   xsweetHandler,
 } = require('../../../controllers/microServices.controller')
@@ -87,7 +89,7 @@ const getBookComponentHandler = async (_, { id }, ctx) => {
 //     )
 
 //     pubsub.publish(BOOK_COMPONENT_LOCK_UPDATED, {
-//       bookComponentLockUpdated: bookComponent,
+//       bookComponentLockUpdated: bookComponent.id,
 //     })
 
 //     return bookComponent
@@ -163,7 +165,7 @@ const ingestWordFileHandler = async (_, { bookComponentFiles }, ctx) => {
         )
 
         pubsub.publish(BOOK_COMPONENT_ADDED, {
-          bookComponentAdded: newBookComponent,
+          bookComponentAdded: newBookComponent.id,
         })
 
         componentId = newBookComponent.id
@@ -188,19 +190,17 @@ const ingestWordFileHandler = async (_, { bookComponentFiles }, ctx) => {
       const updatedBookComponent = await getBookComponent(componentId)
       bookComponents.push(updatedBookComponent)
       pubsub.publish(BOOK_COMPONENT_UPLOADING_UPDATED, {
-        bookComponentUploadingUpdated: updatedBookComponent,
+        bookComponentUploadingUpdated: updatedBookComponent.id,
       })
       pubsub.publish(BOOK_COMPONENT_UPDATED, {
-        bookComponentUpdated: updatedBookComponent,
+        bookComponentUpdated: updatedBookComponent.id,
       })
 
-      // await useCaseXSweet(componentId, `${tempFilePath}/${randomFilename}`)
       return xsweetHandler(componentId, `${tempFilePath}/${randomFilename}`)
     })
-    const updatedBook = await getBook(bookIdToFetch)
 
-    pubsub.publish(`BOOK_UPDATED`, {
-      bookUpdated: updatedBook,
+    pubsub.publish(BOOK_UPDATED, {
+      bookUpdated: bookIdToFetch,
     })
     return bookComponents
   } catch (e) {
@@ -221,14 +221,12 @@ const addBookComponentHandler = async (_, { input }, ctx, info) => {
       title,
     )
 
-    const updatedBook = await getBook(bookId)
-
-    pubsub.publish(`BOOK_UPDATED`, {
-      bookUpdated: updatedBook,
+    pubsub.publish(BOOK_COMPONENT_ADDED, {
+      bookComponentAdded: newBookComponent.id,
     })
 
-    pubsub.publish(BOOK_COMPONENT_ADDED, {
-      bookComponentAdded: newBookComponent,
+    pubsub.publish(BOOK_UPDATED, {
+      bookUpdated: newBookComponent.bookId,
     })
 
     return newBookComponent
@@ -250,17 +248,15 @@ const podAddBookComponentHandler = async (_, { input }, ctx, info) => {
       title,
     )
 
-    const updatedBook = await getBook(bookId)
-
-    pubsub.publish(`BOOK_UPDATED`, {
-      bookUpdated: updatedBook,
-    })
-
     pubsub.publish(BOOK_COMPONENT_ADDED, {
-      bookComponentAdded: newBookComponent,
+      bookComponentAdded: newBookComponent.id,
     })
 
-    return updatedBook
+    pubsub.publish(BOOK_UPDATED, {
+      bookUpdated: bookId,
+    })
+
+    return getBook(bookId)
   } catch (e) {
     logger.error(e.message)
     throw new Error(e)
@@ -276,17 +272,14 @@ const renameBookComponentHandler = async (_, { input }, ctx) => {
 
     const updatedBookComponent = await getBookComponent(id)
 
-    const updatedBook = await getBook(updatedBookComponent.bookId)
-
-    pubsub.publish(`BOOK_UPDATED`, {
-      bookUpdated: updatedBook,
-    })
-
     pubsub.publish(BOOK_COMPONENT_TITLE_UPDATED, {
-      bookComponentTitleUpdated: updatedBookComponent,
+      bookComponentTitleUpdated: updatedBookComponent.id,
     })
     pubsub.publish(BOOK_COMPONENT_UPDATED, {
-      bookComponentUpdated: updatedBookComponent,
+      bookComponentUpdated: updatedBookComponent.id,
+    })
+    pubsub.publish(BOOK_UPDATED, {
+      bookUpdated: updatedBookComponent.bookId,
     })
 
     logger.info('message BOOK_COMPONENT_TITLE_UPDATED broadcasted')
@@ -310,17 +303,14 @@ const deleteBookComponentHandler = async (_, { input }, ctx) => {
 
     const deletedBookComponent = await deleteBookComponent(bookComponent)
 
-    const updatedBook = await getBook(bookComponent.bookId)
-
-    pubsub.publish(`BOOK_UPDATED`, {
-      bookUpdated: updatedBook,
-    })
-
     pubsub.publish(BOOK_COMPONENT_DELETED, {
-      bookComponentDeleted: deletedBookComponent,
+      bookComponentDeleted: deletedBookComponent.id,
     })
     pubsub.publish(BOOK_COMPONENT_UPDATED, {
-      bookComponentUpdated: deletedBookComponent,
+      bookComponentUpdated: deletedBookComponent.id,
+    })
+    pubsub.publish(BOOK_UPDATED, {
+      bookUpdated: bookComponent.bookId,
     })
 
     logger.info('message BOOK_COMPONENT_DELETED broadcasted')
@@ -344,22 +334,19 @@ const podDeleteBookComponentHandler = async (_, { input }, ctx) => {
 
     const deletedBookComponent = await deleteBookComponent(bookComponent)
 
-    const updatedBook = await getBook(bookComponent.bookId)
-
-    pubsub.publish(`BOOK_UPDATED`, {
-      bookUpdated: updatedBook,
-    })
-
     pubsub.publish(BOOK_COMPONENT_DELETED, {
-      bookComponentDeleted: deletedBookComponent,
+      bookComponentDeleted: deletedBookComponent.id,
     })
     pubsub.publish(BOOK_COMPONENT_UPDATED, {
-      bookComponentUpdated: deletedBookComponent,
+      bookComponentUpdated: deletedBookComponent.id,
     })
 
+    pubsub.publish(BOOK_UPDATED, {
+      bookUpdated: bookComponent.bookId,
+    })
     logger.info('message BOOK_COMPONENT_DELETED broadcasted')
 
-    return updatedBook
+    return getBook(bookComponent.bookId)
   } catch (e) {
     logger.error(e.message)
     throw new Error(e)
@@ -387,17 +374,17 @@ const updateWorkflowStateHandler = async (_, { input }, ctx) => {
     const updatedBookComponent = await getBookComponent(id)
 
     pubsub.publish(BOOK_COMPONENT_WORKFLOW_UPDATED, {
-      bookComponentWorkflowUpdated: updatedBookComponent,
+      bookComponentWorkflowUpdated: updatedBookComponent.id,
     })
 
     if (isReviewing) {
       pubsub.publish(BOOK_COMPONENT_TRACK_CHANGES_UPDATED, {
-        bookComponentTrackChangesUpdated: updatedBookComponent,
+        bookComponentTrackChangesUpdated: updatedBookComponent.id,
       })
     }
 
     pubsub.publish(BOOK_COMPONENT_UPDATED, {
-      bookComponentUpdated: updatedBookComponent,
+      bookComponentUpdated: updatedBookComponent.id,
     })
 
     return updatedBookComponent
@@ -418,10 +405,13 @@ const unlockBookComponentHandler = async (_, { input }, ctx) => {
 
     // This should be replaced with book component updated, when refactor Book Builder
     pubsub.publish(BOOK_COMPONENT_LOCK_UPDATED, {
-      bookComponentLockUpdated: updatedBookComponent,
+      bookComponentLockUpdated: updatedBookComponent.id,
     })
     pubsub.publish(BOOK_COMPONENT_UPDATED, {
-      bookComponentUpdated: updatedBookComponent,
+      bookComponentUpdated: updatedBookComponent.id,
+    })
+    pubsub.publish(BOOK_UPDATED, {
+      bookUpdated: updatedBookComponent.bookId,
     })
 
     return updatedBookComponent
@@ -439,15 +429,41 @@ const lockBookComponentHandler = async (_, { id, tabId, userAgent }, ctx) => {
     const bookComponent = await getBookComponent(id)
 
     // This should be replaced with book component updated, when refactor Book Builder
+
     pubsub.publish(BOOK_COMPONENT_LOCK_UPDATED, {
-      bookComponentLockUpdated: bookComponent,
+      bookComponentLockUpdated: bookComponent.id,
     })
 
     pubsub.publish(BOOK_COMPONENT_UPDATED, {
-      bookComponentUpdated: bookComponent,
+      bookComponentUpdated: bookComponent.id,
     })
-
+    pubsub.publish(BOOK_UPDATED, {
+      bookUpdated: bookComponent.bookId,
+    })
     return bookComponent
+  } catch (e) {
+    logger.error(e.message)
+    throw new Error(e)
+  }
+}
+
+const podLockBookComponentHandler = async (
+  _,
+  { id, tabId, userAgent },
+  ctx,
+) => {
+  try {
+    const pubsub = await pubsubManager.getPubsub()
+    await lockBookComponent(id, tabId, userAgent, ctx.user)
+
+    const bookComponent = await getBookComponent(id)
+
+    // This should be replaced with book component updated, when refactor Book Builder
+
+    pubsub.publish(BOOK_UPDATED, {
+      bookUpdated: bookComponent.bookId,
+    })
+    return getBook(bookComponent.bookId)
   } catch (e) {
     logger.error(e.message)
     throw new Error(e)
@@ -468,20 +484,24 @@ const updateContentHandler = async (_, { input }, ctx) => {
     const updatedBookComponent = await getBookComponent(id)
 
     pubsub.publish(BOOK_COMPONENT_CONTENT_UPDATED, {
-      bookComponentContentUpdated: updatedBookComponent,
+      bookComponentContentUpdated: updatedBookComponent.id,
     })
 
     logger.info('message BOOK_COMPONENT_CONTENT_UPDATED broadcasted')
 
     if (shouldNotifyWorkflowChange) {
       pubsub.publish(BOOK_COMPONENT_WORKFLOW_UPDATED, {
-        bookComponentWorkflowUpdated: updatedBookComponent,
+        bookComponentWorkflowUpdated: updatedBookComponent.id,
       })
       logger.info('message BOOK_COMPONENT_WORKFLOW_UPDATED broadcasted')
     }
 
     pubsub.publish(BOOK_COMPONENT_UPDATED, {
-      bookComponentUpdated: updatedBookComponent,
+      bookComponentUpdated: updatedBookComponent.id,
+    })
+
+    pubsub.publish(BOOK_UPDATED, {
+      bookUpdated: updatedBookComponent.bookId,
     })
 
     return updatedBookComponent
@@ -505,11 +525,11 @@ const updatePaginationHandler = async (_, { input }, ctx) => {
     const updatedBookComponent = await updatePagination(id, pagination)
 
     pubsub.publish(BOOK_COMPONENT_PAGINATION_UPDATED, {
-      bookComponentPaginationUpdated: updatedBookComponent,
+      bookComponentPaginationUpdated: updatedBookComponent.id,
     })
 
     pubsub.publish(BOOK_COMPONENT_UPDATED, {
-      bookComponentUpdated: updatedBookComponent,
+      bookComponentUpdated: updatedBookComponent.id,
     })
 
     return updatedBookComponent
@@ -539,11 +559,11 @@ const updateTrackChangesHandler = async (_, { input }, ctx) => {
     const updatedBookComponent = await getBookComponent(id)
 
     pubsub.publish(BOOK_COMPONENT_TRACK_CHANGES_UPDATED, {
-      bookComponentTrackChangesUpdated: updatedBookComponent,
+      bookComponentTrackChangesUpdated: updatedBookComponent.id,
     })
 
     pubsub.publish(BOOK_COMPONENT_UPDATED, {
-      bookComponentUpdated: updatedBookComponent,
+      bookComponentUpdated: updatedBookComponent.id,
     })
 
     return updatedBookComponent
@@ -573,11 +593,11 @@ const updateUploadingHandler = async (_, { input }, ctx) => {
     const updatedBookComponent = await getBookComponent(id)
 
     pubsub.publish(BOOK_COMPONENT_UPLOADING_UPDATED, {
-      bookComponentUploadingUpdated: updatedBookComponent,
+      bookComponentUploadingUpdated: updatedBookComponent.id,
     })
 
     pubsub.publish(BOOK_COMPONENT_UPDATED, {
-      bookComponentUpdated: updatedBookComponent,
+      bookComponentUpdated: updatedBookComponent.id,
     })
 
     return updatedBookComponent
@@ -595,10 +615,10 @@ const updateComponentTypeHandler = async (_, { input }, ctx) => {
     const updatedBookComponent = await updateComponentType(id, componentType)
 
     pubsub.publish(BOOK_COMPONENT_TYPE_UPDATED, {
-      bookComponentTypeUpdated: updatedBookComponent,
+      bookComponentTypeUpdated: updatedBookComponent.id,
     })
     pubsub.publish(BOOK_COMPONENT_UPDATED, {
-      bookComponentUpdated: updatedBookComponent,
+      bookComponentUpdated: updatedBookComponent.id,
     })
 
     return updatedBookComponent
@@ -618,10 +638,10 @@ const toggleIncludeInTOCHandler = async (_, { input }, ctx) => {
     const updatedBookComponent = await getBookComponent(id)
 
     pubsub.publish(BOOK_COMPONENT_TOC_UPDATED, {
-      bookComponentTOCToggled: updatedBookComponent,
+      bookComponentTOCToggled: updatedBookComponent.id,
     })
     pubsub.publish(BOOK_COMPONENT_UPDATED, {
-      bookComponentUpdated: updatedBookComponent,
+      bookComponentUpdated: updatedBookComponent.id,
     })
 
     return updatedBookComponent
@@ -647,6 +667,7 @@ module.exports = {
     updatePagination: updatePaginationHandler,
     unlockBookComponent: unlockBookComponentHandler,
     lockBookComponent: lockBookComponentHandler,
+    podLockBookComponent: podLockBookComponentHandler,
     updateContent: updateContentHandler,
     updateUploading: updateUploadingHandler,
     updateTrackChanges: updateTrackChangesHandler,
@@ -1017,9 +1038,9 @@ module.exports = {
           },
           (payload, variables) => {
             const { id: clientBCId } = variables
-            const { bookComponentUpdated } = payload
-            const { id } = bookComponentUpdated
-            return clientBCId === id
+            const { bookComponentUpdated: updatedBookComponentId } = payload
+
+            return clientBCId === updatedBookComponentId
           },
         )(...args)
       },
