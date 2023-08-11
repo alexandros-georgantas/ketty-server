@@ -117,7 +117,7 @@ const updateFileHandler = async (_, { input }, ctx) => {
     const pubsub = await pubsubManager.getPubsub()
     const updatedFile = await updateFile(id, { name, alt })
     pubsub.publish(FILE_UPDATED, {
-      fileUpdated: updatedFile,
+      fileUpdated: updatedFile.id,
     })
     return updatedFile
   } catch (e) {

@@ -466,7 +466,7 @@ const createBook = async (data = {}) => {
 
           // SUB-SECTION FOR COPYRIGHTS PAGE CREATION
           logger.info(
-            `${BOOK_CONTROLLER} createBook: creating Copyrights page component for the book with id ${bookId}`,
+            `${BOOK_CONTROLLER} createBook: creating Copyright page component for the book with id ${bookId}`,
           )
 
           const newCopyrightsBookComponent = {
@@ -494,7 +494,7 @@ const createBook = async (data = {}) => {
             {
               bookComponentId: createdCopyrightsBookComponent.id,
               languageIso: 'en',
-              title: 'Copyrights',
+              title: 'Copyright',
             },
             { trx: tr },
           )

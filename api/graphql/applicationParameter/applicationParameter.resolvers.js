@@ -41,7 +41,7 @@ const updateApplicationParametersHandler = async (_, { input }, ctx) => {
     )
 
     pubsub.publish(UPDATE_APPLICATION_PARAMETERS, {
-      updateApplicationParameters: updatedApplicationParameters,
+      updateApplicationParameters: updatedApplicationParameters.id,
     })
 
     return updatedApplicationParameters

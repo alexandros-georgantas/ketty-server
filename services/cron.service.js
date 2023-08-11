@@ -5,13 +5,14 @@ const path = require('path')
 const config = require('config')
 const find = require('lodash/find')
 
+const { BookComponent, Lock, BookComponentState, BookComponentTranslation } =
+  require('../models').models
+
+const { BOOK_UPDATED } = require('../api/graphql/book/constants')
+
 const {
-  BookComponent,
-  Lock,
-  BookComponentState,
-  BookComponentTranslation,
-  Book,
-} = require('../models').models
+  BOOK_COMPONENT_UPDATED,
+} = require('../api/graphql/bookComponent/constants')
 
 const tempDirectoryCleanUp =
   JSON.parse(config.get('tempDirectoryCleanUp')) || false
@@ -147,16 +148,11 @@ cron.schedule('*/10 * * * *', async () => {
                 tr,
               ).findById(bookComponentId)
 
-              const updatedBook = await Book.findById(
-                updatedBookComponent.bookId,
-                { trx: tr },
-              )
-
-              pubsub.publish('BOOK_COMPONENT_UPDATED', {
-                bookComponentUpdated: updatedBookComponent,
+              pubsub.publish(BOOK_COMPONENT_UPDATED, {
+                bookComponentUpdated: updatedBookComponent.id,
               })
-              pubsub.publish('BOOK_UPDATED', {
-                bookUpdated: updatedBook,
+              pubsub.publish(BOOK_UPDATED, {
+                bookUpdated: updatedBookComponent.bookId,
               })
               return true
             }

@@ -273,10 +273,10 @@ const decorateText = async (book, hasEndnotes) => {
 
 const generateTOCNCX = async (book, epubFolder) => {
   const navPoints = []
-  const { metadata } = book
+  const { metadata, podMetadata } = book
   const { isbn, issn, issnL } = metadata
 
-  const identifier = isbn || issn || issnL
+  const identifier = isbn || podMetadata?.isbn || issn || issnL
   let counter = 0
   book.divisions.forEach(division => {
     division.bookComponents.forEach(bookComponent => {
@@ -343,7 +343,9 @@ const generateTOCNCX = async (book, epubFolder) => {
       head: {
         meta: [
           {
-            '@content': `urn:uuid:${identifier || book.id}`,
+            '@content': `${
+              identifier ? `urn:isbn:${identifier}` : `urn:uuid:${book.id}`
+            }`,
             '@name': 'dtb:uid',
           },
           {
@@ -379,7 +381,7 @@ const generateTOCNCX = async (book, epubFolder) => {
 }
 
 const generateContentOPF = async (book, epubFolder) => {
-  const { metadata, title, updated } = book
+  const { metadata, title, updated, podMetadata } = book
 
   const {
     isbn,
@@ -394,7 +396,7 @@ const generateContentOPF = async (book, epubFolder) => {
 
   const spineData = []
   const manifestData = []
-  const identifier = isbn || issn || issnL
+  const identifier = isbn || podMetadata?.isbn || issn || issnL
 
   const rights = filter(
     [copyrightYear, copyrightHolder, copyrightStatement],
@@ -538,7 +540,7 @@ const generateContentOPF = async (book, epubFolder) => {
   if (identifier) {
     contentOPF.package.metadata['dc:identifier'] = {
       '@id': 'BookId',
-      '#text': `urn:uuid:${identifier}`,
+      '#text': `urn:isbn:${identifier}`,
     }
 
     metaTemp.push({

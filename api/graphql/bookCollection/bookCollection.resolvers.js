@@ -53,7 +53,9 @@ const createBookCollectionHandler = async (_, { input }, ctx) => {
       'book collection resolver: broadcasting new book collection to clients',
     )
 
-    pubsub.publish(COLLECTION_ADDED, { collectionAdded: createdBookCollection })
+    pubsub.publish(COLLECTION_ADDED, {
+      collectionAdded: createdBookCollection.id,
+    })
 
     return createdBookCollection
   } catch (e) {
