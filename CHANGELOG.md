@@ -1,3 +1,12 @@
+## [1.11.2](https://gitlab.coko.foundation/ketida/server/compare/v1.11.1...v1.11.2) (2023-08-11)
+
+
+### Bug Fixes
+
+* **api/graphql:** subscriptions workarround, send only entities id ([9c1d4bd](https://gitlab.coko.foundation/ketida/server/commit/9c1d4bd1856e4f649ae9f6ac842206845cb1cc00))
+* fixes for 722 and 723 ([19b28c1](https://gitlab.coko.foundation/ketida/server/commit/19b28c18dcce6fc780b4378666eb8e1c1f34a9d4))
+* undefined check for podMetadata ([e93d41e](https://gitlab.coko.foundation/ketida/server/commit/e93d41eed647f369195ad64b9e2b4d4891ca06e6))
+
 ## [1.11.1](https://gitlab.coko.foundation/ketida/server/compare/v1.11.0...v1.11.1) (2023-08-04)
 
 
