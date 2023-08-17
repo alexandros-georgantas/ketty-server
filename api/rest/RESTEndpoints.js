@@ -8,8 +8,11 @@ const uploadsDir = get(config, ['pubsweet-server', 'uploads'], 'uploads')
 const { readFile } = require('../../utilities/filesystem')
 const { xsweetImagesHandler } = require('../../utilities/image')
 
-const { BookComponent, ServiceCallbackToken, Book } =
-  require('../../models').models
+const {
+  BookComponent,
+  ServiceCallbackToken,
+  Book,
+} = require('../../models').models
 
 const {
   BOOK_COMPONENT_UPLOADING_UPDATED,
@@ -24,6 +27,7 @@ const {
   deleteBookComponent,
   getBookComponent,
 } = require('../../controllers/bookComponent.controller')
+
 
 const RESTEndpoints = app => {
   app.use('/api/xsweet', async (req, res) => {
@@ -135,6 +139,34 @@ const RESTEndpoints = app => {
       res.status(500).json({ error })
     }
   })
+
+  app.get('/api/translations/:lang', async (req, res, next) => {
+    const {lang} = req.params
+    let translation
+
+    try {
+      const translationFilePath = `../locales/${lang}/translation.json`
+
+      console.error(`==================${translationFilePath}`)
+
+      // if (fs.existsSync(translationFilePath)) {
+        fs.readFile(translationFilePath, 'utf8', (err, data) => {
+          if (err) {
+            return res.status(404).json({error: err})
+          }
+
+          translation = JSON.parse(data)
+          return  translation
+        });
+      // }else{
+        // return res.status(404).json({error: 'Translation file not found'});
+      // }
+    } catch (error) {
+      res.status(500).json({ error })
+    }
+
+    return res.json(translation)
+  });
 }
 
 module.exports = RESTEndpoints
