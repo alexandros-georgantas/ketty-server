@@ -64,6 +64,11 @@ const filesChecker = async folder => {
 
 const createTemplate = async (sourceRoot, data, cssFile, notes) => {
   try {
+    const featurePODEnabled =
+      config.has('featurePOD') &&
+      ((config.get('featurePOD') && JSON.parse(config.get('featurePOD'))) ||
+        false)
+
     const normalizedTemplates = config.get('templates').map(t => ({
       label: t.label.toLowerCase(),
       url: t.url,
@@ -101,14 +106,16 @@ const createTemplate = async (sourceRoot, data, cssFile, notes) => {
 
     if (trimSize) {
       templateExists = await Template.findOne({
-        name: `${name} (${notes})`,
+        name: featurePODEnabled ? name : `${name} (${notes})`,
         target,
         trimSize,
+        notes,
       })
     } else {
       templateExists = await Template.findOne({
-        name: `${name} (${notes})`,
+        name: featurePODEnabled ? name : `${name} (${notes})`,
         target,
+        notes,
       })
     }
 
@@ -119,7 +126,7 @@ const createTemplate = async (sourceRoot, data, cssFile, notes) => {
 
           const newTemplate = await Template.insert(
             {
-              name: `${name} (${notes})`,
+              name: featurePODEnabled ? name : `${name} (${notes})`,
               author,
               target,
               trimSize,
