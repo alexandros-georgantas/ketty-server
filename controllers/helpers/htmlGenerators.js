@@ -168,44 +168,123 @@ const generateCopyrightsPage = (bookTitle, bookComponent, podMetadata) => {
     bottomPage,
     ncCopyrightHolder,
     ncCopyrightYear,
+    saCopyrightHolder,
+    saCopyrightYear,
   } = podMetadata
 
-  const year = ncCopyrightYear
-    ? new Date(ncCopyrightYear).getFullYear()
-    : undefined
+  let year
 
-  // eslint-disable-next-line no-nested-ternary
-  const licenseText = licenseTypes.NC
-    ? 'All rights reserved. Except as permitted under the United States Copyright Act of 1976, no part of this publication may be reproduced or distributed in any form or by any means, or stored in a database or other retrieval system, without the prior written permission of the copyright holder.'
-    : // eslint-disable-next-line no-nested-ternary
-    licenseTypes.SA
-    ? 'This is licensed under Attribution-ShareAlike 4.0 International.'
-    : licenseTypes.ND
-    ? 'This is licensed under Attribution-NoDerivatives 4.0 International.'
-    : ''
+  if (copyrightLicense === 'SCL') {
+    year = ncCopyrightYear ? new Date(ncCopyrightYear).getFullYear() : undefined
+  }
+
+  if (copyrightLicense === 'CC') {
+    year = saCopyrightYear ? new Date(saCopyrightYear).getFullYear() : undefined
+  }
 
   const pdContent =
     publicDomainType === 'cc0'
       ? 'This  is marked with CC0 1.0 Universal.'
       : 'This work is licensed under the Creative Commons Public Domain Mark 1.0 License.'
 
-  const copyrightText =
-    // eslint-disable-next-line no-nested-ternary
-    copyrightLicense === 'SCL'
-      ? `${
+  let copyrightText
+
+  if (copyrightLicense === 'SCL') {
+    copyrightText = `${
+      bookTitle ? `<span class="book-title">${bookTitle}</span>` : ''
+    }<span class="copyrights-symbol"> © </span>${
+      year ? `<span class="copyrights-year">${year} </span>` : ''
+    }${
+      ncCopyrightHolder
+        ? `<span class="copyrights-holder">by ${ncCopyrightHolder}</span>`
+        : ''
+    }.All rights reserved. Except as permitted under the United States Copyright Act of 1976, no part of this publication may be reproduced or distributed in any form or by any means, or stored in a database or other retrieval system, without the prior written permission of the copyright holder.`
+  }
+
+  if (copyrightLicense === 'CC') {
+    if (licenseTypes) {
+      if (licenseTypes.ND && !licenseTypes.SA && !licenseTypes.NC) {
+        copyrightText = `${
           bookTitle ? `<span class="book-title">${bookTitle}</span>` : ''
         }<span class="copyrights-symbol"> © </span>${
           year ? `<span class="copyrights-year">${year} </span>` : ''
         }${
-          ncCopyrightHolder
-            ? `<span class="copyrights-holder">by ${ncCopyrightHolder}</span>`
+          saCopyrightHolder
+            ? `<span class="copyrights-holder">by ${saCopyrightHolder}</span>`
             : ''
-        }.All rights reserved. Except as permitted under the United States Copyright Act of 1976, no part of this publication may be reproduced or distributed in any form or by any means, or stored in a database or other retrieval system, without the prior written permission of the copyright holder.`
-      : copyrightLicense === 'CC'
-      ? licenseText
-      : pdContent
+        } is licensed under Attribution-NoDerivatives 4.0 International. To view a copy of this license, visit http://creativecommons.org/licenses/by-nd/4.0/`
+      } else if (licenseTypes.NC && !licenseTypes.SA && !licenseTypes.ND) {
+        copyrightText = `${
+          bookTitle ? `<span class="book-title">${bookTitle}</span>` : ''
+        }<span class="copyrights-symbol"> © </span>${
+          year ? `<span class="copyrights-year">${year} </span>` : ''
+        }${
+          saCopyrightHolder
+            ? `<span class="copyrights-holder">by ${saCopyrightHolder}</span>`
+            : ''
+        } is licensed under Attribution-NonCommercial 4.0 International. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc/4.0/`
+      } else if (licenseTypes.SA && !licenseTypes.NC && !licenseTypes.ND) {
+        copyrightText = `${
+          bookTitle ? `<span class="book-title">${bookTitle}</span>` : ''
+        }<span class="copyrights-symbol"> © </span>${
+          year ? `<span class="copyrights-year">${year} </span>` : ''
+        }${
+          saCopyrightHolder
+            ? `<span class="copyrights-holder">by ${saCopyrightHolder}</span>`
+            : ''
+        } is licensed under Attribution-ShareAlike 4.0 International. To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/`
+      } else if (licenseTypes.NC && licenseTypes.ND) {
+        copyrightText = `${
+          bookTitle ? `<span class="book-title">${bookTitle}</span>` : ''
+        }<span class="copyrights-symbol"> © </span>${
+          year ? `<span class="copyrights-year">${year} </span>` : ''
+        }${
+          saCopyrightHolder
+            ? `<span class="copyrights-holder">by ${saCopyrightHolder}</span>`
+            : ''
+        } is licensed under Attribution-NonCommercial-NoDerivatives 4.0 International. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-nd/4.0/`
+      } else if (licenseTypes.NC && licenseTypes.SA) {
+        copyrightText = `${
+          bookTitle ? `<span class="book-title">${bookTitle}</span>` : ''
+        }<span class="copyrights-symbol"> © </span>${
+          year ? `<span class="copyrights-year">${year} </span>` : ''
+        }${
+          saCopyrightHolder
+            ? `<span class="copyrights-holder">by ${saCopyrightHolder}</span>`
+            : ''
+        } is licensed under Attribution-NonCommercial-ShareAlike 4.0 International. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/`
+      } else {
+        copyrightText = `${
+          bookTitle ? `<span class="book-title">${bookTitle}</span>` : ''
+        }<span class="copyrights-symbol"> © </span>${
+          year ? `<span class="copyrights-year">${year} </span>` : ''
+        }${
+          saCopyrightHolder
+            ? `<span class="copyrights-holder">by ${saCopyrightHolder}</span>`
+            : ''
+        } is licensed under Attribution 4.0 International. To view a copy of this license, visit http://creativecommons.org/licenses/by/4.0/`
+      }
+    } else {
+      copyrightText = `${
+        bookTitle ? `<span class="book-title">${bookTitle}</span>` : ''
+      }<span class="copyrights-symbol"> © </span>${
+        year ? `<span class="copyrights-year">${year} </span>` : ''
+      }${
+        saCopyrightHolder
+          ? `<span class="copyrights-holder">by ${saCopyrightHolder}</span>`
+          : ''
+      } is licensed under Attribution 4.0 International. To view a copy of this license, visit http://creativecommons.org/licenses/by/4.0/`
+    }
+  }
 
-  // TODO: Show year and author alongside title once it is available in podMetadata
+  if (copyrightLicense === 'PD') {
+    copyrightText = pdContent
+  }
+
+  // if (!copyrightText) {
+  //   copyrightText = `THIS IS A PLACEHOLDER. IF YOU WANT TO HAVE AN ACTUAL STATEMENT HERE, YOU HAVE TO MAKE SOME SPECIFIC SELECTIONS IN BOOK'S METADATA MODAL.`
+  // }
+
   const output = cheerio.load(
     `<section id="comp-number-${id}"  class="component-${division} ${componentType} ${
       !featurePODEnabled ? paginationExtractor(pagination) : ''

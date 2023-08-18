@@ -264,7 +264,7 @@ const updatePODMetadataHandler = async (_, { bookId, metadata }, ctx) => {
     logger.info('book resolver: broadcasting updated book to clients')
 
     pubsub.publish(BOOK_METADATA_UPDATED, {
-      bookMetadataUpdated: updatedBook.id,
+      bookUpdated: updatedBook.id,
     })
     return updatedBook
   } catch (e) {
