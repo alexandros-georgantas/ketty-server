@@ -1,3 +1,18 @@
+# [1.12.0](https://gitlab.coko.foundation/ketida/server/compare/v1.11.2...v1.12.0) (2023-08-21)
+
+
+### Bug Fixes
+
+* dont show note type for ketida 2 ([252726c](https://gitlab.coko.foundation/ketida/server/commit/252726cbff2ff65e2e360817b254b99cbe8752b0))
+* fixed linting error ([113b717](https://gitlab.coko.foundation/ketida/server/commit/113b717bd64cac990f8eb0b294d91cd1ed07374e))
+* fixes for the auto generation of copyright page ([a1ee8a5](https://gitlab.coko.foundation/ketida/server/commit/a1ee8a54cc0654e2dff12fa057a66fbbc11ff51e))
+* minor text corrections and missing returns ([994598d](https://gitlab.coko.foundation/ketida/server/commit/994598d0730314c54153c08e2043a2a53942f696))
+
+
+### Features
+
+* added yarn script to delete template from db and file server ([99a0f7a](https://gitlab.coko.foundation/ketida/server/commit/99a0f7ae3d83ba1d99e9e396efe6b399be4965f0))
+
 ## [1.11.2](https://gitlab.coko.foundation/ketida/server/compare/v1.11.1...v1.11.2) (2023-08-11)
 
 
