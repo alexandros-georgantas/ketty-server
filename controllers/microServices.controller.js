@@ -63,7 +63,7 @@ const epubcheckerHandler = async epubPath => {
       })
         .then(async ({ data }) => {
           await fileStorageDeleteFiles([storedObjects[0].key])
-          resolve(data)
+          return resolve(data)
         })
         .catch(async err => {
           await fileStorageDeleteFiles([storedObjects[0].key])
@@ -113,7 +113,7 @@ const icmlHandler = async icmlTempPath => {
       })
         .then(async res => {
           await saveDataLocally(icmlTempPath, 'index.icml', res.data, 'utf-8')
-          resolve()
+          return resolve()
         })
         .catch(async err => {
           const { response } = err
@@ -170,7 +170,7 @@ const pdfHandler = async (zipPath, outputPath, PDFFilename) => {
             res.data,
             'binary',
           )
-          resolve()
+          return resolve()
         })
         .catch(async err => {
           const { response } = err
@@ -233,7 +233,7 @@ const xsweetHandler = async (bookComponentId, filePath) => {
         .then(async ({ data }) => {
           const { msg } = data
           await fs.remove(filePath)
-          resolve(msg)
+          return resolve(msg)
         })
         .catch(async err => {
           const { response } = err
@@ -291,7 +291,7 @@ const pagedPreviewerLink = async (dirPath, previewerOptions = undefined) => {
       })
         .then(async ({ data }) => {
           await fs.remove(zipPath)
-          resolve(data)
+          return resolve(data)
         })
         .catch(async err => {
           const { response } = err
