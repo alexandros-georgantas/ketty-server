@@ -198,7 +198,7 @@ const generateCopyrightsPage = (bookTitle, bookComponent, podMetadata) => {
       ncCopyrightHolder
         ? `<span class="copyrights-holder">by ${ncCopyrightHolder}</span>`
         : ''
-    }.All rights reserved. Except as permitted under the United States Copyright Act of 1976, no part of this publication may be reproduced or distributed in any form or by any means, or stored in a database or other retrieval system, without the prior written permission of the copyright holder.`
+    }. All rights reserved. Except as permitted under the United States Copyright Act of 1976, no part of this publication may be reproduced or distributed in any form or by any means, or stored in a database or other retrieval system, without the prior written permission of the copyright holder.`
   }
 
   if (copyrightLicense === 'CC') {
