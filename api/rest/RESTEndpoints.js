@@ -145,10 +145,7 @@ const RESTEndpoints = app => {
     let translation = [];
 
     try {
-      // const translationFilePath = `../locales/${lang}/translation.json`
       const translationFilePath = `${process.cwd()}/api/rest/locales/${lang}/translation.json`
-
-      console.error(`==================${translationFilePath}`)
 
       if (fs.existsSync(translationFilePath)) {
         fs.readFile(translationFilePath, 'utf8', (err, data) => {
