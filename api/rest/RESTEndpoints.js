@@ -142,30 +142,31 @@ const RESTEndpoints = app => {
 
   app.get('/api/translations/:lang', async (req, res, next) => {
     const {lang} = req.params
-    let translation
+    let translation = [];
 
     try {
-      const translationFilePath = `../locales/${lang}/translation.json`
+      // const translationFilePath = `../locales/${lang}/translation.json`
+      const translationFilePath = `${process.cwd()}/api/rest/locales/${lang}/translation.json`
 
       console.error(`==================${translationFilePath}`)
 
-      // if (fs.existsSync(translationFilePath)) {
+      if (fs.existsSync(translationFilePath)) {
         fs.readFile(translationFilePath, 'utf8', (err, data) => {
           if (err) {
-            return res.status(404).json({error: err})
+            res.status(404).json({error: err})
           }
 
           translation = JSON.parse(data)
-          return  translation
+          res.json(translation) // translation
         });
-      // }else{
-        // return res.status(404).json({error: 'Translation file not found'});
-      // }
+      }else{
+        res.status(404).json({error: 'Translation file not found'});
+      }
     } catch (error) {
       res.status(500).json({ error })
     }
 
-    return res.json(translation)
+    return res
   });
 }
 
