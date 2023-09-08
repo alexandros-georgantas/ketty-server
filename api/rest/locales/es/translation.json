@@ -50,7 +50,7 @@
   "this_is_not_a_valid_email_format": "Este no es un formato de correo electrónico válido",
   "enter_your_email": "Ingresa tu correo electrónico",
   "an_email_has_been_sent_to": "Se ha enviado un correo electrónico a {{userEmail}}",
-  "please_re_enter_your_new_password": "Por favor, vuelve a ingresar tu nueva contraseña",
+  "please_re-enter_your_new_password": "Por favor, vuelve a ingresar tu nueva contraseña",
   "current_password_is_required": "Se requiere la contraseña actual",
   "new_password_is_required": "Se requiere una nueva contraseña",
   "passwords_do_not_match": "Las contraseñas no coinciden",
