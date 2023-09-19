@@ -651,6 +651,7 @@ const permissions = {
     getPagedPreviewerLink: isAuthenticatedRule,
     getBookComponent: getBookComponentRule,
     getSpecificTemplates: isAuthenticatedRule,
+    chatGPT: isAuthenticatedRule,
   },
   Mutation: {
     '*': deny,
