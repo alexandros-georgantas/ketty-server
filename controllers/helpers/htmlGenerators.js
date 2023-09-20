@@ -154,9 +154,9 @@ const generateCopyrightsPage = (bookTitle, bookComponent, podMetadata) => {
     componentType,
     division,
     pagination,
-    runningHeadersLeft,
-    runningHeadersRight,
-    title,
+    // runningHeadersLeft,
+    // runningHeadersRight,
+    // title,
   } = bookComponent
 
   const {
@@ -281,17 +281,37 @@ const generateCopyrightsPage = (bookTitle, bookComponent, podMetadata) => {
     copyrightText = pdContent
   }
 
-  // if (!copyrightText) {
-  //   copyrightText = `THIS IS A PLACEHOLDER. IF YOU WANT TO HAVE AN ACTUAL STATEMENT HERE, YOU HAVE TO MAKE SOME SPECIFIC SELECTIONS IN BOOK'S METADATA MODAL.`
-  // }
+  if (!copyrightText) {
+    copyrightText = `THIS IS A PLACEHOLDER. IF YOU WANT TO HAVE AN ACTUAL STATEMENT HERE, YOU HAVE TO MAKE SOME CHOICES USING BOOK'S METADATA MODAL.`
+  }
 
+  // const output = cheerio.load(
+  //   `<section id="comp-number-${id}"  class="component-${division} ${componentType} ${
+  //     !featurePODEnabled ? paginationExtractor(pagination) : ''
+  //   }">${runningHeadersGenerator(
+  //     runningHeadersLeft,
+  //     runningHeadersRight,
+  //   )}<header><h1 class="component-title">${title}</h1></header>
+  //   ${topPage ? `<section class="copyright-before">${topPage}</section>` : ''}
+  //   ${
+  //     copyrightText
+  //       ? `<section class="book-copyrights">${
+  //           isbn ? `<p class="isbn">${isbn}</p>` : ''
+  //         }<p class="main-content">${copyrightText}</p></section>`
+  //       : ''
+  //   }
+  //   ${
+  //     bottomPage
+  //       ? `<section class="copyright-after">${bottomPage}</section>`
+  //       : ''
+  //   }
+
+  //   </section>`,
+  // )
   const output = cheerio.load(
     `<section id="comp-number-${id}"  class="component-${division} ${componentType} ${
       !featurePODEnabled ? paginationExtractor(pagination) : ''
-    }">${runningHeadersGenerator(
-      runningHeadersLeft,
-      runningHeadersRight,
-    )}<header><h1 class="book-title">${title}</h1></header>
+    }">
     ${topPage ? `<section class="copyright-before">${topPage}</section>` : ''}
     ${
       copyrightText
