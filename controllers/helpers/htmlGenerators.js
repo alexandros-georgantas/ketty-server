@@ -154,9 +154,9 @@ const generateCopyrightsPage = (bookTitle, bookComponent, podMetadata) => {
     componentType,
     division,
     pagination,
-    runningHeadersLeft,
-    runningHeadersRight,
-    title,
+    // runningHeadersLeft,
+    // runningHeadersRight,
+    // title,
   } = bookComponent
 
   const {
