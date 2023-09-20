@@ -1,3 +1,12 @@
+## [1.12.1](https://gitlab.coko.foundation/ketida/server/compare/v1.12.0...v1.12.1) (2023-09-20)
+
+
+### Bug Fixes
+
+* **api/graphql:** added permissions for chatgpt ([500a504](https://gitlab.coko.foundation/ketida/server/commit/500a504d8f797994260e76e4ba6b8500ea6ad120))
+* **controllers:** remove title from copyright page ([6d57a8a](https://gitlab.coko.foundation/ketida/server/commit/6d57a8a2af6412e45528d0ead195c67280232e98))
+* fix linting error ([c47b918](https://gitlab.coko.foundation/ketida/server/commit/c47b918387837f80686ac668636ccb0eea4193d8))
+
 # [1.12.0](https://gitlab.coko.foundation/ketida/server/compare/v1.11.2...v1.12.0) (2023-08-21)
 
 
