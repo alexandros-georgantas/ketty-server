@@ -8,13 +8,35 @@ const ApplicationParameter = require('../../models/applicationParameter/applicat
 const configBooksprints = require('../../config/modules/bookBuilderBooksprints')
 const configVanilla = require('../../config/modules/bookBuilderVanilla')
 const configOEN = require('../../config/modules/bookBuilderOEN')
+const configKetidaV2 = require('../../config/modules/applicationParametersKetida2')
 
 const featureBookStructureEnabled =
   (process.env.FEATURE_BOOK_STRUCTURE &&
     JSON.parse(process.env.FEATURE_BOOK_STRUCTURE)) ||
   false
 
+const featurePODEnabled =
+  (process.env.FEATURE_POD && JSON.parse(process.env.FEATURE_POD)) || false
+
 const flavour = process.env.KETIDA_FLAVOUR
+
+const whichConfig = () => {
+  let config = configVanilla
+
+  if (featureBookStructureEnabled && flavour !== 'BOOKSPRINTS') {
+    config = configOEN
+  }
+
+  if (featurePODEnabled && flavour !== 'BOOKSPRINTS') {
+    config = configKetidaV2
+  }
+
+  if (flavour === 'BOOKSPRINTS') {
+    config = configBooksprints
+  }
+
+  return config
+}
 
 const truncate = async () => {
   await db.raw(`truncate table application_parameter cascade`)
@@ -29,75 +51,29 @@ const seedApplicationParameters = async () => {
       )
     }
 
-    if (!featureBookStructureEnabled) {
-      if (flavour !== 'BOOKSPRINTS') {
-        const areas = Object.keys(configVanilla)
-        await truncate()
-        await Promise.all(
-          areas.map(async area =>
-            useTransaction(async trx => {
-              logger.info(
-                `New Application Parameter created: ${JSON.stringify(
-                  configVanilla[area],
-                )}`,
-              )
-              return ApplicationParameter.insert(
-                {
-                  context: 'bookBuilder',
-                  area,
-                  config: JSON.stringify(configVanilla[area]),
-                },
-                { trx },
-              )
-            }),
-          ),
-        )
-      } else {
-        const areas = Object.keys(configBooksprints)
-        await truncate()
-        await Promise.all(
-          areas.map(async area =>
-            useTransaction(async trx => {
-              logger.info(
-                `New Application Parameter created: ${JSON.stringify(
-                  configBooksprints[area],
-                )}`,
-              )
-              return ApplicationParameter.insert(
-                {
-                  context: 'bookBuilder',
-                  area,
-                  config: JSON.stringify(configBooksprints[area]),
-                },
-                { trx },
-              )
-            }),
-          ),
-        )
-      }
-    } else {
-      const areas = Object.keys(configOEN)
-      await truncate()
-      await Promise.all(
-        areas.map(async area =>
-          useTransaction(async trx => {
-            logger.info(
-              `New Application Parameter created: ${JSON.stringify(
-                configOEN[area],
-              )}`,
-            )
-            return ApplicationParameter.insert(
-              {
-                context: 'bookBuilder',
-                area,
-                config: JSON.stringify(configOEN[area]),
-              },
-              { trx },
-            )
-          }),
-        ),
-      )
-    }
+    const selectedConfig = whichConfig()
+
+    const areas = Object.keys(selectedConfig)
+    await truncate()
+    await Promise.all(
+      areas.map(async area =>
+        useTransaction(async trx => {
+          logger.info(
+            `New Application Parameter created: ${JSON.stringify(
+              selectedConfig[area],
+            )}`,
+          )
+          return ApplicationParameter.insert(
+            {
+              context: 'bookBuilder',
+              area,
+              config: JSON.stringify(selectedConfig[area]),
+            },
+            { trx },
+          )
+        }),
+      ),
+    )
   } catch (e) {
     logger.error(e.message)
     throw new Error(e)
