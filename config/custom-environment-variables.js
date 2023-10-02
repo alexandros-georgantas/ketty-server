@@ -82,4 +82,5 @@ module.exports = {
   chatGPT: {
     key: 'CHAT_GPT_KEY',
   },
+  featureAIEnabled: 'AI_ENABLED',
 }
