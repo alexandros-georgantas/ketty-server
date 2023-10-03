@@ -1,3 +1,12 @@
+## [1.12.2](https://gitlab.coko.foundation/ketida/server/compare/v1.12.1...v1.12.2) (2023-10-03)
+
+
+### Bug Fixes
+
+* added ai toggle and minor refactoring ([51cf293](https://gitlab.coko.foundation/ketida/server/commit/51cf293a944a2c3928bb576a9ce8f654a0fedc64))
+* **api/graphql:** broadcast the correct event, update dep in compose files ([b5811c0](https://gitlab.coko.foundation/ketida/server/commit/b5811c007996816ae49bbfbac704c0dd9bf29cfe))
+* **api/graphql:** subscriptions added for updating admin user ([7d4b665](https://gitlab.coko.foundation/ketida/server/commit/7d4b66543d2f73736c0a13880ed35e4aec75201c))
+
 ## [1.12.1](https://gitlab.coko.foundation/ketida/server/compare/v1.12.0...v1.12.1) (2023-09-20)
 
 
