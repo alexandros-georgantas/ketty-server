@@ -1,6 +1,8 @@
 const { withFilter } = require('graphql-subscriptions')
 const { pubsubManager, logger, fileStorage } = require('@coko/server')
+
 const { getUser } = require('@coko/server/src/models/user/user.controller')
+
 const map = require('lodash/map')
 const isEmpty = require('lodash/isEmpty')
 
@@ -19,6 +21,8 @@ const {
 } = require('./constants')
 
 const { getObjectTeam } = require('../../../controllers/team.controller')
+
+const { isAdmin } = require('../../../controllers/user.controller')
 
 const { getURL } = fileStorage
 
@@ -557,9 +561,19 @@ module.exports = {
   },
   Subscription: {
     bookCreated: {
-      subscribe: async () => {
+      subscribe: async (...args) => {
         const pubsub = await pubsubManager.getPubsub()
-        return pubsub.asyncIterator(BOOK_CREATED)
+
+        return withFilter(
+          () => {
+            return pubsub.asyncIterator(BOOK_CREATED)
+          },
+          (_, __, ctx) => {
+            const { user } = ctx
+
+            return isAdmin(user)
+          },
+        )(...args)
       },
     },
     bookUpdated: {
@@ -586,15 +600,35 @@ module.exports = {
       },
     },
     bookDeleted: {
-      subscribe: async () => {
+      subscribe: async (...args) => {
         const pubsub = await pubsubManager.getPubsub()
-        return pubsub.asyncIterator(BOOK_DELETED)
+
+        return withFilter(
+          () => {
+            return pubsub.asyncIterator(BOOK_DELETED)
+          },
+          (_, __, ctx) => {
+            const { user } = ctx
+
+            return isAdmin(user)
+          },
+        )(...args)
       },
     },
     bookRenamed: {
-      subscribe: async () => {
+      subscribe: async (...args) => {
         const pubsub = await pubsubManager.getPubsub()
-        return pubsub.asyncIterator(BOOK_RENAMED)
+
+        return withFilter(
+          () => {
+            return pubsub.asyncIterator(BOOK_RENAMED)
+          },
+          (_, __, ctx) => {
+            const { user } = ctx
+
+            return isAdmin(user)
+          },
+        )(...args)
       },
     },
     bookMetadataUpdated: {
