@@ -1,3 +1,6 @@
+const featureAIEnabled =
+  (process.env.AI_ENABLED && JSON.parse(process.env.AI_ENABLED)) || false
+
 module.exports = {
   instance: 'VANILLA',
   stages: [
@@ -120,4 +123,5 @@ module.exports = {
     },
   ],
   lockTrackChangesWhenReviewing: true,
+  aiEnabled: featureAIEnabled,
 }
