@@ -2,7 +2,7 @@ const featureAIEnabled =
   (process.env.AI_ENABLED && JSON.parse(process.env.AI_ENABLED)) || false
 
 module.exports = {
-  instance: 'BOOKSPRINTS',
+  instance: 'KETIDA_V2',
   stages: [
     {
       title: 'Upload',
@@ -122,11 +122,12 @@ module.exports = {
           value: 'endnotes',
           title: 'notes placeholder',
           visibleInHeader: true,
+          predefined: true,
         },
       ],
       defaultComponentType: 'component',
     },
   ],
-  lockTrackChangesWhenReviewing: true,
+  lockTrackChangesWhenReviewing: false,
   aiEnabled: featureAIEnabled,
 }
