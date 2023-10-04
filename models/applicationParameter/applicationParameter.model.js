@@ -25,6 +25,10 @@ class ApplicationParameter extends BaseModel {
       },
     }
   }
+
+  static findByContextAndArea(context, area) {
+    return ApplicationParameter.query().skipUndefined().where({ context, area })
+  }
 }
 
 module.exports = ApplicationParameter

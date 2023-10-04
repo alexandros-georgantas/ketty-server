@@ -49,6 +49,13 @@ class BookTranslation extends Translation {
   getBook() {
     return this.$relatedQuery('book')
   }
+
+  static patchTitleById(options, title, bookTranslationId) {
+    const { trx } = options
+    return BookTranslation.query(trx)
+      .patch({ title })
+      .where({ id: bookTranslationId })
+  }
 }
 
 module.exports = BookTranslation

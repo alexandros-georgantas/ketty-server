@@ -12,7 +12,7 @@
   Get book components & relation
 */
 
-const { Model } = require('objection')
+const { Model, raw } = require('objection')
 
 const Base = require('../ketidaBase')
 const { arrayOfIds, id, stringNotEmpty } = require('../helpers').schema
@@ -71,6 +71,22 @@ class Division extends Base {
 
   getBookComponents() {
     return this.$relatedQuery('bookComponents')
+  }
+
+  static addBookComponentToDivision(
+    options,
+    divisionId,
+    createdBookComponentId,
+  ) {
+    const { trx } = options
+
+    return Division.query(trx)
+      .where('id', divisionId)
+      .patch({
+        book_components: raw(
+          `book_components || '"${createdBookComponentId}"'`,
+        ),
+      })
   }
 }
 

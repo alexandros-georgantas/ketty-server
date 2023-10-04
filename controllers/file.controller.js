@@ -76,7 +76,7 @@ const getEntityFiles = async (
           return result
         }
 
-        const { result } = File.find({ objectId: entityId }, { trx: tr })
+        const result = File.find({ objectId: entityId }, { trx: tr })
 
         return result
       },
@@ -107,7 +107,7 @@ const getSpecificFiles = async (ids, options = {}) => {
   try {
     const { trx } = options
     logger.info(`>>> fetching the files with ids ${ids}`)
-    return useTransaction(async tr => File.query(tr).whereIn('id', ids), {
+    return useTransaction(async tr => File.findByIds(ids, { trx: tr }), {
       trx,
       passedTrxOnly: true,
     })
@@ -232,18 +232,11 @@ const isFileInUse = async (bookId, fileId, options = {}) => {
       async tr => {
         const foundIn = []
 
-        const bookComponentsOfBook = await BookComponent.query(tr)
-          .select('book_component.id', 'book_component_translation.content')
-          .leftJoin(
-            'book_component_translation',
-            'book_component.id',
-            'book_component_translation.book_component_id',
+        const bookComponentsOfBook =
+          await BookComponent.getBookComponentsWithTranslations(
+            { trx: tr },
+            bookId,
           )
-          .where({
-            'book_component.book_id': bookId,
-            'book_component.deleted': false,
-            languageIso: 'en',
-          })
 
         forEach(bookComponentsOfBook, bookComponent => {
           const { content, id } = bookComponent

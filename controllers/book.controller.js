@@ -302,9 +302,7 @@ const createBook = async (data = {}) => {
           createdDivisionIds = createdDivisions.map(d => d.id)
         }
 
-        await Book.query(tr)
-          .patch({ divisions: createdDivisionIds })
-          .where({ id: bookId })
+        await Book.patchDivisionId(createdDivisionIds, bookId)
 
         logger.info(
           `${BOOK_CONTROLLER} createBook: book with id ${bookId} patched with the new divisions`,
@@ -703,9 +701,11 @@ const renameBook = async (bookId, title, options = {}) => {
           { trx: tr },
         )
 
-        await BookTranslation.query(tr)
-          .patch({ title })
-          .where({ id: bookTranslation.id })
+        await BookTranslation.patchTitleById(
+          { trx: tr },
+          title,
+          bookTranslation.id,
+        )
 
         logger.info(
           `${BOOK_CONTROLLER} renameBook: title updated for book with id ${bookId}`,
@@ -1007,9 +1007,10 @@ const updateRunningHeaders = async (bookComponents, bookId, options = {}) => {
           map(bookComponents, async bookComponent => {
             const { id } = bookComponent
 
-            const bookComponentState = await BookComponentState.query(
-              tr,
-            ).findOne({ bookComponentId: id }, { trx: tr })
+            const bookComponentState = await BookComponentState.findOne(
+              { bookComponentId: id },
+              { trx: tr },
+            )
 
             return BookComponentState.patchAndFetchById(
               bookComponentState.id,

@@ -118,6 +118,23 @@ class BookComponent extends Base {
   getBookComponentState() {
     return this.$relatedQuery('bookComponentState')
   }
+
+  static getBookComponentsWithTranslations(options, bookId) {
+    const { trx } = options
+
+    return BookComponent.query(trx)
+      .select('book_component.id', 'book_component_translation.content')
+      .leftJoin(
+        'book_component_translation',
+        'book_component.id',
+        'book_component_translation.book_component_id',
+      )
+      .where({
+        'book_component.book_id': bookId,
+        'book_component.deleted': false,
+        languageIso: 'en',
+      })
+  }
 }
 
 module.exports = BookComponent
