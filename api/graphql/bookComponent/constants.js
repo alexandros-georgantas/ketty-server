@@ -15,13 +15,26 @@ const BOOK_COMPONENT_TYPE_UPDATED = 'BOOK_COMPONENT_TYPE_UPDATED'
 const BOOK_COMPONENT_TOC_UPDATED = 'BOOK_COMPONENT_TOC_UPDATED'
 const BOOK_COMPONENT_UPDATED = 'BOOK_COMPONENT_UPDATED'
 
-const UNLOCK_REASONS = {
+const STATUSES_TRANSLATION = {
   100: 'Unlocked by the admin of the system',
   101: 'Unlocked by the owner of the lock',
   102: 'Unlocked due to inactivity',
   103: 'Unlocked but found multiple locks',
   104: 'Unlocked by the system',
   105: 'Unlocked due to permission changes',
+  200: 'LOCKED',
+  300: 'Conversion error',
+}
+
+const STATUSES = {
+  UNLOCKED_BY_ADMIN: 100,
+  UNLOCKED_BY_OWNER: 101,
+  UNLOCKED_DUE_INACTIVITY: 102,
+  UNLOCKED_WITH_MULTIPLE_LOCKS: 103,
+  UNLOCKED_BY_SYSTEM: 104,
+  UNLOCKED_DUE_PERMISSIONS: 105,
+  FINE: 200,
+  CONVERSION_ERROR: 300,
 }
 
 module.exports = {
@@ -38,5 +51,6 @@ module.exports = {
   BOOK_COMPONENTS_LOCK_UPDATED,
   BOOK_COMPONENT_TYPE_UPDATED,
   BOOK_COMPONENT_TOC_UPDATED,
-  UNLOCK_REASONS,
+  STATUSES,
+  STATUSES_TRANSLATION,
 }

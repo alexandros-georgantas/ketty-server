@@ -18,6 +18,8 @@ const {
   Lock,
 } = require('../models').models
 
+const { STATUSES } = require('../api/graphql/bookComponent/constants')
+
 const bookComponentContentCreator = require('./helpers/bookComponentContentCreator')
 
 const { isEmptyString } = require('../utilities/generic')
@@ -496,6 +498,39 @@ const updateTrackChanges = async (bookComponentId, trackChangesEnabled) => {
   }
 }
 
+const setStatus = async (bookComponentId, status) => {
+  try {
+    const currentState = await BookComponentState.findOne({
+      bookComponentId,
+    })
+
+    if (!currentState) {
+      throw new Error(
+        `no state info exists for the book component with id ${bookComponentId}`,
+      )
+    }
+
+    const { id } = currentState
+
+    logger.info(
+      `Current state for the book component with id ${bookComponentId} found with id ${id}`,
+    )
+
+    const updatedState = await BookComponentState.patchAndFetchById(id, {
+      status,
+    })
+
+    logger.info(
+      `book component status changed from ${currentState.status} to ${updatedState.status} for book component with id ${bookComponentId}`,
+    )
+
+    return updatedState
+  } catch (e) {
+    logger.error(e.message)
+    throw new Error(e)
+  }
+}
+
 const updatePagination = async (bookComponentId, pagination) => {
   try {
     return BookComponent.patchAndFetchById(bookComponentId, {
@@ -515,7 +550,7 @@ const unlockBookComponent = async (
     const serverIdentifier = config.get('serverIdentifier')
 
     return useTransaction(async tr => {
-      let status = 101
+      let status = STATUSES.UNLOCKED_BY_OWNER
 
       const { result: locks } = await Lock.find(
         {
@@ -527,7 +562,7 @@ const unlockBookComponent = async (
       )
 
       if (locks.length > 1) {
-        status = 103
+        status = STATUSES.UNLOCKED_WITH_MULTIPLE_LOCKS
         logger.info(
           `multiple locks found for book component with id ${bookComponentId} and deleted `,
         )
@@ -548,7 +583,7 @@ const unlockBookComponent = async (
         const adminUser = await isAdmin(actingUserId)
 
         if (adminUser && locks[0].userId !== actingUserId) {
-          status = 100
+          status = STATUSES.UNLOCKED_BY_ADMIN
         }
       }
 
@@ -620,7 +655,7 @@ const lockBookComponent = async (bookComponentId, tabId, userAgent, userId) => {
       serverIdentifier,
     })
 
-    const status = 200
+    const status = STATUSES.FINE
 
     await BookComponentState.query()
       .patch({ status })
@@ -701,7 +736,7 @@ const updateWorkflowState = async (bookComponentId, workflowStages, ctx) => {
             foreignType: 'bookComponent',
           })
           return BookComponentState.query()
-            .patch({ status: 105 })
+            .patch({ status: STATUSES.UNLOCKED_DUE_PERMISSIONS })
             .where({ bookComponentId })
         })
     }
@@ -845,6 +880,7 @@ module.exports = {
   getBookComponent,
   getBookComponentAndAcquireLock,
   updateBookComponent,
+  setStatus,
   addBookComponent,
   updateContent,
   toggleIncludeInTOC,
