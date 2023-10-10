@@ -2,10 +2,10 @@ FROM node:16.19.0-bullseye
 
 RUN apt-get update \
     && apt-get upgrade -y \
-    && apt-get install -y ranger vim python netcat imagemagick
+    && apt-get install -y ranger vim python netcat imagemagick potrace ghostscript
 
-RUN sed -i'.bak' '/\<policy domain="coder" rights="none" pattern="PS" \/\>/d' /etc/ImageMagick-6/policy.xml
-RUN sed -i'.bak' '/\<policy domain="coder" rights="none" pattern="EPS" \/\>/d' /etc/ImageMagick-6/policy.xml
+RUN sed -i.bak 's/rights="none" pattern="PS"/rights="read | write" pattern="PS"/g' /etc/ImageMagick-6/policy.xml
+RUN sed -i.bak 's/rights="none" pattern="EPS"/rights="read | write" pattern="EPS"/g' /etc/ImageMagick-6/policy.xml
 
 
 WORKDIR /home/node/server
