@@ -61,6 +61,7 @@ const {
   updateWorkflowState,
   deleteBookComponent,
   renameBookComponent,
+  setStatus,
 } = require('../../../controllers/bookComponent.controller')
 
 const { getContentFiles } = require('../../../controllers/file.controller')
@@ -651,6 +652,28 @@ const toggleIncludeInTOCHandler = async (_, { input }, ctx) => {
   }
 }
 
+const setBookComponentStatusHandler = async (_, { id, status }, ctx) => {
+  try {
+    // const { id, status } = input
+    const pubsub = await pubsubManager.getPubsub()
+
+    await setStatus(id, status)
+    const updatedBookComponent = await getBookComponent(id)
+
+    pubsub.publish(BOOK_UPDATED, {
+      bookUpdated: updatedBookComponent.bookId,
+    })
+    pubsub.publish(BOOK_COMPONENT_UPDATED, {
+      bookComponentUpdated: updatedBookComponent.id,
+    })
+
+    return updatedBookComponent
+  } catch (e) {
+    logger.error(e.message)
+    throw new Error(e)
+  }
+}
+
 module.exports = {
   Query: {
     getBookComponent: getBookComponentHandler,
@@ -673,6 +696,7 @@ module.exports = {
     updateTrackChanges: updateTrackChangesHandler,
     updateComponentType: updateComponentTypeHandler,
     toggleIncludeInTOC: toggleIncludeInTOCHandler,
+    setBookComponentStatus: setBookComponentStatusHandler,
   },
   BookComponent: {
     async title(bookComponent, _, ctx) {
