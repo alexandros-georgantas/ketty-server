@@ -366,6 +366,29 @@ const updateTrackChangesRule = rule()(
   },
 )
 
+const setBookComponentStatusRule = rule()(
+  async (parent, { id: bookComponentId }, ctx, info) => {
+    try {
+      const { user: userId } = ctx
+      if (!userId) return false
+
+      if (!bookComponentId) {
+        throw new Error('bookComponent id should be provided')
+      }
+
+      /* eslint-disable global-require */
+      const BookComponent = require('../../models/bookComponent/bookComponent.model')
+      /* eslint-enable global-require */
+      const bookComponent = await BookComponent.findById(bookComponentId)
+      const { bookId } = bookComponent
+
+      return canEditBookAndRelevantAssets(userId, bookId)
+    } catch (e) {
+      throw new Error(e.message)
+    }
+  },
+)
+
 const updateBookComponentOrderRule = rule()(
   async (parent, { targetDivisionId }, ctx, info) => {
     try {
@@ -671,6 +694,7 @@ const permissions = {
     updatePODMetadata: updateMetadataRule,
     exportBook: exportBookRule,
     ingestWordFile: ingestWordFileRule,
+    setBookComponentStatus: setBookComponentStatusRule,
     podAddBookComponent: addBookComponentRule,
     renameBookComponent: renameBookComponentRule,
     podDeleteBookComponent: deleteBookComponentRule,
