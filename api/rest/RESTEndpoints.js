@@ -1,4 +1,4 @@
-const { pubsubManager } = require('@coko/server')
+const { pubsubManager, logger } = require('@coko/server')
 const fs = require('fs-extra')
 const config = require('config')
 const mime = require('mime-types')
@@ -13,7 +13,8 @@ const { BookComponent, ServiceCallbackToken, Book } =
 
 const {
   BOOK_COMPONENT_UPLOADING_UPDATED,
-  BOOK_COMPONENT_DELETED,
+  BOOK_COMPONENT_UPDATED,
+  STATUSES,
 } = require('../graphql/bookComponent/constants')
 
 const { BOOK_UPDATED } = require('../graphql/book/constants')
@@ -21,8 +22,9 @@ const { BOOK_UPDATED } = require('../graphql/book/constants')
 const {
   updateContent,
   updateUploading,
-  deleteBookComponent,
+  // deleteBookComponent,
   getBookComponent,
+  setStatus,
 } = require('../../controllers/bookComponent.controller')
 
 const RESTEndpoints = app => {
@@ -84,24 +86,22 @@ const RESTEndpoints = app => {
 
       const { objectId: bookComponentId } = body
 
-      res.status(200).json({
-        msg: 'ok',
-      })
-
       const bookComp = await getBookComponent(bookComponentId)
+      await updateUploading(bookComponentId, false)
+      await setStatus(bookComponentId, STATUSES.CONVERSION_ERROR)
 
-      await deleteBookComponent(bookComp)
+      // await deleteBookComponent(bookComp)
       const belongingBook = await Book.findById(bookComp.bookId)
 
-      pubsub.publish(BOOK_COMPONENT_DELETED, {
-        bookComponentDeleted: bookComponentId,
+      pubsub.publish(BOOK_COMPONENT_UPDATED, {
+        bookComponentUpdated: bookComponentId,
       })
 
       pubsub.publish(BOOK_UPDATED, {
         bookUpdated: belongingBook.id,
       })
       // throw something which will only be displayed in server's logs
-      throw new Error(error)
+      logger.error(error)
     }
   })
   app.use('/api/fileserver/cleanup/:scope/:hash', async (req, res, next) => {

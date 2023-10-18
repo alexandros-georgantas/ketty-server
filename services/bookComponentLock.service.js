@@ -8,6 +8,7 @@ const { BOOK_UPDATED } = require('../api/graphql/book/constants')
 const {
   BOOK_COMPONENT_LOCK_UPDATED,
   BOOK_COMPONENT_UPDATED,
+  STATUSES,
 } = require('../api/graphql/bookComponent/constants')
 
 const unlockBookComponent = async (bookComponentId, userId, tabId) => {
@@ -26,7 +27,7 @@ const unlockBookComponent = async (bookComponentId, userId, tabId) => {
 
       logger.info(`locks removed ${affectedRows}`)
       await BookComponentState.query(tr)
-        .patch({ status: 200 })
+        .patch({ status: STATUSES.FINE })
         .where({ bookComponentId })
 
       return BookComponent.findById(bookComponentId, { trx: tr })
@@ -91,7 +92,7 @@ const unlockOrphanLocks = async bookComponentIdsWithLock => {
             }
 
             await BookComponentState.query(tr)
-              .patch({ status: 104 })
+              .patch({ status: STATUSES.UNLOCKED_BY_SYSTEM })
               .where({ bookComponentId })
 
             const updatedBookComponent = await BookComponent.findById(
@@ -191,7 +192,7 @@ const cleanUpLocks = async (immediate = false) => {
             }
 
             await BookComponentState.query(tr)
-              .patch({ status: 104 })
+              .patch({ status: STATUSES.UNLOCKED_BY_SYSTEM })
               .where({ bookComponentId })
 
             const updatedBookComponent = await BookComponent.findById(

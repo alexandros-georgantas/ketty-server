@@ -147,6 +147,7 @@ extend type Mutation {
   updateComponentType(input: UpdateBookComponentInput): BookComponent!
   updateUploading(input: UpdateBookComponentInput): BookComponent!
   toggleIncludeInTOC(input: UpdateBookComponentInput): BookComponent!
+  setBookComponentStatus(id: ID!, status: Int!): BookComponent!
 }
 
 extend type Subscription {
