@@ -1,3 +1,11 @@
+## [1.12.3](https://gitlab.coko.foundation/ketida/server/compare/v1.12.2...v1.12.3) (2023-10-18)
+
+
+### Bug Fixes
+
+* **api/graphql:** added missing handlers for seting book component status ([42b9080](https://gitlab.coko.foundation/ketida/server/commit/42b9080666c5e0ff0de99eadf8102fe812d34d73))
+* introduce flow for conversion error ([55ee0f8](https://gitlab.coko.foundation/ketida/server/commit/55ee0f8aa10aceb1790c7b4d453ed87a81011ba8))
+
 ## [1.12.2](https://gitlab.coko.foundation/ketida/server/compare/v1.12.1...v1.12.2) (2023-10-03)
 
 
