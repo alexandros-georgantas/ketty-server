@@ -69,11 +69,9 @@ class ExportProfile extends Base {
   }
 
   $beforeInsert(queryContext) {
-    console.log('here', this)
-
     if (this.format !== 'pdf' && this.trimSize) {
       throw new objection.ValidationError({
-        message: 'trim size is not valid option for EPUB format',
+        message: 'trim size is only valid option for PDF format',
         type: 'ValidationError',
       })
     }

@@ -79,6 +79,6 @@ describe('Export Profile model', () => {
         trimSize: '6x9',
         templateId,
       }),
-    ).rejects.toThrow('trim size is not valid option for EPUB format')
+    ).rejects.toThrow('trim size is only valid option for PDF format')
   })
 })
