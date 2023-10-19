@@ -25,6 +25,8 @@ module.exports = [
   './models/dataloader',
   './models/serviceCredential',
   './models/serviceCallbackToken',
+  './models/exportProfile',
+  './models/bookExportProfile',
   './api/graphql',
   './api/rest',
 ]

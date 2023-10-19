@@ -245,6 +245,7 @@ const schema = {
     // format: 'date-time',
     format: 'date',
   },
+  timestamp: { type: 'integer' },
   dateOrNull: {
     type: ['string', 'object', 'null'],
     format: 'date-time',
