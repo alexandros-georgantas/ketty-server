@@ -85,6 +85,15 @@ const bookStructure = {
   },
 }
 
+const isbnItem = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    isbn: string,
+    label: string,
+  },
+}
+
 const podMetadata = {
   type: ['object'],
   additionalProperties: false,
@@ -92,7 +101,12 @@ const podMetadata = {
     authors: string,
     bottomPage: string,
     copyrightLicense: string,
-    isbn: string,
+    isbn: {
+      type: 'array',
+      additionalProperties: false,
+      default: [],
+      items: isbnItem,
+    },
     licenseTypes: {
       type: 'object',
       additionalProperties: false,
