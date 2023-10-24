@@ -1,3 +1,4 @@
+const { get } = require('lodash')
 const cheerio = require('cheerio')
 const config = require('config')
 
@@ -163,8 +164,7 @@ const generateCopyrightsPage = (bookTitle, bookComponent, podMetadata) => {
     copyrightLicense,
     licenseTypes,
     publicDomainType,
-    // TODO - isbns is an array now!
-    isbn,
+    isbns,
     topPage,
     bottomPage,
     ncCopyrightHolder,
@@ -173,6 +173,7 @@ const generateCopyrightsPage = (bookTitle, bookComponent, podMetadata) => {
     saCopyrightYear,
   } = podMetadata
 
+  const isbn = get(isbns, [0, 'isbn'])
   let year
 
   if (copyrightLicense === 'SCL') {
