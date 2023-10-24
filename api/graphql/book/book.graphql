@@ -63,7 +63,7 @@ type PODMetadata {
   authors: String
   bottomPage: String
   copyrightLicense: String
-  isbn: String
+  isbns: [ISBN]
   licenseTypes: LicenseTypes
   ncCopyrightHolder: String
   ncCopyrightYear: Date
@@ -73,11 +73,21 @@ type PODMetadata {
   topPage: String
 }
 
+type ISBN {
+  isbn: String
+  label: String
+}
+
+input ISBNInput {
+  isbn: String
+  label: String
+}
+
 input PODMetadataInput {
   authors: String
   bottomPage: String
   copyrightLicense: String
-  isbn: String
+  isbns: [ISBNInput]
   licenseTypes: LicenseTypesInput
   ncCopyrightHolder: String
   ncCopyrightYear: Date

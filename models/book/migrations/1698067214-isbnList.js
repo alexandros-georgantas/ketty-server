@@ -15,13 +15,13 @@ exports.up = async knex => {
         await Book.query()
           .whereRaw("TRIM(pod_metadata->>'isbn') != ''")
           .patch({
-            'podMetadata:isbn': knex.raw(
+            'podMetadata:isbns': knex.raw(
               "json_build_array(json_build_object('label', '', 'isbn', pod_metadata->'isbn')) ",
             ),
           })
         await Book.query()
           .whereRaw("TRIM(pod_metadata->>'isbn') = ''")
-          .patch({ 'podMetadata:isbn': knex.raw('json_build_array()') })
+          .patch({ 'podMetadata:isbns': knex.raw('json_build_array()') })
       }
     }
 

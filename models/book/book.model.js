@@ -101,7 +101,7 @@ const podMetadata = {
     authors: string,
     bottomPage: string,
     copyrightLicense: string,
-    isbn: {
+    isbns: {
       type: 'array',
       additionalProperties: false,
       default: [],

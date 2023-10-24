@@ -163,6 +163,7 @@ const generateCopyrightsPage = (bookTitle, bookComponent, podMetadata) => {
     copyrightLicense,
     licenseTypes,
     publicDomainType,
+    // TODO - isbns is an array now!
     isbn,
     topPage,
     bottomPage,
@@ -325,7 +326,7 @@ const generateCopyrightsPage = (bookTitle, bookComponent, podMetadata) => {
         ? `<section class="copyright-after">${bottomPage}</section>`
         : ''
     }
-    
+
     </section>`,
   )
 

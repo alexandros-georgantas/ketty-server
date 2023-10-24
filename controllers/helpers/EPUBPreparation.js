@@ -276,6 +276,7 @@ const generateTOCNCX = async (book, epubFolder) => {
   const { metadata, podMetadata } = book
   const { isbn, issn, issnL } = metadata
 
+  // TODO - podMetadata?.isbns is an array now!
   const identifier = isbn || podMetadata?.isbn || issn || issnL
   let counter = 0
   book.divisions.forEach(division => {
@@ -396,6 +397,7 @@ const generateContentOPF = async (book, epubFolder) => {
 
   const spineData = []
   const manifestData = []
+  // TODO - podMetadata?.isbn is an array now!
   const identifier = isbn || podMetadata?.isbn || issn || issnL
 
   const rights = filter(
