@@ -28,6 +28,7 @@ exports.up = async knex => {
           enumName: 'export_profile_trim_size_type',
         })
         .nullable()
+        .defaultTo(null)
       table.jsonb('providerInfo').defaultTo([])
       table.boolean('deleted').defaultTo(false)
     })

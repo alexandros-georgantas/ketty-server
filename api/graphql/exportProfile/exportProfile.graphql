@@ -1,0 +1,70 @@
+type IncludedComponents {
+  toc: Boolean!
+  copyrights: Boolean!
+  titlePage: Boolean!
+}
+
+input IncludedComponentsInput {
+  toc: Boolean
+  copyrights: Boolean
+  titlePage: Boolean
+}
+
+enum Format {
+  epub
+  pdf
+}
+
+type ProviderInfo {
+  id: ID!
+  externalProjectId: ID!
+  bookMetadataHash: String!
+  bookContentHash: String!
+  templateHash: String!
+  lastSync: Int!
+}
+
+input ProviderInfoInput {
+  id: ID
+  externalProjectId: ID
+  bookMetadataHash: String
+  bookContentHash: String
+  templateHash: String
+  lastSync: Int
+}
+
+type ExportProfile {
+  id: ID!
+  displayName: String!
+  templateId: ID!
+  includedComponents: IncludedComponents!
+  format: Format!
+  trimSize: String
+  providerInfo: [ProviderInfo!]!
+}
+
+input ExportProfileInput {
+  id: ID
+  displayName: String
+  templateId: ID
+  includedComponents: IncludedComponentsInput
+  format: Format
+  trimSize: String
+  providerInfo: [ProviderInfoInput]
+}
+
+extend type Query {
+  getExportProfile(id: ID!): ExportProfile!
+  getBookExportProfiles(bookId: ID!): [ExportProfile!]!
+}
+
+extend type Mutation {
+  createExportProfile(input: ExportProfileInput!): ExportProfile!
+  updateExportProfile(input: ExportProfileInput!): ExportProfile!
+  deleteExportProfile(id: ID!): ID!
+  uploadToProvider: ExportProfile!
+}
+
+extend type Subscription {
+  exportProfileUpdated(bookId: ID!): ID!
+}

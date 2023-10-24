@@ -13,7 +13,7 @@ const format = {
 const trimSize = {
   additionalProperties: false,
   type: ['string', 'null'],
-  enum: ['8.5x11', '6x9', '5.5x8.5', null],
+  enum: ['8.5x11', '6x9', '5.5x8.5'],
 }
 
 const providerItem = {
@@ -69,14 +69,39 @@ class ExportProfile extends Base {
   }
 
   $beforeInsert(queryContext) {
-    if (this.format !== 'pdf' && this.trimSize) {
+    if (this.format === 'epub' && this.trimSize) {
       throw new objection.ValidationError({
         message: 'trim size is only valid option for PDF format',
         type: 'ValidationError',
       })
     }
 
+    if (this.format === 'pdf' && !this.trimSize) {
+      throw new objection.ValidationError({
+        message: 'trim size is required for PDF format',
+        type: 'ValidationError',
+      })
+    }
+
     super.$beforeInsert(queryContext)
+  }
+
+  $beforeUpdate(queryContext) {
+    if (this.format === 'epub' && this.trimSize) {
+      throw new objection.ValidationError({
+        message: 'trim size is only valid option for PDF format',
+        type: 'ValidationError',
+      })
+    }
+
+    if (this.format === 'pdf' && !this.trimSize) {
+      throw new objection.ValidationError({
+        message: 'trim size is required for PDF format',
+        type: 'ValidationError',
+      })
+    }
+
+    super.$beforeUpdate(queryContext)
   }
 
   static get schema() {
