@@ -1,4 +1,5 @@
-const { Model } = require('objection')
+const { Model, ValidationError } = require('objection')
+const { get, isEmpty } = require('lodash')
 
 const { uuid } = require('@coko/server')
 
@@ -89,9 +90,10 @@ const isbnItem = {
   type: 'object',
   additionalProperties: false,
   properties: {
-    isbn: string,
-    label: string,
+    isbn: {type: 'string'},
+    label: {type: 'string'},
   },
+  required: ['isbn'],
 }
 
 const podMetadata = {
@@ -106,6 +108,7 @@ const podMetadata = {
       additionalProperties: false,
       default: [],
       items: isbnItem,
+      uniqueItems: true,
     },
     licenseTypes: {
       type: 'object',
@@ -460,16 +463,71 @@ class Book extends Base {
     }
   }
 
+  validatePodMetadataIsbns() {
+    const isbns = get(this.podMetadata, 'isbns')
+    const fieldDuplicates = {}
+    if(isEmpty(isbns)) {
+      return
+    }
+
+    const checkForDuplicates = (items, itemPath) => {
+      if (!isEmpty(items)) {
+        // Identify duplicate
+        const valueCount = {}
+        const duplicates = []
+        items.forEach(item => {
+          const trimmedValue = get(item, itemPath, '').trim()
+
+          if (!isEmpty(trimmedValue)) {
+            valueCount[trimmedValue] = (valueCount[trimmedValue] || 0) + 1
+
+            if (valueCount[trimmedValue] === 2) {
+              duplicates.push(trimmedValue)
+            }
+          }
+        })
+
+        if (!isEmpty(duplicates)) {
+          fieldDuplicates[itemPath] = duplicates
+        }
+      }
+    }
+
+    checkForDuplicates(isbns, 'label')
+    checkForDuplicates(isbns, 'isbn')
+
+    if (!isEmpty(fieldDuplicates)) {
+      throw new ValidationError({
+        message: 'ISBN list should not contain duplicate labels or values',
+        type: 'ISBNDuplicateError',
+        data: fieldDuplicates,
+      })
+    }
+
+    if (isbns.length > 1) {
+      isbns.forEach(item => {
+        if(isEmpty(item.label?.trim())) {
+          throw new ValidationError({
+            message: 'ISBN label is required when there are multiple ISBNs',
+            type: 'ISBNLabelError'
+          })
+        }
+      })
+    }
+  }
+
   $beforeInsert() {
     super.$beforeInsert()
     // If no reference id is given, assume that this is a new book & create one
     this.referenceId = this.referenceId || uuid()
     this.ensureIds()
+    this.validatePodMetadataIsbns()
   }
 
   $beforeUpdate() {
     super.$beforeUpdate()
     this.ensureIds()
+    this.validatePodMetadataIsbns()
   }
 
   // static async beforeDelete({ asFindQuery, transaction }) {
