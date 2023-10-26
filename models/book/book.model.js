@@ -90,8 +90,8 @@ const isbnItem = {
   type: 'object',
   additionalProperties: false,
   properties: {
-    isbn: {type: 'string'},
-    label: {type: 'string'},
+    isbn: { type: 'string' },
+    label: { type: 'string' },
   },
   required: ['isbn'],
 }
@@ -467,7 +467,7 @@ class Book extends Base {
     const isbns = get(this.podMetadata, 'isbns')
     const fieldDuplicates = {}
 
-    if(isEmpty(isbns)) {
+    if (isEmpty(isbns)) {
       return
     }
 
@@ -507,10 +507,10 @@ class Book extends Base {
 
     if (isbns.length > 1) {
       isbns.forEach(item => {
-        if(isEmpty(item.label?.trim())) {
+        if (isEmpty(item.label?.trim())) {
           throw new ValidationError({
             message: 'ISBN label is required when there are multiple ISBNs',
-            type: 'ISBNLabelError'
+            type: 'ISBNLabelError',
           })
         }
       })
