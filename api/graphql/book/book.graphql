@@ -74,8 +74,8 @@ type PODMetadata {
 }
 
 type ISBN {
-  isbn: String
-  label: String
+  isbn: String!
+  label: String!
 }
 
 input ISBNInput {
