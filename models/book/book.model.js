@@ -466,6 +466,7 @@ class Book extends Base {
   validatePodMetadataIsbns() {
     const isbns = get(this.podMetadata, 'isbns')
     const fieldDuplicates = {}
+
     if(isEmpty(isbns)) {
       return
     }

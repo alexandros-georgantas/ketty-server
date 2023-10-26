@@ -279,6 +279,7 @@ const generateTOCNCX = async (book, epubFolder) => {
 
   const identifier =
     isbn || get(podMetadata, ['isbns', 0, 'isbn']) || issn || issnL
+
   let counter = 0
   book.divisions.forEach(division => {
     division.bookComponents.forEach(bookComponent => {
@@ -398,6 +399,7 @@ const generateContentOPF = async (book, epubFolder) => {
 
   const spineData = []
   const manifestData = []
+
   const identifier =
     isbn || get(podMetadata, ['isbns', 0, 'isbn']) || issn || issnL
 
