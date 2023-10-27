@@ -130,4 +130,5 @@ module.exports = {
   ],
   lockTrackChangesWhenReviewing: false,
   aiEnabled: featureAIEnabled,
+  heartbeatInterval: process.env.WS_HEARTBEAT_INTERVAL || 5000,
 }
