@@ -5,10 +5,8 @@ const builder = require('xmlbuilder')
 const fs = require('fs-extra')
 const tidy = require('libtidy-updated')
 const mime = require('mime-types')
-const map = require('lodash/map')
-const filter = require('lodash/filter')
-const find = require('lodash/find')
-const get = require('lodash/get')
+const { get, isEmpty, map, filter, find } = require('lodash')
+
 const config = require('config')
 
 const beautify = require('js-beautify').html
@@ -400,8 +398,20 @@ const generateContentOPF = async (book, epubFolder) => {
   const spineData = []
   const manifestData = []
 
-  const identifier =
-    isbn || get(podMetadata, ['isbns', 0, 'isbn']) || issn || issnL
+  let identifiers
+
+  if (!isbn && !isEmpty(podMetadata.isbns)) {
+    // Content of "podMetadata.isbns"
+    identifiers = podMetadata.isbns.map(item => {
+      return {
+        idExtension: podMetadata.isbns.length > 1 ? `-${item.label}` : '',
+        number: item.isbn,
+      }
+    })
+  } else if (isbn || issn || issnL) {
+    // Coerce to an array of identifiers with empty labels
+    identifiers = [{ idExtension: '', number: isbn || issn || issnL }]
+  }
 
   const rights = filter(
     [copyrightYear, copyrightHolder, copyrightStatement],
@@ -512,7 +522,9 @@ const generateContentOPF = async (book, epubFolder) => {
         'rendition: http://www.idpf.org/vocab/rendition/# schema: http://schema.org/ ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/ a11y: http://www.idpf.org/epub/vocab/package/a11y/#',
       '@xmlns': 'http://www.idpf.org/2007/opf',
       '@version': '3.0',
-      '@unique-identifier': 'BookId',
+      '@unique-identifier': isEmpty(identifiers)
+        ? 'BookId'
+        : `BookId${identifiers[0].idExtension}`,
       '@xml:lang': 'en',
       metadata: {
         '@xmlns:opf': 'http://www.idpf.org/2007/opf',
@@ -542,17 +554,18 @@ const generateContentOPF = async (book, epubFolder) => {
     )
   }
 
-  if (identifier) {
-    contentOPF.package.metadata['dc:identifier'] = {
-      '@id': 'BookId',
-      '#text': `urn:isbn:${identifier}`,
-    }
-
-    metaTemp.push({
-      '@refines': '#BookId',
-      '@property': 'identifier-type',
-      '@scheme': 'onix:codelist5',
-      '#text': 15,
+  if (identifiers) {
+    contentOPF.package.metadata['dc:identifier'] = identifiers.map(item => {
+      metaTemp.push({
+        '@refines': `#BookId${item.idExtension}`,
+        '@property': 'identifier-type',
+        '@scheme': 'onix:codelist5',
+        '#text': 15,
+      })
+      return {
+        '@id': `BookId${item.idExtension}`,
+        '#text': `urn:isbn:${item.number}`,
+      }
     })
   } else {
     contentOPF.package.metadata['dc:identifier'] = {

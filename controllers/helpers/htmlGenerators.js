@@ -317,7 +317,10 @@ const generateCopyrightsPage = (bookTitle, bookComponent, podMetadata) => {
     isbnText = isbns
       .map(
         item =>
-          `<span class="isbn-label">${item.label}</span><span class="isbn-number">${item.isbn}</span>`,
+          '<span class="isbn-item">' +
+          `<span class="isbn-label">${item.label}</span>` +
+          `<span class="isbn-number">${item.isbn}</span>` +
+          '</span>',
       )
       .join('')
   } else {
