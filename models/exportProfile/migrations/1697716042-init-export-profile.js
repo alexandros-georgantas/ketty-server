@@ -11,7 +11,20 @@ exports.up = async knex => {
       table.timestamp('updated', { useTz: true })
       table.text('type').notNullable()
       table.text('displayName').notNullable()
-      table.uuid('templateId').nullable()
+
+      table
+        .uuid('bookId')
+        .notNullable()
+        .references('id')
+        .inTable('book')
+        .onDelete('CASCADE')
+
+      table
+        .uuid('templateId')
+        .notNullable()
+        .references('id')
+        .inTable('template')
+
       table
         .jsonb('includedComponents')
         .notNullable()

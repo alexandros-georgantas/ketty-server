@@ -445,34 +445,34 @@ class Book extends Base {
     this.ensureIds()
   }
 
-  static async beforeDelete({ asFindQuery, transaction }) {
-    try {
-      /* eslint-disable global-require */
-      const ExportProfile = require('../exportProfile/exportProfile.model')
-      const BookExportProfile = require('../bookExportProfile/bookExportProfile.model')
-      /* eslint-enable global-require */
+  // static async beforeDelete({ asFindQuery, transaction }) {
+  //   try {
+  //     /* eslint-disable global-require */
+  //     const ExportProfile = require('../exportProfile/exportProfile.model')
+  //     const BookExportProfile = require('../bookExportProfile/bookExportProfile.model')
+  //     /* eslint-enable global-require */
 
-      const affectedItems = await asFindQuery().select('id')
+  //     const affectedItems = await asFindQuery().select('id')
 
-      const { id: toBeDeletedBookId } = affectedItems[0]
+  //     const { id: toBeDeletedBookId } = affectedItems[0]
 
-      const { result: exportProfiles } = await BookExportProfile.find(
-        {
-          bookId: toBeDeletedBookId,
-        },
-        { trx: transaction },
-      )
+  //     const { result: exportProfiles } = await BookExportProfile.find(
+  //       {
+  //         bookId: toBeDeletedBookId,
+  //       },
+  //       { trx: transaction },
+  //     )
 
-      return ExportProfile.query(transaction)
-        .delete()
-        .whereIn(
-          'id',
-          exportProfiles.map(exportProfile => exportProfile.id),
-        )
-    } catch (e) {
-      throw new Error(e.message)
-    }
-  }
+  //     return ExportProfile.query(transaction)
+  //       .delete()
+  //       .whereIn(
+  //         'id',
+  //         exportProfiles.map(exportProfile => exportProfile.id),
+  //       )
+  //   } catch (e) {
+  //     throw new Error(e.message)
+  //   }
+  // }
 }
 
 module.exports = Book

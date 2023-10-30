@@ -108,8 +108,9 @@ class ExportProfile extends Base {
     return {
       additionalProperties: false,
       type: 'object',
-      required: ['displayName', 'format', 'templateId'],
+      required: ['bookId', 'displayName', 'format', 'templateId'],
       properties: {
+        bookId: id,
         displayName: stringNotEmpty,
         templateId: id,
         includedComponents,

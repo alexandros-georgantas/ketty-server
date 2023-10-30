@@ -5,9 +5,9 @@ type IncludedComponents {
 }
 
 input IncludedComponentsInput {
-  toc: Boolean
-  copyrights: Boolean
-  titlePage: Boolean
+  toc: Boolean!
+  copyrights: Boolean!
+  titlePage: Boolean!
 }
 
 enum Format {
@@ -35,6 +35,7 @@ input ProviderInfoInput {
 
 type ExportProfile {
   id: ID!
+  bookId: ID!
   displayName: String!
   templateId: ID!
   includedComponents: IncludedComponents!
@@ -47,8 +48,9 @@ input ExportProfileInput {
   id: ID
   displayName: String
   templateId: ID
+  bookId: ID!
   includedComponents: IncludedComponentsInput
-  format: Format
+  format: Format!
   trimSize: String
   providerInfo: [ProviderInfoInput]
 }
@@ -57,10 +59,27 @@ extend type Query {
   getExportProfile(id: ID!): ExportProfile!
   getBookExportProfiles(bookId: ID!): [ExportProfile!]!
 }
+input CreateExportProfileInput {
+  displayName: String!
+  templateId: ID!
+  bookId: ID!
+  includedComponents: IncludedComponentsInput!
+  format: Format!
+  trimSize: String
+  providerInfo: [ProviderInfoInput]
+}
 
+input UpdateExportProfileInput {
+  displayName: String
+  templateId: ID
+  includedComponents: IncludedComponentsInput
+  format: Format
+  trimSize: String
+  providerInfo: [ProviderInfoInput]
+}
 extend type Mutation {
-  createExportProfile(input: ExportProfileInput!): ExportProfile!
-  updateExportProfile(input: ExportProfileInput!): ExportProfile!
+  createExportProfile(input: CreateExportProfileInput!): ExportProfile!
+  updateExportProfile(id: ID!, data: UpdateExportProfileInput!): ExportProfile!
   deleteExportProfile(id: ID!): ID!
   uploadToProvider: ExportProfile!
 }

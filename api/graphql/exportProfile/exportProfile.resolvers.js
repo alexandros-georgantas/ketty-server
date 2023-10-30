@@ -1,16 +1,109 @@
-const { pubsubManager } = require('@coko/server')
+const { pubsubManager, logger } = require('@coko/server')
 
-const { EXPORT_PROFILE_UPDATED } = require('./constants')
+const { subscriptions, labels } = require('./constants')
 
-const getExportProfileHandler = () => {}
+const {
+  getExportProfile,
+  getBookExportProfiles,
+  createExportProfile,
+  updateExportProfile,
+  deleteExportProfile,
+} = require('../../../controllers/exportProfile.controller')
 
-const getBookExportProfilesHandler = () => {}
+const {
+  EXPORT_PROFILE_CREATED,
+  EXPORT_PROFILE_UPDATED,
+  EXPORT_PROFILE_DELETED,
+} = subscriptions
 
-const createExportProfileHandler = () => {}
+const { EXPORT_PROFILE_RESOLVER } = labels
 
-const updateExportProfileHandler = () => {}
+const getExportProfileHandler = async (_, { id }) => {
+  try {
+    logger.info(`${EXPORT_PROFILE_RESOLVER} getExportProfileHandler`)
+    return getExportProfile(id)
+  } catch (e) {
+    logger.error(
+      `${EXPORT_PROFILE_RESOLVER} getExportProfileHandler: ${e.message}`,
+    )
+    throw new Error(e)
+  }
+}
 
-const deleteExportProfileHandler = () => {}
+const getBookExportProfilesHandler = (_, { bookId }) => {
+  try {
+    logger.info(`${EXPORT_PROFILE_RESOLVER} getBookExportProfilesHandler`)
+    return getBookExportProfiles(bookId)
+  } catch (e) {
+    logger.error(
+      `${EXPORT_PROFILE_RESOLVER} getBookExportProfilesHandler: ${e.message}`,
+    )
+    throw new Error(e)
+  }
+}
+
+const createExportProfileHandler = async (_, { input }, ctx) => {
+  try {
+    logger.info(`${EXPORT_PROFILE_RESOLVER} createExportProfileHandler`)
+
+    const pubsub = await pubsubManager.getPubsub()
+
+    const newExportProfile = await createExportProfile(input)
+
+    pubsub.publish(EXPORT_PROFILE_CREATED, {
+      exportProfileCreated: newExportProfile.id,
+    })
+
+    return newExportProfile
+  } catch (e) {
+    logger.error(
+      `${EXPORT_PROFILE_RESOLVER} createExportProfileHandler: ${e.message}`,
+    )
+    throw new Error(e)
+  }
+}
+
+const updateExportProfileHandler = async (_, { id, data }) => {
+  try {
+    logger.info(`${EXPORT_PROFILE_RESOLVER} updateExportProfileHandler`)
+
+    const pubsub = await pubsubManager.getPubsub()
+
+    const updatedExportProfile = await updateExportProfile(id, data)
+
+    pubsub.publish(EXPORT_PROFILE_UPDATED, {
+      exportProfileUpdated: updatedExportProfile.id,
+    })
+
+    return updatedExportProfile
+  } catch (e) {
+    logger.error(
+      `${EXPORT_PROFILE_RESOLVER} updateExportProfileHandler: ${e.message}`,
+    )
+    throw new Error(e)
+  }
+}
+
+const deleteExportProfileHandler = async (_, { id }) => {
+  try {
+    logger.info(`${EXPORT_PROFILE_RESOLVER} deleteExportProfileHandler`)
+
+    const pubsub = await pubsubManager.getPubsub()
+
+    await deleteExportProfile(id)
+
+    pubsub.publish(EXPORT_PROFILE_DELETED, {
+      exportProfileDeleted: id,
+    })
+
+    return id
+  } catch (e) {
+    logger.error(
+      `${EXPORT_PROFILE_RESOLVER} deleteExportProfileHandler: ${e.message}`,
+    )
+    throw new Error(e)
+  }
+}
 
 const uploadToProviderHandler = () => {}
 
