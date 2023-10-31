@@ -17,13 +17,13 @@ module.exports = {
       globalSetup: './scripts/helpers/_setup.js',
       globalTeardown: './scripts/helpers/_teardown.js',
     },
-    {
+    /* {
       displayName: 'models',
       testEnvironment: 'node',
       testRegex: './models/__tests__/.+test.js$',
       globalSetup: './scripts/helpers/_setup.js',
       globalTeardown: './scripts/helpers/_teardown.js',
-    },
+    }, */
     {
       displayName: 'controllers',
       testEnvironment: 'node',

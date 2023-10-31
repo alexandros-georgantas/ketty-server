@@ -3,13 +3,7 @@
 /* eslint-disable jest/no-disabled-tests */
 const _ = require('lodash')
 const BookTranslation = require('../../../models/bookTranslation/bookTranslation.model')
-/*const { useTransaction } = require('@coko/server')
-const User = require('../../../models/user/user.model')
-const Team = require('../../../models/team/team.model')
-*/
 const seedAdmin = require('../../../scripts/seeds/admin')
-//const seedUser = require('../../../scripts/seeds/user')
-//const seedBookCollection = require('../../../scripts/seeds/bookCollection')
 const seedGlobalTeams = require('../../../scripts/seeds/globalTeams')
 const seedApplicationParams = require('../../../scripts/seeds/applicationParameters')
 const clearDb = require('../../../scripts/helpers/_clearDB')
@@ -19,7 +13,7 @@ const createBookGraphQL = async (
   testServer,
   { input = { title: 'A book with just a title' }, resStructure = '{id}' },
 ) => {
-  return await testServer.executeOperation({
+  return testServer.executeOperation({
     query: `mutation($input: CreateBookInput!){createBook(input: $input) ${resStructure}}`,
     variables: { input },
   })
@@ -142,15 +136,15 @@ describe('Book GraphQL Query', () => {
         metadata: {
           /* authors
           bottomPage
-          copyrightLicense*/
+          copyrightLicense */
           isbns: [{ isbn: '978-3-16-148410-0', label: 'hardcover' }],
-          /*licenseTypes
+          /* licenseTypes
           ncCopyrightHolder
           ncCopyrightYear
           publicDomainType
           saCopyrightHolder
           saCopyrightYear
-          topPage*/
+          topPage */
         },
       },
     })
@@ -173,9 +167,9 @@ describe('Book GraphQL Query', () => {
     ])
 
     // Book was created without an author
-    expect(bookUpdated.podMetadata.isbns).toEqual(
-      [{ isbn: '978-3-16-148410-0', label: 'hardcover' }]
-    )
+    expect(bookUpdated.podMetadata.isbns).toEqual([
+      { isbn: '978-3-16-148410-0', label: 'hardcover' },
+    ])
   })
 
   it('Fails to update book with duplicate ISBN numbers', async () => {
@@ -190,8 +184,8 @@ describe('Book GraphQL Query', () => {
         metadata: {
           isbns: [
             { isbn: '978-3-16-148410-0', label: 'hardcover' },
-            { isbn: '978-3-16-148410-0', label: 'softcover' }
-          ]
+            { isbn: '978-3-16-148410-0', label: 'softcover' },
+          ],
         },
       },
     })
@@ -199,7 +193,7 @@ describe('Book GraphQL Query', () => {
     expect(res.errors.length).toEqual(1)
     expect(res.errors[0].constructor.name).toEqual('GraphQLError')
     expect(res.errors[0].message).toEqual(
-      'ValidationError: ISBN list should not contain duplicate labels or values'
+      'ValidationError: ISBN list should not contain duplicate labels or values',
     )
   })
 
@@ -215,8 +209,8 @@ describe('Book GraphQL Query', () => {
         metadata: {
           isbns: [
             { isbn: '978-3-16-148410-0', label: 'hardcover' },
-            { isbn: '978-3-16-148410-1', label: 'hardcover' }
-          ]
+            { isbn: '978-3-16-148410-1', label: 'hardcover' },
+          ],
         },
       },
     })
@@ -224,7 +218,7 @@ describe('Book GraphQL Query', () => {
     expect(res.errors.length).toEqual(1)
     expect(res.errors[0].constructor.name).toEqual('GraphQLError')
     expect(res.errors[0].message).toEqual(
-      'ValidationError: ISBN list should not contain duplicate labels or values'
+      'ValidationError: ISBN list should not contain duplicate labels or values',
     )
   })
 
@@ -238,13 +232,10 @@ describe('Book GraphQL Query', () => {
       variables: {
         bookId,
         metadata: {
-          isbns: [
-            { label: 'hardcover' }
-          ]
+          isbns: [{ label: 'hardcover' }],
         },
       },
     })
-    console.log(res)
     expect(res.data).toBe(undefined)
     expect(res.errors.length).toEqual(1)
     expect(res.errors[0].constructor.name).toEqual('UserInputError')
@@ -260,13 +251,10 @@ describe('Book GraphQL Query', () => {
       variables: {
         bookId,
         metadata: {
-          isbns: [
-            { isbn: '978-3-16-148410-0' }
-          ]
+          isbns: [{ isbn: '978-3-16-148410-0' }],
         },
       },
     })
-    console.log(res)
     expect(res.data).toBe(undefined)
     expect(res.errors.length).toEqual(1)
     expect(res.errors[0].constructor.name).toEqual('UserInputError')
@@ -284,8 +272,8 @@ describe('Book GraphQL Query', () => {
         metadata: {
           isbns: [
             { isbn: '978-3-16-148410-0', label: 'hardcover' },
-            { isbn: '978-3-16-148410-1', label: 'softcover' }
-          ]
+            { isbn: '978-3-16-148410-1', label: 'softcover' },
+          ],
         },
       },
     })
@@ -317,7 +305,7 @@ describe('Book GraphQL Query', () => {
     title
     thumbnailId
     thumbnailURL}}`,
-      variables: {id: bookId},
+      variables: { id: bookId },
     })
 
     const bookData = res.data.getBook
@@ -349,11 +337,9 @@ describe('Book GraphQL Query', () => {
       'thumbnailURL',
       'title',
     ])
-    expect(bookData.podMetadata.isbns).toEqual(
-      [
-        { isbn: '978-3-16-148410-0', label: 'hardcover' },
-        { isbn: '978-3-16-148410-1', label: 'softcover' }
-      ]
-    )
+    expect(bookData.podMetadata.isbns).toEqual([
+      { isbn: '978-3-16-148410-0', label: 'hardcover' },
+      { isbn: '978-3-16-148410-1', label: 'softcover' },
+    ])
   })
 })
