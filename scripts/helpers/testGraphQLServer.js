@@ -29,6 +29,12 @@ const extraApolloConfig = config.has('pubsweet-server.apollo')
   : {}
 
 const testGraphQLServer = testUserContext => {
+  if (process.env.NODE_ENV !== 'test' && testUserContext) {
+    throw new Error(
+      'Do not pass a test user context unless you are running a test suite',
+    )
+  }
+
   const createdLoaders = loaders()
 
   const middleware = []

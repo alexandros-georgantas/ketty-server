@@ -378,6 +378,10 @@ const generateTOCNCX = async (book, epubFolder) => {
     pretty: true,
   })
 
+  if (epubFolder === false) {
+    return output
+  }
+
   return writeFile(`${epubFolder.oebps}/toc.ncx`, output)
 }
 
@@ -594,6 +598,10 @@ const generateContentOPF = async (book, epubFolder) => {
     pretty: true,
   })
 
+  if (epubFolder === false) {
+    return output
+  }
+
   return writeFile(`${epubFolder.oebps}/content.opf`, output)
 }
 
@@ -706,4 +714,11 @@ const EPUBPreparation = async (book, template, EPUBtempFolderAssetsPath) => {
   }
 }
 
-module.exports = EPUBPreparation
+if (process.env.NODE_ENV === 'test') {
+  module.exports = {
+    generateTOCNCX,
+    generateContentOPF,
+  }
+} else {
+  module.exports = EPUBPreparation
+}

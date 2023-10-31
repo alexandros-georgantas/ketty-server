@@ -15,7 +15,7 @@ services:
       - ${SERVER_PORT:-3000}:${SERVER_PORT:-3000}
       - ${WS_SERVER_PORT:-3333}:${WS_SERVER_PORT:-3333}
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=test
       - SERVER_IDENTIFIER=${SERVER_IDENTIFIER:-0a3cf3f0-98b6-11ed-87cd-0800200c9a66}
       - KETIDA_FLAVOUR=${KETIDA_FLAVOUR:-VANILLA}
       - PUBSWEET_SECRET=${PUBSWEET_SECRET:-dev_secret}
