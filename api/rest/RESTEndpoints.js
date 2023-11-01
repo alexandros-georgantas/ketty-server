@@ -3,6 +3,7 @@ const fs = require('fs-extra')
 const config = require('config')
 const mime = require('mime-types')
 const get = require('lodash/get')
+const { NotFoundError } = require('objection')
 
 const uploadsDir = get(config, ['pubsweet-server', 'uploads'], 'uploads')
 const { readFile } = require('../../utilities/filesystem')
@@ -86,9 +87,8 @@ const RESTEndpoints = app => {
 
       const { objectId: bookComponentId } = body
 
-      const bookComp = await getBookComponent(bookComponentId, {}, null)
-
-      if (bookComp) {
+      if (!(error instanceof NotFoundError)) {
+        const bookComp = await getBookComponent(bookComponentId)
         await updateUploading(bookComponentId, false)
         await setStatus(bookComponentId, STATUSES.CONVERSION_ERROR)
 
