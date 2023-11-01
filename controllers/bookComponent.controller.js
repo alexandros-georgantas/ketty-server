@@ -25,7 +25,11 @@ const bookComponentContentCreator = require('./helpers/bookComponentContentCreat
 const { isEmptyString } = require('../utilities/generic')
 const { isAdmin } = require('./user.controller')
 
-const getBookComponent = async (bookComponentId, options = {}) => {
+const getBookComponent = async (
+  bookComponentId,
+  options = {},
+  default_ = undefined,
+) => {
   try {
     const { trx } = options
     logger.info(`>>> fetching book component with id ${bookComponentId}`)
@@ -39,7 +43,7 @@ const getBookComponent = async (bookComponentId, options = {}) => {
       { trx, passedTrxOnly: true },
     )
 
-    if (!bookComponent) {
+    if (!bookComponent && default_ === undefined) {
       throw new Error(
         `book component with id: ${bookComponentId} does not exist`,
       )

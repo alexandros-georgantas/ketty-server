@@ -86,20 +86,24 @@ const RESTEndpoints = app => {
 
       const { objectId: bookComponentId } = body
 
-      const bookComp = await getBookComponent(bookComponentId)
-      await updateUploading(bookComponentId, false)
-      await setStatus(bookComponentId, STATUSES.CONVERSION_ERROR)
+      const bookComp = await getBookComponent(bookComponentId, {}, null)
 
-      // await deleteBookComponent(bookComp)
-      const belongingBook = await Book.findById(bookComp.bookId)
+      if (bookComp) {
+        await updateUploading(bookComponentId, false)
+        await setStatus(bookComponentId, STATUSES.CONVERSION_ERROR)
 
-      pubsub.publish(BOOK_COMPONENT_UPDATED, {
-        bookComponentUpdated: bookComponentId,
-      })
+        // await deleteBookComponent(bookComp)
+        const belongingBook = await Book.findById(bookComp.bookId)
 
-      pubsub.publish(BOOK_UPDATED, {
-        bookUpdated: belongingBook.id,
-      })
+        pubsub.publish(BOOK_COMPONENT_UPDATED, {
+          bookComponentUpdated: bookComponentId,
+        })
+
+        pubsub.publish(BOOK_UPDATED, {
+          bookUpdated: belongingBook.id,
+        })
+      }
+
       // throw something which will only be displayed in server's logs
       logger.error(error)
     }
