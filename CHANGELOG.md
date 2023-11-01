@@ -1,3 +1,10 @@
+## [1.12.4](https://gitlab.coko.foundation/ketida/server/compare/v1.12.3...v1.12.4) (2023-11-01)
+
+
+### Bug Fixes
+
+* **api/graphql:** configurable heartbeat added ([4d67d86](https://gitlab.coko.foundation/ketida/server/commit/4d67d864d9fb6c1c51a83c76ad07fc20b55287ab))
+
 ## [1.12.3](https://gitlab.coko.foundation/ketida/server/compare/v1.12.2...v1.12.3) (2023-10-18)
 
 
