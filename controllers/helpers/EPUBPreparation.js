@@ -716,9 +716,10 @@ const EPUBPreparation = async (book, template, EPUBtempFolderAssetsPath) => {
 
 if (process.env.NODE_ENV === 'test') {
   module.exports = {
+    EPUBPreparation,
     generateTOCNCX,
     generateContentOPF,
   }
 } else {
-  module.exports = EPUBPreparation
+  module.exports = { EPUBPreparation }
 }

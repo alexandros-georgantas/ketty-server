@@ -20,7 +20,7 @@ const crypto = require('crypto')
 //   generateCopyrightsPage,
 // } = require('./htmlGenerators')
 
-const EPUBPreparation = require('./EPUBPreparation')
+const { EPUBPreparation } = require('./EPUBPreparation')
 const ICMLPreparation = require('./ICMLPreparation')
 const PagedJSPreparation = require('./PagedJSPreparation')
 const EPUBArchiver = require('./EPUBArchiver')
