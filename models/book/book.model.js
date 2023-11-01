@@ -123,39 +123,39 @@ const statusFieldSchema = {
   default: 0,
 }
 
-const previewerConfiguration = {
-  type: ['object', 'null'],
-  additionalProperties: false,
-  properties: {
-    additionalProperties: false,
-    templateId: { type: ['string', 'null'], format: 'uuid', default: null },
-    trimSize: { type: ['string', 'null'], default: null },
-    additionalExportOptions: {
-      includeTOC: { type: 'boolean', default: true },
-      includeCopyrights: { type: 'boolean', default: true },
-      includeTitlePage: { type: 'boolean', default: true },
-    },
-  },
-}
+// const previewerConfiguration = {
+//   type: ['object', 'null'],
+//   additionalProperties: false,
+//   properties: {
+//     additionalProperties: false,
+//     templateId: { type: ['string', 'null'], format: 'uuid', default: null },
+//     trimSize: { type: ['string', 'null'], default: null },
+//     additionalExportOptions: {
+//       includeTOC: { type: 'boolean', default: true },
+//       includeCopyrights: { type: 'boolean', default: true },
+//       includeTitlePage: { type: 'boolean', default: true },
+//     },
+//   },
+// }
 
-const associatedTemplatesSchema = {
-  type: 'object',
-  additionalProperties: false,
-  properties: {
-    pagedjs: {
-      type: 'array',
-      additionalProperties: false,
-      items: previewerConfiguration,
-    },
-    epub: previewerConfiguration,
-    icml: previewerConfiguration,
-  },
-  default: {
-    pagedjs: [],
-    epub: null,
-    icml: null,
-  },
-}
+// const associatedTemplatesSchema = {
+//   type: 'object',
+//   additionalProperties: false,
+//   properties: {
+//     pagedjs: {
+//       type: 'array',
+//       additionalProperties: false,
+//       items: previewerConfiguration,
+//     },
+//     epub: previewerConfiguration,
+//     icml: previewerConfiguration,
+//   },
+//   default: {
+//     pagedjs: [],
+//     epub: null,
+//     icml: null,
+//   },
+// }
 
 class Book extends Base {
   constructor(properties) {
@@ -170,6 +170,7 @@ class Book extends Base {
   static get relationMappings() {
     /* eslint-disable global-require */
     const BookCollection = require('../bookCollection/bookCollection.model')
+    const ExportProfile = require('../exportProfile/exportProfile.model')
     /* eslint-enable global-require */
     return {
       bookCollection: {
@@ -180,7 +181,19 @@ class Book extends Base {
           to: 'BookCollection.id',
         },
       },
+      exportProfiles: {
+        relation: Model.HasManyRelation,
+        modelClass: ExportProfile,
+        join: {
+          from: 'book.id',
+          to: 'export_profiles.book_id',
+        },
+      },
     }
+  }
+
+  async getExportProfiles(tr = undefined) {
+    return this.$relatedQuery('exportProfiles', tr)
   }
 
   static async getAllBooks(options, collectionId = undefined) {
@@ -365,7 +378,7 @@ class Book extends Base {
         license: string,
         podMetadata,
         status: statusFieldSchema,
-        associatedTemplates: associatedTemplatesSchema,
+        // associatedTemplates: associatedTemplatesSchema,
         thumbnailId: id,
       },
     }

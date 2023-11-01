@@ -46,7 +46,7 @@ const { createDivision } = require('./division.controller')
 
 const { createTeam, getObjectTeam, deleteTeam } = require('./team.controller')
 
-const { getSpecificTemplates } = require('./template.controller')
+// const { getSpecificTemplates } = require('./template.controller')
 
 const toCamelCase = string =>
   string
@@ -600,89 +600,78 @@ const createBook = async (data = {}) => {
         // END OF BOOK SPECIAL COMPONENTS CREATION SECTION
 
         // SECTION FOR SETTING DEFAULT TEMPLATE
-        if (featurePODEnabled) {
-          const additionalExportOptions = {
-            includeTOC: true,
-            includeCopyrights: true,
-            includeTitlePage: true,
-          }
-
-          const pagedjs = []
-
-          const pagedjsTrimA4 = await getSpecificTemplates(
-            'pagedjs',
-            '8.5x11',
-            null,
-            {
-              trx: tr,
-            },
-          )
-
-          if (pagedjsTrimA4[0]) {
-            pagedjs.push({
-              templateId: pagedjsTrimA4[0].id,
-              trimSize: pagedjsTrimA4[0].trimSize,
-              additionalExportOptions,
-            })
-          }
-
-          const pagedjsTrimA5 = await getSpecificTemplates(
-            'pagedjs',
-            '5.5x8.5',
-            pagedjsTrimA4[0]?.name,
-            {
-              trx: tr,
-            },
-          )
-
-          if (pagedjsTrimA5[0]) {
-            pagedjs.push({
-              templateId: pagedjsTrimA5[0].id,
-              trimSize: pagedjsTrimA5[0].trimSize,
-              additionalExportOptions,
-            })
-          }
-
-          const pagedjsTrimTrade = await getSpecificTemplates(
-            'pagedjs',
-            '6x9',
-            pagedjsTrimA4[0]?.name,
-            {
-              trx: tr,
-            },
-          )
-
-          if (pagedjsTrimTrade[0]) {
-            pagedjs.push({
-              templateId: pagedjsTrimTrade[0].id,
-              trimSize: pagedjsTrimTrade[0].trimSize,
-              additionalExportOptions,
-            })
-          }
-
-          const epubTemplate = await getSpecificTemplates('epub', null, null, {
-            trx: tr,
-          })
-
-          const epub = epubTemplate[0]
-            ? { templateId: epubTemplate[0].id, additionalExportOptions }
-            : null
-
-          const associatedTemplates = {
-            pagedjs,
-            epub,
-          }
-
-          await Book.patchAndFetchById(
-            newBook.id,
-            {
-              associatedTemplates,
-            },
-            { trx: tr },
-          )
-        }
-
+        // if (featurePODEnabled) {
+        // const additionalExportOptions = {
+        //   includeTOC: true,
+        //   includeCopyrights: true,
+        //   includeTitlePage: true,
+        // }
+        // const pagedjs = []
+        // const pagedjsTrimA4 = await getSpecificTemplates(
+        //   'pagedjs',
+        //   '8.5x11',
+        //   null,
+        //   {
+        //     trx: tr,
+        //   },
+        // )
+        // if (pagedjsTrimA4[0]) {
+        //   pagedjs.push({
+        //     templateId: pagedjsTrimA4[0].id,
+        //     trimSize: pagedjsTrimA4[0].trimSize,
+        //     additionalExportOptions,
+        //   })
+        // }
+        // const pagedjsTrimA5 = await getSpecificTemplates(
+        //   'pagedjs',
+        //   '5.5x8.5',
+        //   pagedjsTrimA4[0]?.name,
+        //   {
+        //     trx: tr,
+        //   },
+        // )
+        // if (pagedjsTrimA5[0]) {
+        //   pagedjs.push({
+        //     templateId: pagedjsTrimA5[0].id,
+        //     trimSize: pagedjsTrimA5[0].trimSize,
+        //     additionalExportOptions,
+        //   })
+        // }
+        // const pagedjsTrimTrade = await getSpecificTemplates(
+        //   'pagedjs',
+        //   '6x9',
+        //   pagedjsTrimA4[0]?.name,
+        //   {
+        //     trx: tr,
+        //   },
+        // )
+        // if (pagedjsTrimTrade[0]) {
+        //   pagedjs.push({
+        //     templateId: pagedjsTrimTrade[0].id,
+        //     trimSize: pagedjsTrimTrade[0].trimSize,
+        //     additionalExportOptions,
+        //   })
+        // }
+        // const epubTemplate = await getSpecificTemplates('epub', null, null, {
+        //   trx: tr,
+        // })
+        // const epub = epubTemplate[0]
+        //   ? { templateId: epubTemplate[0].id, additionalExportOptions }
+        //   : null
+        // const associatedTemplates = {
+        //   pagedjs,
+        //   epub,
+        // }
+        // await Book.patchAndFetchById(
+        //   newBook.id,
+        //   {
+        //     associatedTemplates,
+        //   },
+        //   { trx: tr },
+        // )
+        // }
         // END OF BOOK DEFAULT TEMPLATE CREATION SECTION
+
         return newBook
       },
       { trx },

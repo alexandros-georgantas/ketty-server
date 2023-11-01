@@ -176,7 +176,7 @@ const modifyBooksInDashboardRule = rule()(
   },
 )
 
-const updateAssociatedTemplatesRule = rule()(
+const interactWithExportProfileRule = rule()(
   async (parent, { bookId }, ctx, info) => {
     try {
       const { user: userId } = ctx
@@ -704,7 +704,9 @@ const permissions = {
     updateTrackChanges: updateTrackChangesRule,
     updateContent: updateContentRule,
     updateBookComponentsOrder: updateBookComponentOrderRule,
-    updateAssociatedTemplates: updateAssociatedTemplatesRule,
+    createExportProfile: interactWithExportProfileRule,
+    updateExportProfile: interactWithExportProfileRule,
+    deleteExportProfile: interactWithExportProfileRule,
     uploadFiles: uploadFilesRules,
     removeTeamMember: isAuthenticatedRule,
     searchForUsers: isAuthenticatedRule,

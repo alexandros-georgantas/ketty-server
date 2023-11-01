@@ -33,6 +33,11 @@ input ProviderInfoInput {
   lastSync: Int
 }
 
+type ExportProfileResponse {
+  result: [ExportProfile!]!
+  totalCount: Int
+}
+
 type ExportProfile {
   id: ID!
   bookId: ID!
@@ -57,7 +62,7 @@ input ExportProfileInput {
 
 extend type Query {
   getExportProfile(id: ID!): ExportProfile!
-  getBookExportProfiles(bookId: ID!): [ExportProfile!]!
+  getBookExportProfiles(bookId: ID!): ExportProfileResponse!
 }
 input CreateExportProfileInput {
   displayName: String!

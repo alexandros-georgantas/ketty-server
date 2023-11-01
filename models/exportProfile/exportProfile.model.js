@@ -12,7 +12,7 @@ const format = {
 
 const trimSize = {
   additionalProperties: false,
-  type: ['string', 'null'],
+  type: ['string', null],
   enum: ['8.5x11', '6x9', '5.5x8.5'],
 }
 
@@ -86,22 +86,37 @@ class ExportProfile extends Base {
     super.$beforeInsert(queryContext)
   }
 
-  $beforeUpdate(queryContext) {
-    if (this.format === 'epub' && this.trimSize) {
-      throw new objection.ValidationError({
-        message: 'trim size is only valid option for PDF format',
-        type: 'ValidationError',
-      })
-    }
+  static async beforeUpdate({ asFindQuery, inputItems }) {
+    try {
+      const affectedItems = await asFindQuery().select('*')
 
-    if (this.format === 'pdf' && !this.trimSize) {
-      throw new objection.ValidationError({
-        message: 'trim size is required for PDF format',
-        type: 'ValidationError',
-      })
-    }
+      affectedItems.forEach(item => {
+        const { format: itemFormat } = item
+        inputItems.forEach(input => {
+          const { trimSize: inputTrimSize } = input
 
-    super.$beforeUpdate(queryContext)
+          if (itemFormat === 'epub') {
+            if (inputTrimSize) {
+              throw new objection.ValidationError({
+                message: 'trim size is only valid option for PDF format',
+                type: 'ValidationError',
+              })
+            }
+          }
+
+          if (itemFormat === 'pdf') {
+            if (!inputTrimSize) {
+              throw new objection.ValidationError({
+                message: 'trim size is required for PDF format',
+                type: 'ValidationError',
+              })
+            }
+          }
+        })
+      })
+    } catch (e) {
+      throw new Error(e.message)
+    }
   }
 
   static get schema() {
