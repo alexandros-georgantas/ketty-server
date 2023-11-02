@@ -5,7 +5,7 @@ const builder = require('xmlbuilder')
 const fs = require('fs-extra')
 const tidy = require('libtidy-updated')
 const mime = require('mime-types')
-const { get, isEmpty, map, filter, find } = require('lodash')
+const { get, isEmpty, map, filter, find, trim } = require('lodash')
 
 const config = require('config')
 
@@ -408,7 +408,10 @@ const generateContentOPF = async (book, epubFolder) => {
     // Content of "podMetadata.isbns"
     identifiers = podMetadata.isbns.map(item => {
       return {
-        idExtension: podMetadata.isbns.length > 1 ? `-${item.label}` : '',
+        idExtension:
+          podMetadata.isbns.length > 1
+            ? `-${trim(item.label.replace(/[^A-Za-z0-9]+/g, '-'), '-')}`
+            : '',
         number: item.isbn,
       }
     })
