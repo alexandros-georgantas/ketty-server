@@ -515,6 +515,24 @@ class Book extends Base {
         }
       })
     }
+
+    isbns.forEach(item => {
+      // isbn MAY NOT be empty
+      if (isEmpty(item.isbn?.trim())) {
+        throw new ValidationError({
+          message: 'ISBN value is required',
+          type: 'ISBNValueError',
+        })
+      }
+
+      // isbn MAY ONLY CONTAIN ' ', '-' or '0-9'
+      if (item.isbn.search(/[^\s\-0-9]/) !== -1) {
+        throw new ValidationError({
+          message: 'ISBN values may only contain spaces, dashes and digits',
+          type: 'ISBNValueError',
+        })
+      }
+    })
   }
 
   $beforeInsert() {
