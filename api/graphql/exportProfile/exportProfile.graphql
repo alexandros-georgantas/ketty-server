@@ -88,7 +88,7 @@ extend type Mutation {
   createExportProfile(input: CreateExportProfileInput!): ExportProfile!
   updateExportProfile(id: ID!, data: UpdateExportProfileInput!): ExportProfile!
   deleteExportProfile(id: ID!): ID!
-  uploadToProvider(id: ID!): ExportProfile!
+  uploadToProvider(providerLabel: String!, id: ID!): ExportProfile!
 }
 
 extend type Subscription {

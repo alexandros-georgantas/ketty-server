@@ -8,6 +8,7 @@ const {
   createExportProfile,
   updateExportProfile,
   deleteExportProfile,
+  uploadToProvider,
 } = require('../../../controllers/exportProfile.controller')
 
 const {
@@ -105,7 +106,30 @@ const deleteExportProfileHandler = async (_, { id }) => {
   }
 }
 
-const uploadToProviderHandler = () => {}
+const uploadToProviderHandler = async (_, { providerLabel, id }, ctx) => {
+  try {
+    logger.info(`${EXPORT_PROFILE_RESOLVER} uploadToProviderHandler`)
+
+    const pubsub = await pubsubManager.getPubsub()
+
+    const updatedExportProfile = await uploadToProvider(
+      providerLabel,
+      id,
+      ctx.user,
+    )
+
+    pubsub.publish(EXPORT_PROFILE_UPDATED, {
+      exportProfileUpdated: updatedExportProfile.id,
+    })
+
+    return updatedExportProfile
+  } catch (e) {
+    logger.error(
+      `${EXPORT_PROFILE_RESOLVER} uploadToProviderHandler: ${e.message}`,
+    )
+    throw new Error(e)
+  }
+}
 
 module.exports = {
   Query: {
