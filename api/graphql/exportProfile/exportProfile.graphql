@@ -18,10 +18,12 @@ enum Format {
 type ProviderInfo {
   id: ID!
   externalProjectId: ID!
-  bookMetadataHash: String!
-  bookContentHash: String!
-  templateHash: String!
-  lastSync: Int!
+  bookMetadataHash: String
+  bookContentHash: String
+  templateHash: String
+  fileHash: String
+  lastSync: Int
+  inSync: Boolean
 }
 
 input ProviderInfoInput {
@@ -86,7 +88,7 @@ extend type Mutation {
   createExportProfile(input: CreateExportProfileInput!): ExportProfile!
   updateExportProfile(id: ID!, data: UpdateExportProfileInput!): ExportProfile!
   deleteExportProfile(id: ID!): ID!
-  uploadToProvider: ExportProfile!
+  uploadToProvider(id: ID!): ExportProfile!
 }
 
 extend type Subscription {

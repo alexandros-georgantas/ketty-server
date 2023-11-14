@@ -19,15 +19,9 @@ const trimSize = {
 const providerItem = {
   type: 'object',
   additionalProperties: false,
-  required: [
-    'id',
-    'externalProjectId',
-    'bookMetadataHash',
-    'bookContentHash',
-    'templateHash',
-  ],
+  required: ['providerLabel', 'externalProjectId'],
   properties: {
-    id,
+    providerLabel: stringNotEmpty,
     externalProjectId: id,
     bookMetadataHash: stringNotEmpty,
     bookContentHash: stringNotEmpty,

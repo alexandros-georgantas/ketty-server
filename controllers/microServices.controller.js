@@ -170,7 +170,7 @@ const pdfHandler = async (zipPath, outputPath, PDFFilename) => {
             res.data,
             'binary',
           )
-          return resolve()
+          return resolve(`${outputPath}/${PDFFilename}`)
         })
         .catch(async err => {
           const { response } = err

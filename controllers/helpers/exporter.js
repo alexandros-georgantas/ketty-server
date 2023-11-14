@@ -61,7 +61,6 @@ const ExporterService = async (
   fileExtension,
   icmlNotes,
   additionalExportOptions,
-  ctx,
 ) => {
   try {
     let template
@@ -91,7 +90,7 @@ const ExporterService = async (
     // The produced representation of the book holds two Map data types one
     // for the division and one for the book components of each division to
     // ensure the order of things
-    const book = await bookConstructor(bookId, templateHasEndnotes, ctx)
+    const book = await bookConstructor(bookId, templateHasEndnotes)
 
     const frontDivision = book.divisions.get('front')
     const backDivision = book.divisions.get('back')

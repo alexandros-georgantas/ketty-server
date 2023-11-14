@@ -1446,42 +1446,42 @@ const getBookTitle = async (bookId, options = {}) => {
   }
 }
 
-const updateAssociatedTemplates = async (
-  bookId,
-  associatedTemplates,
-  options = {},
-) => {
-  try {
-    const { trx } = options
-    return useTransaction(
-      async tr => {
-        const book = await Book.query().findById(bookId)
+// const updateAssociatedTemplates = async (
+//   bookId,
+//   associatedTemplates,
+//   options = {},
+// ) => {
+//   try {
+//     const { trx } = options
+//     return useTransaction(
+//       async tr => {
+//         const book = await Book.query().findById(bookId)
 
-        if (!book) {
-          throw new Error('Book not found')
-        }
+//         if (!book) {
+//           throw new Error('Book not found')
+//         }
 
-        const updatedBook = await Book.patchAndFetchById(
-          bookId,
-          {
-            associatedTemplates,
-          },
-          { trx: tr },
-        )
+//         const updatedBook = await Book.patchAndFetchById(
+//           bookId,
+//           {
+//             associatedTemplates,
+//           },
+//           { trx: tr },
+//         )
 
-        logger.info(
-          `${BOOK_CONTROLLER} updateAssociatedTemplates: book with id ${updatedBook.id} has updated associated templates`,
-        )
+//         logger.info(
+//           `${BOOK_CONTROLLER} updateAssociatedTemplates: book with id ${updatedBook.id} has updated associated templates`,
+//         )
 
-        return updatedBook
-      },
-      { trx },
-    )
-  } catch (e) {
-    logger.error(`${BOOK_CONTROLLER} updateAssociatedTemplates: ${e.message}`)
-    throw new Error(e)
-  }
-}
+//         return updatedBook
+//       },
+//       { trx },
+//     )
+//   } catch (e) {
+//     logger.error(`${BOOK_CONTROLLER} updateAssociatedTemplates: ${e.message}`)
+//     throw new Error(e)
+//   }
+// }
 
 const updateBookStatus = async (id, status, options = {}) => {
   try {
@@ -1586,7 +1586,7 @@ module.exports = {
   updateShowWelcome,
   finalizeBookStructure,
   getBookTitle,
-  updateAssociatedTemplates,
+  // updateAssociatedTemplates,
   updateBookStatus,
   getBookSubtitle,
   uploadBookThumbnail,
