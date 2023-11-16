@@ -11,6 +11,7 @@ const user = require('./user')
 const template = require('./template')
 const file = require('./file')
 const systemInfo = require('./systemInfo')
+const exportProfile = require('./exportProfile')
 
 module.exports = {
   typeDefs: [
@@ -26,6 +27,7 @@ module.exports = {
     user.typeDefs,
     template.typeDefs,
     systemInfo.typeDefs,
+    exportProfile.typeDefs,
   ].join(' '),
   resolvers: merge(
     {},
@@ -41,5 +43,6 @@ module.exports = {
     template.resolvers,
     user.resolvers,
     systemInfo.resolvers,
+    exportProfile.resolvers,
   ),
 }

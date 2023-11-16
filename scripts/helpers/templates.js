@@ -75,7 +75,7 @@ const createTemplate = async (sourceRoot, data, cssFile, notes) => {
       assetsRoot: t.assetsRoot.replace(/^\/+/, '').replace(/\/+$/, ''),
     }))
 
-    const { name, author, target, trimSize } = data
+    const { isDefault, name, author, target, trimSize } = data
 
     const foundTemplate = find(normalizedTemplates, {
       label: name.toLowerCase(),
@@ -130,6 +130,7 @@ const createTemplate = async (sourceRoot, data, cssFile, notes) => {
               author,
               target,
               trimSize,
+              default: isDefault,
               notes,
             },
             { trx },
