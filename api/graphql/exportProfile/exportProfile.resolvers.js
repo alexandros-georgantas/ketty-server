@@ -1,3 +1,4 @@
+const { withFilter } = require('graphql-subscriptions')
 const { pubsubManager, logger } = require('@coko/server')
 
 const { subscriptions, labels } = require('./constants')
@@ -8,6 +9,8 @@ const {
   createExportProfile,
   updateExportProfile,
   deleteExportProfile,
+  createLuluProject,
+  updateLuluProject,
   uploadToProvider,
 } = require('../../../controllers/exportProfile.controller')
 
@@ -108,6 +111,54 @@ const deleteExportProfileHandler = async (_, { id }) => {
   }
 }
 
+const createLuluProjectHandler = async (_, { exportProfileId }, ctx) => {
+  try {
+    logger.info(`${EXPORT_PROFILE_RESOLVER} createLuluProjectHandler`)
+
+    const pubsub = await pubsubManager.getPubsub()
+
+    const updatedExportProfile = await createLuluProject(
+      ctx.user,
+      exportProfileId,
+    )
+
+    pubsub.publish(EXPORT_PROFILE_DELETED, {
+      exportProfileUpdated: updatedExportProfile.id,
+    })
+
+    return updatedExportProfile
+  } catch (e) {
+    logger.error(
+      `${EXPORT_PROFILE_RESOLVER} createLuluProjectHandler: ${e.message}`,
+    )
+    throw new Error(e)
+  }
+}
+
+const updateLuluProjectHandler = async (_, { exportProfileId }, ctx) => {
+  try {
+    logger.info(`${EXPORT_PROFILE_RESOLVER} updateLuluProjectHandler`)
+
+    const pubsub = await pubsubManager.getPubsub()
+
+    const updatedExportProfile = await updateLuluProject(
+      ctx.user,
+      exportProfileId,
+    )
+
+    pubsub.publish(EXPORT_PROFILE_DELETED, {
+      exportProfileUpdated: updatedExportProfile.id,
+    })
+
+    return updatedExportProfile
+  } catch (e) {
+    logger.error(
+      `${EXPORT_PROFILE_RESOLVER} updateLuluProjectHandler: ${e.message}`,
+    )
+    throw new Error(e)
+  }
+}
+
 const uploadToProviderHandler = async (_, { providerLabel, id }, ctx) => {
   try {
     logger.info(`${EXPORT_PROFILE_RESOLVER} uploadToProviderHandler`)
@@ -142,6 +193,8 @@ module.exports = {
     createExportProfile: createExportProfileHandler,
     updateExportProfile: updateExportProfileHandler,
     deleteExportProfile: deleteExportProfileHandler,
+    createLuluProject: createLuluProjectHandler,
+    updateLuluProject: updateLuluProjectHandler,
     uploadToProvider: uploadToProviderHandler,
   },
   // ProviderInfo: {
@@ -158,9 +211,60 @@ module.exports = {
   // },
   Subscription: {
     exportProfileUpdated: {
-      subscribe: async () => {
+      subscribe: async (...args) => {
         const pubsub = await pubsubManager.getPubsub()
-        return pubsub.asyncIterator(EXPORT_PROFILE_UPDATED)
+
+        return withFilter(
+          () => {
+            return pubsub.asyncIterator(EXPORT_PROFILE_UPDATED)
+          },
+          async (payload, variables) => {
+            const { bookId } = variables
+            const { exportProfileUpdated: exportProfileId } = payload
+
+            const exportProfile = await getExportProfile(exportProfileId)
+
+            return bookId === exportProfile.bookId
+          },
+        )(...args)
+      },
+    },
+    exportProfileCreated: {
+      subscribe: async (...args) => {
+        const pubsub = await pubsubManager.getPubsub()
+
+        return withFilter(
+          () => {
+            return pubsub.asyncIterator(EXPORT_PROFILE_CREATED)
+          },
+          async (payload, variables) => {
+            const { bookId } = variables
+            const { exportProfileCreated: exportProfileId } = payload
+
+            const exportProfile = await getExportProfile(exportProfileId)
+
+            return bookId === exportProfile.bookId
+          },
+        )(...args)
+      },
+    },
+    exportProfileDeleted: {
+      subscribe: async (...args) => {
+        const pubsub = await pubsubManager.getPubsub()
+
+        return withFilter(
+          () => {
+            return pubsub.asyncIterator(EXPORT_PROFILE_DELETED)
+          },
+          async (payload, variables) => {
+            const { bookId } = variables
+            const { exportProfileDeleted: exportProfileId } = payload
+
+            const exportProfile = await getExportProfile(exportProfileId)
+
+            return bookId === exportProfile.bookId
+          },
+        )(...args)
       },
     },
   },

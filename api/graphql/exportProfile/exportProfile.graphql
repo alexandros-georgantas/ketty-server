@@ -62,10 +62,6 @@ input ExportProfileInput {
   providerInfo: [ProviderInfoInput]
 }
 
-extend type Query {
-  getExportProfile(id: ID!): ExportProfile!
-  getBookExportProfiles(bookId: ID!): ExportProfileResponse!
-}
 input CreateExportProfileInput {
   displayName: String!
   templateId: ID!
@@ -84,13 +80,22 @@ input UpdateExportProfileInput {
   trimSize: String
   providerInfo: [ProviderInfoInput]
 }
+extend type Query {
+  getExportProfile(id: ID!): ExportProfile!
+  getBookExportProfiles(bookId: ID!): ExportProfileResponse!
+}
+
 extend type Mutation {
   createExportProfile(input: CreateExportProfileInput!): ExportProfile!
   updateExportProfile(id: ID!, data: UpdateExportProfileInput!): ExportProfile!
   deleteExportProfile(id: ID!): ID!
+  createLuluProject(exportProfileId: ID!): ExportProfile!
+  updateLuluProject(exportProfileId: ID!): ExportProfile!
   uploadToProvider(providerLabel: String!, id: ID!): ExportProfile!
 }
 
 extend type Subscription {
   exportProfileUpdated(bookId: ID!): ID!
+  exportProfileCreated(bookId: ID!): ID!
+  exportProfileDeleted(bookId: ID!): ID!
 }
