@@ -11,6 +11,8 @@ const {
   uploadToProvider,
 } = require('../../../controllers/exportProfile.controller')
 
+// const generateBookHashes = require('../../../controllers/helpers/generateBookHashes')
+
 const {
   EXPORT_PROFILE_CREATED,
   EXPORT_PROFILE_UPDATED,
@@ -142,6 +144,18 @@ module.exports = {
     deleteExportProfile: deleteExportProfileHandler,
     uploadToProvider: uploadToProviderHandler,
   },
+  // ProviderInfo: {
+  //   async inSync(args, _, ctx) {
+  //     const bookHashes = await generateBookHashes(bookId, templateId)
+  //     const { contentHash, metadataHash, stylesheetHash } = bookHashes
+
+  //     return (
+  //       contentHash === bookContentHash &&
+  //       metadataHash === bookMetadataHash &&
+  //       stylesheetHash === templateHash
+  //     )
+  //   },
+  // },
   Subscription: {
     exportProfileUpdated: {
       subscribe: async () => {
