@@ -270,7 +270,7 @@ const decorateText = async (book, hasEndnotes) => {
   })
 }
 
-const generateTOCNCX = async (book, epubFolder, isbnIndex=0) => {
+const generateTOCNCX = async (book, epubFolder, isbnIndex = 0) => {
   const navPoints = []
   const { metadata, podMetadata } = book
   const { isbn, issn, issnL } = metadata
@@ -385,7 +385,7 @@ const generateTOCNCX = async (book, epubFolder, isbnIndex=0) => {
   return writeFile(`${epubFolder.oebps}/toc.ncx`, output)
 }
 
-const generateContentOPF = async (book, epubFolder, isbnIndex=0) => {
+const generateContentOPF = async (book, epubFolder, isbnIndex = 0) => {
   const { metadata, title, updated, podMetadata } = book
 
   const {
@@ -692,18 +692,30 @@ const cleaner = () => {
   xhtmls = []
 }
 
-const EPUBPreparation = async (book, template, EPUBtempFolderAssetsPath, withISBN) => {
+const EPUBPreparation = async (
+  book,
+  template,
+  EPUBtempFolderAssetsPath,
+  withISBN,
+) => {
   let isbnIndex = 0
-  if(withISBN) {
+
+  if (withISBN) {
     // Bind book to a specific ISBN in book.podMetadata
-    if(isEmpty(book.podMetadata?.isbns)) {
+    if (isEmpty(book.podMetadata?.isbns)) {
       throw new Error('Failed to export book with unconfigured ISBN metadata')
     }
-    isbnIndex = findIndex(book.podMetadata.isbns, item => item.isbn == withISBN.isbn && item.label == withISBN.label)
-    if(isbnIndex < 0) {
+
+    isbnIndex = findIndex(
+      book.podMetadata.isbns,
+      item => item.isbn === withISBN.isbn && item.label === withISBN.label,
+    )
+
+    if (isbnIndex < 0) {
       throw new Error('Failed to export book with unknown ISBN')
     }
   }
+
   try {
     const templateFiles = await template.getFiles()
     const hasEndnotes = template.notes === 'endnotes'
