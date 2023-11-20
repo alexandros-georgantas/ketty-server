@@ -965,6 +965,7 @@ const exportBook = async (
   fileExtension,
   icmlNotes,
   additionalExportOptions,
+  withISBN,
   options = {},
 ) => {
   try {
@@ -978,6 +979,7 @@ const exportBook = async (
           fileExtension,
           icmlNotes,
           additionalExportOptions,
+          withISBN,
         ),
       { trx, passedTrxOnly: true },
     )

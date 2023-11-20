@@ -122,6 +122,7 @@ input ExportBookInput {
   fileExtension: String
   icmlNotes: String
   additionalExportOptions: AdditionalExportOptionsInput
+  withISBN: ISBNInput
 }
 
 type ContentStructure {

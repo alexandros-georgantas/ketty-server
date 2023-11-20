@@ -5,7 +5,7 @@ const builder = require('xmlbuilder')
 const fs = require('fs-extra')
 const tidy = require('libtidy-updated')
 const mime = require('mime-types')
-const { get, isEmpty, map, filter, find, trim } = require('lodash')
+const { get, isEmpty, map, filter, find, findIndex, trim } = require('lodash')
 
 const config = require('config')
 
@@ -270,13 +270,13 @@ const decorateText = async (book, hasEndnotes) => {
   })
 }
 
-const generateTOCNCX = async (book, epubFolder) => {
+const generateTOCNCX = async (book, epubFolder, isbnIndex=0) => {
   const navPoints = []
   const { metadata, podMetadata } = book
   const { isbn, issn, issnL } = metadata
 
   const identifier =
-    isbn || get(podMetadata, ['isbns', 0, 'isbn']) || issn || issnL
+    isbn || get(podMetadata, ['isbns', isbnIndex, 'isbn']) || issn || issnL
 
   let counter = 0
   book.divisions.forEach(division => {
@@ -385,7 +385,7 @@ const generateTOCNCX = async (book, epubFolder) => {
   return writeFile(`${epubFolder.oebps}/toc.ncx`, output)
 }
 
-const generateContentOPF = async (book, epubFolder) => {
+const generateContentOPF = async (book, epubFolder, isbnIndex=0) => {
   const { metadata, title, updated, podMetadata } = book
 
   const {
@@ -531,7 +531,7 @@ const generateContentOPF = async (book, epubFolder) => {
       '@version': '3.0',
       '@unique-identifier': isEmpty(identifiers)
         ? 'BookId'
-        : `BookId${identifiers[0].idExtension}`,
+        : `BookId${identifiers[isbnIndex].idExtension}`,
       '@xml:lang': 'en',
       metadata: {
         '@xmlns:opf': 'http://www.idpf.org/2007/opf',
@@ -692,7 +692,18 @@ const cleaner = () => {
   xhtmls = []
 }
 
-const EPUBPreparation = async (book, template, EPUBtempFolderAssetsPath) => {
+const EPUBPreparation = async (book, template, EPUBtempFolderAssetsPath, withISBN) => {
+  let isbnIndex = 0
+  if(withISBN) {
+    // Bind book to a specific ISBN in book.podMetadata
+    if(isEmpty(book.podMetadata?.isbns)) {
+      throw new Error('Failed to export book with unconfigured ISBN metadata')
+    }
+    isbnIndex = findIndex(book.podMetadata.isbns, item => item.isbn == withISBN.isbn && item.label == withISBN.label)
+    if(isbnIndex < 0) {
+      throw new Error('Failed to export book with unknown ISBN')
+    }
+  }
   try {
     const templateFiles = await template.getFiles()
     const hasEndnotes = template.notes === 'endnotes'
@@ -707,8 +718,8 @@ const EPUBPreparation = async (book, template, EPUBtempFolderAssetsPath) => {
     await decorateText(book, hasEndnotes)
     await gatherTexts(book, epubFolder)
     await transferTexts(xhtmls)
-    await generateTOCNCX(book, epubFolder)
-    await generateContentOPF(book, epubFolder)
+    await generateTOCNCX(book, epubFolder, isbnIndex)
+    await generateContentOPF(book, epubFolder, isbnIndex)
     cleaner()
 
     return epubFolder.root

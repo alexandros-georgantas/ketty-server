@@ -285,6 +285,7 @@ const exportBookHandler = async (_, { input }, ctx) => {
     fileExtension,
     icmlNotes,
     additionalExportOptions = {},
+    withISBN = null,
   } = input
 
   logger.info('book resolver: executing exportBook use case')
@@ -296,6 +297,7 @@ const exportBookHandler = async (_, { input }, ctx) => {
     fileExtension,
     icmlNotes,
     additionalExportOptions,
+    withISBN,
   )
 }
 
