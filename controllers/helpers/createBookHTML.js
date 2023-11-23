@@ -1,15 +1,23 @@
 const cheerio = require('cheerio')
 
-const bookConstructor = require('./bookConstructor')
+// const bookConstructor = require('./bookConstructor')
 const { generatePagedjsContainer } = require('./htmlGenerators')
 
-const createBookHTML = async bookId => {
-  const book = await bookConstructor(bookId)
+const createBookHTML = async book => {
+  // const book = await bookConstructor(book.id)
+
+  // console.log('the book', book)
 
   book.divisions.forEach(division => {
+    // console.log('d comps', division.bookComponents)
+
     division.bookComponents.forEach(bookComponent => {
       const { content } = bookComponent
+      // console.log('before load')
+      // console.log(content)
       const $ = cheerio.load(content)
+
+      // console.log('before img')
 
       $('img').each((_, node) => {
         const $node = $(node)
@@ -22,6 +30,9 @@ const createBookHTML = async bookId => {
           }
         }
       })
+
+      // console.log('after img')
+
       $('figure').each((_, node) => {
         const $node = $(node)
         const srcExists = $node.attr('src')
@@ -34,9 +45,12 @@ const createBookHTML = async bookId => {
       bookComponent.content = $.html('body')
       /* eslint-enable no-param-reassign */
     })
+
+    // console.log('after fig')
   })
 
   const output = cheerio.load(generatePagedjsContainer(book.title))
+  // console.log('after output')
 
   book.divisions.forEach(division => {
     division.bookComponents.forEach(bc => {
@@ -44,6 +58,8 @@ const createBookHTML = async bookId => {
       output('body').append(content)
     })
   })
+
+  // console.log('before html')
 
   return output.html()
 }

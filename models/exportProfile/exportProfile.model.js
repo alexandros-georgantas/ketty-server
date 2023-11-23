@@ -2,7 +2,7 @@
 const objection = require('objection')
 
 const Base = require('../ketidaBase')
-const { id, stringNotEmpty, timestamp } = require('../helpers').schema
+const { id, stringNotEmpty, date } = require('../helpers').schema
 
 const format = {
   additionalProperties: false,
@@ -22,11 +22,11 @@ const providerItem = {
   required: ['providerLabel', 'externalProjectId'],
   properties: {
     providerLabel: stringNotEmpty,
-    externalProjectId: id,
+    externalProjectId: stringNotEmpty,
     bookMetadataHash: stringNotEmpty,
     bookContentHash: stringNotEmpty,
     templateHash: stringNotEmpty,
-    lastSync: timestamp,
+    lastSync: date,
   },
 }
 
@@ -35,12 +35,12 @@ const includedComponents = {
   additionalProperties: false,
   properties: {
     toc: { type: 'boolean', default: true },
-    copyrights: { type: 'boolean', default: true },
+    copyright: { type: 'boolean', default: true },
     titlePage: { type: 'boolean', default: true },
   },
   default: {
     toc: true,
-    copyrights: true,
+    copyright: true,
     titlePage: true,
   },
 }
@@ -81,36 +81,36 @@ class ExportProfile extends Base {
   }
 
   static async beforeUpdate({ asFindQuery, inputItems }) {
-    try {
-      const affectedItems = await asFindQuery().select('*')
+    const affectedItems = await asFindQuery().select('*')
 
-      affectedItems.forEach(item => {
-        const { format: itemFormat } = item
-        inputItems.forEach(input => {
-          const { trimSize: inputTrimSize } = input
+    affectedItems.forEach(item => {
+      const { format: currentFormat, trimSize: currentTrimSize } = item
 
-          if (itemFormat === 'epub') {
-            if (inputTrimSize) {
-              throw new objection.ValidationError({
-                message: 'trim size is only valid option for PDF format',
-                type: 'ValidationError',
-              })
-            }
+      inputItems.forEach(input => {
+        const { format: incomingFormat, trimSize: incomingTrimSize } = input
+
+        const finalFormat = incomingFormat || currentFormat
+        const finalTrimSize = incomingTrimSize || currentTrimSize
+
+        if (finalFormat === 'epub') {
+          if (finalTrimSize) {
+            throw new objection.ValidationError({
+              message: 'trim size is only valid option for PDF format',
+              type: 'ValidationError',
+            })
           }
+        }
 
-          if (itemFormat === 'pdf') {
-            if (!inputTrimSize) {
-              throw new objection.ValidationError({
-                message: 'trim size is required for PDF format',
-                type: 'ValidationError',
-              })
-            }
+        if (finalFormat === 'pdf') {
+          if (!finalTrimSize) {
+            throw new objection.ValidationError({
+              message: 'trim size is required for PDF format',
+              type: 'ValidationError',
+            })
           }
-        })
+        }
       })
-    } catch (e) {
-      throw new Error(e.message)
-    }
+    })
   }
 
   static get schema() {

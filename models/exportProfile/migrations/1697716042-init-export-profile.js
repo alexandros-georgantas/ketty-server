@@ -28,7 +28,7 @@ exports.up = async knex => {
       table
         .jsonb('includedComponents')
         .notNullable()
-        .defaultTo({ toc: true, copyrights: true, titlePage: true })
+        .defaultTo({ toc: true, copyright: true, titlePage: true })
       table
         .enu('format', ['epub', 'pdf'], {
           useNative: true,

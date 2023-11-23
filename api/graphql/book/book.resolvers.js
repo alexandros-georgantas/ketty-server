@@ -287,19 +287,16 @@ const exportBookHandler = async (_, { input }, ctx) => {
     additionalExportOptions = {},
   } = input
 
-  try {
-    logger.info('book resolver: executing exportBook use case')
-    return exportBook(
-      bookId,
-      templateId,
-      previewer,
-      fileExtension,
-      icmlNotes,
-      additionalExportOptions,
-    )
-  } catch (e) {
-    throw new Error(e)
-  }
+  logger.info('book resolver: executing exportBook use case')
+
+  return exportBook(
+    bookId,
+    templateId,
+    previewer,
+    fileExtension,
+    icmlNotes,
+    additionalExportOptions,
+  )
 }
 
 const updateRunningHeadersHandler = async (_, { input, bookId }, ctx) => {

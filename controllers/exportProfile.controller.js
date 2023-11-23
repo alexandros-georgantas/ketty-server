@@ -1,5 +1,12 @@
 const fs = require('fs')
-const { useTransaction, logger, authenticatedCall } = require('@coko/server')
+
+const {
+  useTransaction,
+  logger,
+  makeOAuthCall: authenticatedCall,
+} = require('@coko/server')
+
+const FormData = require('form-data')
 const config = require('config')
 const find = require('lodash/find')
 const findIndex = require('lodash/findIndex')
@@ -73,7 +80,7 @@ const createExportProfile = async (data, options = {}) => {
     logger.error(
       `${EXPORT_PROFILE_CONTROLLER} createExportProfile: ${e.message}`,
     )
-    throw new Error(e)
+    throw e
   }
 }
 
@@ -379,6 +386,194 @@ const uploadToProvider = async (
   }
 }
 
+const uploadToLulu = async (exportProfileId, userId, options = {}) => {
+  try {
+    // console.log('HELLO', exportProfileId)
+
+    logger.info(
+      `${EXPORT_PROFILE_CONTROLLER} uploadToProvider: uploading file on provider's end based on export profile with id ${exportProfileId}`,
+    )
+
+    const { trx } = options
+
+    const declaredClientUrl = config.has('clientUrl') && config.get('clientUrl')
+
+    if (!declaredClientUrl) {
+      throw new Error('Client url is missing from config')
+    }
+
+    const lulu =
+      config.has('integrations.lulu') && config.get('integrations.lulu')
+
+    if (!lulu) {
+      throw new Error('Lulu configuration is missing')
+    }
+
+    const { baseAPIURL } = lulu
+
+    if (!baseAPIURL) {
+      throw new Error('Lulu base api url is missing')
+    }
+
+    return useTransaction(
+      async tr => {
+        const exportProfile = await ExportProfile.findById(exportProfileId, {
+          trx: tr,
+        })
+
+        if (!exportProfile) {
+          throw new Error(
+            `export profile with id ${exportProfileId} does not exist`,
+          )
+        }
+
+        const { bookId, providerInfo, templateId, includedComponents, format } =
+          exportProfile
+
+        const bookTranslation = await BookTranslation.findOne(
+          { bookId, languageIso: 'en' },
+          { trx: tr },
+        )
+
+        if (!bookTranslation) {
+          throw new Error(
+            'book translation should exist before creating a project on Lulu',
+          )
+        }
+
+        const { title, subtitle } = bookTranslation
+
+        if (!title) {
+          throw new Error(
+            'book should have title before creating a project on Lulu',
+          )
+        }
+
+        const alreadyExists = find(providerInfo, { providerLabel: 'lulu' })
+
+        const commonData = {
+          headers: { 'Content-Type': 'application/json' },
+          data: {
+            language: 'eng',
+            project_type: 'PRINTED_BOOK',
+            ...(subtitle && { subtitle }),
+            title,
+            source_editor_url: `${declaredClientUrl}/books/${bookId}/producer`,
+          },
+        }
+
+        let data
+
+        if (!alreadyExists) {
+          data = {
+            ...commonData,
+            method: 'post',
+            url: `${baseAPIURL}/`,
+          }
+        } else {
+          data = {
+            ...commonData,
+            method: 'patch',
+            url: `${baseAPIURL}/${alreadyExists.externalProjectId}`,
+          }
+        }
+
+        const response = await authenticatedCall(userId, 'lulu', data)
+
+        if (!alreadyExists) {
+          // console.log(response)
+          const { id } = response.data
+
+          const providerItem = {
+            providerLabel: 'lulu',
+            externalProjectId: id,
+          }
+
+          providerInfo.push(providerItem)
+
+          // return ExportProfile.patchAndFetchById(exportProfileId, {
+          //   providerInfo,
+          // })
+        }
+
+        // console.log('hey')
+
+        // const bookHashes = await generateBookHashes(bookId, templateId)
+        // console.log('hey ya')
+
+        const { book, localPath: PDFPath } = await exporter(
+          bookId,
+          templateId,
+          undefined,
+          format,
+          undefined,
+          { includedComponents },
+        )
+
+        // console.log('hey boo')
+
+        const bookHashes = await generateBookHashes(book, templateId)
+
+        const fileMD5Hash = await generateHash(fs.createReadStream(PDFPath))
+        const form = new FormData()
+        form.append('file', fs.createReadStream(PDFPath))
+        form.append('file_md5', fileMD5Hash)
+
+        // console.log('bye')
+
+        const providerIndex = findIndex(providerInfo, { providerLabel: 'lulu' })
+
+        if (providerIndex === -1) {
+          throw new Error(`provider info undefined for provider lulu`)
+        }
+
+        const providerInfoClone = clone(providerInfo)
+
+        // // console.log('the form', form)
+
+        // console.log(providerInfo)
+
+        const callPayload = {
+          method: 'post',
+          url: `${baseAPIURL}/${providerInfo[providerIndex].externalProjectId}/interior/`,
+          headers: {
+            ...form.getHeaders(),
+          },
+          data: form,
+        }
+
+        await authenticatedCall(userId, 'lulu', callPayload)
+
+        // console.log('yo')
+
+        providerInfoClone[providerIndex].bookContentHash =
+          bookHashes.contentHash
+        providerInfoClone[providerIndex].bookContentHash =
+          bookHashes.metadataHash
+        providerInfoClone[providerIndex].templateHash =
+          bookHashes.stylesheetHash
+        // providerInfoClone[providerIndex].lastSync = new Date().getTime()
+        // providerInfoClone[providerIndex].lastSync = new Date().toUTCString()
+        providerInfoClone[providerIndex].lastSync = new Date() // LOOK
+
+        // console.log('providerInfo', providerInfo)
+
+        return ExportProfile.patchAndFetchById(
+          exportProfileId,
+          {
+            providerInfo: providerInfoClone,
+          },
+          { trx: tr },
+        )
+      },
+      { trx },
+    )
+  } catch (e) {
+    logger.error(`${EXPORT_PROFILE_CONTROLLER} uploadToProvider: ${e.message}`)
+    throw e
+  }
+}
+
 module.exports = {
   getExportProfile,
   getBookExportProfiles,
@@ -387,5 +582,6 @@ module.exports = {
   deleteExportProfile,
   createLuluProject,
   updateLuluProject,
+  uploadToLulu,
   uploadToProvider,
 }

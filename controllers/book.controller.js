@@ -983,7 +983,7 @@ const exportBook = async (
     )
   } catch (e) {
     logger.error(`${BOOK_CONTROLLER} exportBook: ${e.message}`)
-    throw new Error(e)
+    throw e
   }
 }
 

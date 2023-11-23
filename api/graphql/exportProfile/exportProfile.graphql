@@ -1,12 +1,12 @@
 type IncludedComponents {
   toc: Boolean!
-  copyrights: Boolean!
+  copyright: Boolean!
   titlePage: Boolean!
 }
 
 input IncludedComponentsInput {
   toc: Boolean!
-  copyrights: Boolean!
+  copyright: Boolean!
   titlePage: Boolean!
 }
 
@@ -16,23 +16,23 @@ enum Format {
 }
 
 type ProviderInfo {
-  id: ID!
+  id: String!
   externalProjectId: ID!
   bookMetadataHash: String
   bookContentHash: String
   templateHash: String
   fileHash: String
-  lastSync: Int
+  lastSync: Date
   inSync: Boolean
 }
 
 input ProviderInfoInput {
-  id: ID
+  id: String
   externalProjectId: ID
   bookMetadataHash: String
   bookContentHash: String
   templateHash: String
-  lastSync: Int
+  lastSync: Date
 }
 
 type ExportProfileResponse {
@@ -80,6 +80,7 @@ input UpdateExportProfileInput {
   trimSize: String
   providerInfo: [ProviderInfoInput]
 }
+
 extend type Query {
   getExportProfile(id: ID!): ExportProfile!
   getBookExportProfiles(bookId: ID!): ExportProfileResponse!
@@ -91,6 +92,7 @@ extend type Mutation {
   deleteExportProfile(id: ID!): ID!
   createLuluProject(exportProfileId: ID!): ExportProfile!
   updateLuluProject(exportProfileId: ID!): ExportProfile!
+  uploadToLulu(id: ID!): ExportProfile!
   uploadToProvider(providerLabel: String!, id: ID!): ExportProfile!
 }
 

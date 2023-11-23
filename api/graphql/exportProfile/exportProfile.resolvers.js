@@ -11,6 +11,7 @@ const {
   deleteExportProfile,
   createLuluProject,
   updateLuluProject,
+  uploadToLulu,
   uploadToProvider,
 } = require('../../../controllers/exportProfile.controller')
 
@@ -65,7 +66,7 @@ const createExportProfileHandler = async (_, { input }, ctx) => {
     logger.error(
       `${EXPORT_PROFILE_RESOLVER} createExportProfileHandler: ${e.message}`,
     )
-    throw new Error(e)
+    throw e
   }
 }
 
@@ -122,7 +123,7 @@ const createLuluProjectHandler = async (_, { exportProfileId }, ctx) => {
       exportProfileId,
     )
 
-    pubsub.publish(EXPORT_PROFILE_DELETED, {
+    pubsub.publish(EXPORT_PROFILE_UPDATED, {
       exportProfileUpdated: updatedExportProfile.id,
     })
 
@@ -146,7 +147,7 @@ const updateLuluProjectHandler = async (_, { exportProfileId }, ctx) => {
       exportProfileId,
     )
 
-    pubsub.publish(EXPORT_PROFILE_DELETED, {
+    pubsub.publish(EXPORT_PROFILE_UPDATED, {
       exportProfileUpdated: updatedExportProfile.id,
     })
 
@@ -184,6 +185,27 @@ const uploadToProviderHandler = async (_, { providerLabel, id }, ctx) => {
   }
 }
 
+const uploadToLuluHandler = async (_, { id }, ctx) => {
+  try {
+    logger.info(`${EXPORT_PROFILE_RESOLVER} uploadToLuluHandler`)
+
+    const updatedExportProfile = await uploadToLulu(id, ctx.user)
+
+    const pubsub = await pubsubManager.getPubsub()
+
+    pubsub.publish(EXPORT_PROFILE_UPDATED, {
+      exportProfileUpdated: updatedExportProfile.id,
+    })
+
+    return updatedExportProfile
+  } catch (e) {
+    logger.error(
+      `${EXPORT_PROFILE_RESOLVER} uploadToProviderHandler: ${e.message}`,
+    )
+    throw e
+  }
+}
+
 module.exports = {
   Query: {
     getExportProfile: getExportProfileHandler,
@@ -195,6 +217,7 @@ module.exports = {
     deleteExportProfile: deleteExportProfileHandler,
     createLuluProject: createLuluProjectHandler,
     updateLuluProject: updateLuluProjectHandler,
+    uploadToLulu: uploadToLuluHandler,
     uploadToProvider: uploadToProviderHandler,
   },
   // ProviderInfo: {

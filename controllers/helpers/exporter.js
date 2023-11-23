@@ -385,17 +385,19 @@ const ExporterService = async (
         await fs.remove(pagedJStempFolderAssetsPathForPDF)
         await fs.remove(zippedTempFolderFilePath)
 
+        const localPath = path.join(
+          uploadsDir,
+          'temp',
+          'paged',
+          PDFFileTimestamp,
+          PDFFilename,
+        )
+
         // pagedjs-cli
         return {
-          path: getURL(
-            path.join(
-              uploadsDir,
-              'temp',
-              'paged',
-              PDFFileTimestamp,
-              PDFFilename,
-            ),
-          ),
+          book,
+          localPath,
+          path: getURL(localPath),
           validationResult: undefined,
         }
       }
