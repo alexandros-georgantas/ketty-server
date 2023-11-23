@@ -16,7 +16,7 @@ enum Format {
 }
 
 type ProviderInfo {
-  id: String!
+  providerLabel: String!
   externalProjectId: ID!
   bookMetadataHash: String
   bookContentHash: String
@@ -27,7 +27,7 @@ type ProviderInfo {
 }
 
 input ProviderInfoInput {
-  id: String
+  providerLabel: String
   externalProjectId: ID
   bookMetadataHash: String
   bookContentHash: String

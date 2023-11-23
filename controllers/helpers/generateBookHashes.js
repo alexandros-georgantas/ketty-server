@@ -12,12 +12,18 @@ const { download } = fileStorage
 
 const createBookHTML = require('./createBookHTML')
 const generateHash = require('./generateHash')
+const prepareBook = require('./prepareBook')
 
 const uploadsDir = get(config, ['pubsweet-server', 'uploads'], 'uploads')
 
-const generateBookHashes = async (book, templateId) => {
+const generateBookHashes = async (
+  bookId,
+  templateId,
+  format,
+  includedComponents,
+) => {
   const template = await Template.findById(templateId)
-  // const book = await Book.findById(book.id)
+  const book = await Book.findById(bookId)
 
   if (!template) {
     throw new Error(`template with id ${templateId} does not exist`)
@@ -46,26 +52,23 @@ const generateBookHashes = async (book, templateId) => {
 
   const tempStylesheetPath = path.join(dir, stylesheetFilename)
 
-  // console.log('1')
-
   await fs.ensureDir(dir)
-  // console.log('2')
+
   await download(stylesheet.key, tempStylesheetPath)
-  // console.log('3')
 
-  const x = fs.readFileSync(tempStylesheetPath)
-  // console.log('3.1')
-
-  const stylesheetHash = await generateHash(x)
-  // console.log('4')
+  const stylesheetHash = await generateHash(fs.readFileSync(tempStylesheetPath))
 
   await fs.remove(tempStylesheetPath)
-  // console.log('5')
 
-  const bookHTML = await createBookHTML(book)
-  // console.log('6')
+  const preparedBook = await prepareBook(bookId, template, {
+    fileExtension: format,
+    includeTOC: includedComponents.toc,
+    includeCopyrights: includedComponents.copyright,
+    includeTitlePage: includedComponents.titlePage,
+  })
+
+  const bookHTML = await createBookHTML(preparedBook)
   const contentHash = await generateHash(bookHTML)
-  // console.log('7')
   const metadataHash = await generateHash(JSON.stringify(book.podMetadata))
   // console.log('8')
 

@@ -388,8 +388,6 @@ const uploadToProvider = async (
 
 const uploadToLulu = async (exportProfileId, userId, options = {}) => {
   try {
-    // console.log('HELLO', exportProfileId)
-
     logger.info(
       `${EXPORT_PROFILE_CONTROLLER} uploadToProvider: uploading file on provider's end based on export profile with id ${exportProfileId}`,
     )
@@ -474,14 +472,13 @@ const uploadToLulu = async (exportProfileId, userId, options = {}) => {
           data = {
             ...commonData,
             method: 'patch',
-            url: `${baseAPIURL}/${alreadyExists.externalProjectId}`,
+            url: `${baseAPIURL}/${alreadyExists.externalProjectId}/`,
           }
         }
 
         const response = await authenticatedCall(userId, 'lulu', data)
 
         if (!alreadyExists) {
-          // console.log(response)
           const { id } = response.data
 
           const providerItem = {
@@ -496,30 +493,30 @@ const uploadToLulu = async (exportProfileId, userId, options = {}) => {
           // })
         }
 
-        // console.log('hey')
-
-        // const bookHashes = await generateBookHashes(bookId, templateId)
-        // console.log('hey ya')
-
-        const { book, localPath: PDFPath } = await exporter(
+        const { localPath: PDFPath } = await exporter(
           bookId,
           templateId,
           undefined,
           format,
           undefined,
-          { includedComponents },
+          {
+            includeTitlePage: includedComponents.titlePage,
+            includeTOC: includedComponents.toc,
+            includeCopyrights: includedComponents.copyright,
+          },
         )
 
-        // console.log('hey boo')
-
-        const bookHashes = await generateBookHashes(book, templateId)
+        const bookHashes = await generateBookHashes(
+          bookId,
+          templateId,
+          format,
+          includedComponents,
+        )
 
         const fileMD5Hash = await generateHash(fs.createReadStream(PDFPath))
         const form = new FormData()
         form.append('file', fs.createReadStream(PDFPath))
         form.append('file_md5', fileMD5Hash)
-
-        // console.log('bye')
 
         const providerIndex = findIndex(providerInfo, { providerLabel: 'lulu' })
 
@@ -528,10 +525,6 @@ const uploadToLulu = async (exportProfileId, userId, options = {}) => {
         }
 
         const providerInfoClone = clone(providerInfo)
-
-        // // console.log('the form', form)
-
-        // console.log(providerInfo)
 
         const callPayload = {
           method: 'post',
@@ -544,8 +537,6 @@ const uploadToLulu = async (exportProfileId, userId, options = {}) => {
 
         await authenticatedCall(userId, 'lulu', callPayload)
 
-        // console.log('yo')
-
         providerInfoClone[providerIndex].bookContentHash =
           bookHashes.contentHash
         providerInfoClone[providerIndex].bookContentHash =
@@ -555,8 +546,6 @@ const uploadToLulu = async (exportProfileId, userId, options = {}) => {
         // providerInfoClone[providerIndex].lastSync = new Date().getTime()
         // providerInfoClone[providerIndex].lastSync = new Date().toUTCString()
         providerInfoClone[providerIndex].lastSync = new Date() // LOOK
-
-        // console.log('providerInfo', providerInfo)
 
         return ExportProfile.patchAndFetchById(
           exportProfileId,
