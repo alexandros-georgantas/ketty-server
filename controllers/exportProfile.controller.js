@@ -1,4 +1,5 @@
 const fs = require('fs')
+const moment = require('moment')
 
 const {
   useTransaction,
@@ -539,13 +540,11 @@ const uploadToLulu = async (exportProfileId, userId, options = {}) => {
 
         providerInfoClone[providerIndex].bookContentHash =
           bookHashes.contentHash
-        providerInfoClone[providerIndex].bookContentHash =
+        providerInfoClone[providerIndex].bookMetadataHash =
           bookHashes.metadataHash
         providerInfoClone[providerIndex].templateHash =
           bookHashes.stylesheetHash
-        // providerInfoClone[providerIndex].lastSync = new Date().getTime()
-        // providerInfoClone[providerIndex].lastSync = new Date().toUTCString()
-        providerInfoClone[providerIndex].lastSync = new Date() // LOOK
+        providerInfoClone[providerIndex].lastSync = moment().utc().toDate()
 
         return ExportProfile.patchAndFetchById(
           exportProfileId,

@@ -15,7 +15,7 @@ const {
   uploadToProvider,
 } = require('../../../controllers/exportProfile.controller')
 
-// const generateBookHashes = require('../../../controllers/helpers/generateBookHashes')
+const generateBookHashes = require('../../../controllers/helpers/generateBookHashes')
 
 const {
   EXPORT_PROFILE_CREATED,
@@ -206,6 +206,46 @@ const uploadToLuluHandler = async (_, { id }, ctx) => {
   }
 }
 
+/**
+ * Pass variables to the nested resolver (without affecting gql schema)
+ */
+const providerInfoHandler = parent => {
+  return parent.providerInfo.map(p => ({
+    ...p,
+    templateId: parent.templateId,
+    bookId: parent.bookId,
+    format: parent.format,
+    includedComponents: parent.includedComponents,
+  }))
+}
+
+const projectInSync = async (parent, _, ctx, info) => {
+  const {
+    bookId,
+    templateId,
+    format,
+    includedComponents,
+    bookContentHash,
+    bookMetadataHash,
+    templateHash,
+  } = parent
+
+  const bookHashes = await generateBookHashes(
+    bookId,
+    templateId,
+    format,
+    includedComponents,
+  )
+
+  const { contentHash, metadataHash, stylesheetHash } = bookHashes
+
+  return (
+    contentHash === bookContentHash &&
+    metadataHash === bookMetadataHash &&
+    stylesheetHash === templateHash
+  )
+}
+
 module.exports = {
   Query: {
     getExportProfile: getExportProfileHandler,
@@ -220,18 +260,12 @@ module.exports = {
     uploadToLulu: uploadToLuluHandler,
     uploadToProvider: uploadToProviderHandler,
   },
-  // ProviderInfo: {
-  //   async inSync(args, _, ctx) {
-  //     const bookHashes = await generateBookHashes(bookId, templateId)
-  //     const { contentHash, metadataHash, stylesheetHash } = bookHashes
-
-  //     return (
-  //       contentHash === bookContentHash &&
-  //       metadataHash === bookMetadataHash &&
-  //       stylesheetHash === templateHash
-  //     )
-  //   },
-  // },
+  ExportProfile: {
+    providerInfo: providerInfoHandler,
+  },
+  ProviderInfo: {
+    inSync: projectInSync,
+  },
   Subscription: {
     exportProfileUpdated: {
       subscribe: async (...args) => {

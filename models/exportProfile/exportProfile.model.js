@@ -5,15 +5,11 @@ const Base = require('../ketidaBase')
 const { id, stringNotEmpty, date } = require('../helpers').schema
 
 const format = {
-  additionalProperties: false,
-  type: 'string',
   enum: ['epub', 'pdf'],
 }
 
 const trimSize = {
-  additionalProperties: false,
-  type: ['string', null],
-  enum: ['8.5x11', '6x9', '5.5x8.5'],
+  enum: ['8.5x11', '6x9', '5.5x8.5', null],
 }
 
 const providerItem = {

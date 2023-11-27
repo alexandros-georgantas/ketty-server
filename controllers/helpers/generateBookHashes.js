@@ -69,7 +69,14 @@ const generateBookHashes = async (
 
   const bookHTML = await createBookHTML(preparedBook)
   const contentHash = await generateHash(bookHTML)
-  const metadataHash = await generateHash(JSON.stringify(book.podMetadata))
+
+  const metadataHash = await generateHash(
+    JSON.stringify({
+      ...book.podMetadata,
+      title: preparedBook.title,
+      subtitle: preparedBook.subtitle,
+    }),
+  )
   // console.log('8')
 
   return { contentHash, metadataHash, stylesheetHash }
