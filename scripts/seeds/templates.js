@@ -103,10 +103,17 @@ const seedTemplates = async () => {
         )
 
         if (get(target, 'epub.file')) {
+          const foundTemplateConfig = find(normalizedTemplates, {
+            label: name.toLowerCase(),
+          })
+
+          const shouldBeDefault = foundTemplateConfig?.default || false
+
           const epubData = {
             name,
             author,
             target: 'epub',
+            isDefault: shouldBeDefault,
           }
 
           logger.info('EPUB Templates')

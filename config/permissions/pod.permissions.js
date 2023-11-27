@@ -600,6 +600,17 @@ const updateSubtitleRule = rule()(async (parent, { id: bookId }, ctx, info) => {
   }
 })
 
+const getBookExportProfilesRule = rule()(async (_, { bookId }, ctx, __) => {
+  try {
+    const { user: userId } = ctx
+    if (!userId) return false
+
+    return canInteractWithBookAndRelevantAssets(userId, bookId)
+  } catch (e) {
+    throw new Error(e.message)
+  }
+})
+
 const teamRule = rule()(async (parent, { id: teamId }, ctx, info) => {
   try {
     const { user: userId } = ctx
@@ -662,6 +673,30 @@ const uploadBookThumbnailRule = rule()(
   },
 )
 
+const uploadToLuluRule = rule()(async (_, { id: exportProfileId }, ctx) => {
+  try {
+    const { user: userId } = ctx
+    if (!userId) return false
+
+    const isAuthenticatedUser = await isAuthenticated(userId)
+
+    if (!isAuthenticatedUser) {
+      return false
+    }
+
+    /* eslint-disable global-require */
+    const ExportProfile = require('../../models/exportProfile/exportProfile.model')
+    /* eslint-enable global-require */
+    const exportProfile = await ExportProfile.findById(exportProfileId)
+
+    const { bookId } = exportProfile
+
+    return isOwner(userId, bookId)
+  } catch (e) {
+    throw new Error(e.message)
+  }
+})
+
 const permissions = {
   Query: {
     '*': deny,
@@ -671,7 +706,7 @@ const permissions = {
     getBook: getBookRule,
     getBookComponent: getBookComponentRule,
     getBooks: isAuthenticatedRule,
-    getBookExportProfiles: isAuthenticatedRule, // LOOK
+    getBookExportProfiles: getBookExportProfilesRule,
     getObjectTeams: getObjectTeamsRule,
     getPagedPreviewerLink: isAuthenticatedRule,
     getSpecificTemplates: isAuthenticatedRule,
@@ -712,7 +747,7 @@ const permissions = {
     updateTrackChanges: updateTrackChangesRule,
     uploadBookThumbnail: uploadBookThumbnailRule,
     uploadFiles: uploadFilesRules,
-    uploadToLulu: isAuthenticated, // LOOK
+    uploadToLulu: uploadToLuluRule,
     verifyEmail: allow,
   },
 }
