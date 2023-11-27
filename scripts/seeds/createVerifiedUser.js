@@ -7,13 +7,18 @@ const User = require('../../models/user/user.model')
 ;(async () => {
   try {
     const email = process.argv[2]
-    const username = process.argv[3]
+    // const username = process.argv[3]
+    const givenNames = process.argv[3]
+    const surname = process.argv[4]
+    const username = process.argv[5]
 
     const newUser = await User.insert({
-      username,
-      password: 'Password@123',
+      // username: 'user',
+      password: 'Test@123',
       agreedTc: true,
       isActive: true,
+      givenNames,
+      surname,
     })
 
     // eslint-disable-next-line no-console
