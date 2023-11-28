@@ -1,3 +1,19 @@
+# [1.13.0](https://gitlab.coko.foundation/ketida/server/compare/v1.12.4...v1.13.0) (2023-11-28)
+
+
+### Bug Fixes
+
+* deterministic id for h2 ([01f7688](https://gitlab.coko.foundation/ketida/server/commit/01f7688228fbea56c8840cea11dea6f4c90927f0))
+* lulu connection ([61725e7](https://gitlab.coko.foundation/ketida/server/commit/61725e770ee5ea93c6f932c4b00f3ea3ab6f725c))
+
+
+### Features
+
+* add insync value to lulu profile ([3e1a976](https://gitlab.coko.foundation/ketida/server/commit/3e1a976331df453dd1e9c9f13f5fe972c3449bf4))
+* export profile models with tests and graphql init ([54c126e](https://gitlab.coko.foundation/ketida/server/commit/54c126e567b543bdc8fa4c9aab926bd9c4514e58))
+* **models:** export profile model added ([cb6b7f1](https://gitlab.coko.foundation/ketida/server/commit/cb6b7f14bacab5ea52334e64d43a4c56c3fa2422))
+* upload to external providers init ([f3a7aaf](https://gitlab.coko.foundation/ketida/server/commit/f3a7aaff843d3dfbd8785ed19cddb3a2c7ccff2d))
+
 ## [1.12.4](https://gitlab.coko.foundation/ketida/server/compare/v1.12.3...v1.12.4) (2023-11-01)
 
 
