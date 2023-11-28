@@ -176,7 +176,7 @@ const modifyBooksInDashboardRule = rule()(
   },
 )
 
-const updateAssociatedTemplatesRule = rule()(
+const interactWithExportProfileRule = rule()(
   async (parent, { bookId }, ctx, info) => {
     try {
       const { user: userId } = ctx
@@ -600,6 +600,17 @@ const updateSubtitleRule = rule()(async (parent, { id: bookId }, ctx, info) => {
   }
 })
 
+const getBookExportProfilesRule = rule()(async (_, { bookId }, ctx, __) => {
+  try {
+    const { user: userId } = ctx
+    if (!userId) return false
+
+    return canInteractWithBookAndRelevantAssets(userId, bookId)
+  } catch (e) {
+    throw new Error(e.message)
+  }
+})
+
 const teamRule = rule()(async (parent, { id: teamId }, ctx, info) => {
   try {
     const { user: userId } = ctx
@@ -662,6 +673,30 @@ const uploadBookThumbnailRule = rule()(
   },
 )
 
+const uploadToLuluRule = rule()(async (_, { id: exportProfileId }, ctx) => {
+  try {
+    const { user: userId } = ctx
+    if (!userId) return false
+
+    const isAuthenticatedUser = await isAuthenticated(userId)
+
+    if (!isAuthenticatedUser) {
+      return false
+    }
+
+    /* eslint-disable global-require */
+    const ExportProfile = require('../../models/exportProfile/exportProfile.model')
+    /* eslint-enable global-require */
+    const exportProfile = await ExportProfile.findById(exportProfileId)
+
+    const { bookId } = exportProfile
+
+    return isOwner(userId, bookId)
+  } catch (e) {
+    throw new Error(e.message)
+  }
+})
+
 const permissions = {
   Query: {
     '*': deny,
@@ -671,6 +706,7 @@ const permissions = {
     getBook: getBookRule,
     getBookComponent: getBookComponentRule,
     getBooks: isAuthenticatedRule,
+    getBookExportProfiles: getBookExportProfilesRule,
     getObjectTeams: getObjectTeamsRule,
     getPagedPreviewerLink: isAuthenticatedRule,
     getSpecificTemplates: isAuthenticatedRule,
@@ -679,36 +715,40 @@ const permissions = {
   },
   Mutation: {
     '*': deny,
-    signUp: allow,
-    ketidaLogin: allow,
-    verifyEmail: allow,
-    ketidaRequestVerificationEmail: allow,
-    sendPasswordResetEmail: allow,
-    resetPassword: allow,
     addTeamMembers: addTeamMembersRule,
-    updateTeamMemberStatus: updateTeamMemberStatusRule,
     createBook: createBookRule,
-    renameBook: renameBookRule,
-    updateSubtitle: updateSubtitleRule,
+    createExportProfile: interactWithExportProfileRule,
+    createOAuthIdentity: isAuthenticatedRule,
     deleteBook: modifyBooksInDashboardRule,
-    updatePODMetadata: updateMetadataRule,
+    deleteExportProfile: interactWithExportProfileRule,
     exportBook: exportBookRule,
     ingestWordFile: ingestWordFileRule,
-    setBookComponentStatus: setBookComponentStatusRule,
-    podAddBookComponent: addBookComponentRule,
-    renameBookComponent: renameBookComponentRule,
-    podDeleteBookComponent: deleteBookComponentRule,
-    unlockBookComponent: unlockBookComponentRule,
+    ketidaLogin: allow,
+    ketidaRequestVerificationEmail: allow,
     lockBookComponent: interactWithBookComponentRule,
+    podAddBookComponent: addBookComponentRule,
+    podDeleteBookComponent: deleteBookComponentRule,
     podLockBookComponent: interactWithBookComponentRule,
-    updateTrackChanges: updateTrackChangesRule,
-    updateContent: updateContentRule,
-    updateBookComponentsOrder: updateBookComponentOrderRule,
-    updateAssociatedTemplates: updateAssociatedTemplatesRule,
-    uploadFiles: uploadFilesRules,
     removeTeamMember: isAuthenticatedRule,
+    renameBook: renameBookRule,
+    renameBookComponent: renameBookComponentRule,
+    resetPassword: allow,
     searchForUsers: isAuthenticatedRule,
+    sendPasswordResetEmail: allow,
+    setBookComponentStatus: setBookComponentStatusRule,
+    signUp: allow,
+    unlockBookComponent: unlockBookComponentRule,
+    updateBookComponentsOrder: updateBookComponentOrderRule,
+    updateContent: updateContentRule,
+    updateExportProfile: interactWithExportProfileRule,
+    updatePODMetadata: updateMetadataRule,
+    updateSubtitle: updateSubtitleRule,
+    updateTeamMemberStatus: updateTeamMemberStatusRule,
+    updateTrackChanges: updateTrackChangesRule,
     uploadBookThumbnail: uploadBookThumbnailRule,
+    uploadFiles: uploadFilesRules,
+    uploadToLulu: uploadToLuluRule,
+    verifyEmail: allow,
   },
 }
 

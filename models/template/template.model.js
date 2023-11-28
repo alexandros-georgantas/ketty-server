@@ -2,8 +2,14 @@ const { Model } = require('objection')
 const remove = require('lodash/remove')
 const Base = require('../ketidaBase')
 
-const { id, stringNotEmpty, string, targetType, notesType } =
-  require('../helpers').schema
+const {
+  id,
+  stringNotEmpty,
+  string,
+  targetType,
+  notesType,
+  booleanDefaultFalse,
+} = require('../helpers').schema
 
 class Template extends Base {
   constructor(properties) {
@@ -26,6 +32,7 @@ class Template extends Base {
         author: string,
         target: targetType,
         trimSize: string,
+        default: booleanDefaultFalse,
         exportScripts: {
           type: ['object', 'array'],
         },

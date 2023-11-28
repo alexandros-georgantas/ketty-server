@@ -1,6 +1,5 @@
-const { db } = require('@coko/server')
+const { db } = require('@pubsweet/db-manager')
 
 module.exports = async () => {
-  await db.raw('DROP SCHEMA public CASCADE;CREATE SCHEMA public;')
-  return db.destroy()
+  db.destroy()
 }

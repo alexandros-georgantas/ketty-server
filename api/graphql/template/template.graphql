@@ -21,6 +21,7 @@ type Template {
   trimSize: String
   target: String
   notes: String
+  default: Boolean
   files: [File]!
   exportScripts: [ExportScript]!
 }

@@ -1,31 +1,24 @@
-const { db } = require('@coko/server')
-const isEmpty = require('lodash/isEmpty')
-const remove = require('lodash/remove')
+const { db } = require('@pubsweet/db-manager')
 
 const dbCleaner = async () => {
-  try {
-    const query = await db.raw(
-      `SELECT tablename FROM pg_tables WHERE schemaname='public'`,
+  const query = await db.raw(
+    `SELECT tablename FROM pg_tables WHERE schemaname='public'`,
+  )
+
+  const { rows } = query
+
+  if (rows.length > 0) {
+    await Promise.all(
+      rows.map(async row => {
+        const { tablename } = row
+
+        if (tablename !== 'migrations') {
+          await db.raw(`TRUNCATE TABLE ${tablename} CASCADE`)
+        }
+
+        return true
+      }),
     )
-
-    const { rows } = query
-
-    if (!isEmpty(rows)) {
-      const cleanedRows = rows
-      remove(rows, row => row.tablename === 'migrations')
-
-      await Promise.all(
-        cleanedRows.map(async row => {
-          const { tablename } = row
-
-          return db.raw(`TRUNCATE TABLE ${tablename} CASCADE`)
-        }),
-      )
-    }
-
-    return true
-  } catch (e) {
-    throw new Error(e)
   }
 }
 

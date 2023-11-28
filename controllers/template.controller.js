@@ -164,9 +164,9 @@ const createTemplate = async (
 
         logger.info(`>>> new template created with id ${newTemplate.id}`)
 
-        if (files.length > 0) {
+        if (files?.length > 0) {
           logger.info(
-            `>> there is/are ${files.length} file/s to be uploaded for the template`,
+            `>> there is/are ${files?.length} file/s to be uploaded for the template`,
           )
           await Promise.all(
             map(files, async file => {

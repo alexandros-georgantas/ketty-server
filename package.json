@@ -31,15 +31,16 @@
   },
   "resolutions": {
     "objection": "^2.2.15",
-    "pg": "8"
+    "pg": "8",
+    "axios": "1.6"
   },
   "dependencies": {
-    "@coko/server": "^3.0.1",
+    "@coko/server": "^3.2.3",
     "@pubsweet/component-password-reset-server": "^2.2.26",
     "@pubsweet/db-manager": "3.1.26",
     "@pubsweet/models": "^0.3.26",
     "archiver": "^3.1.1",
-    "axios": "^0.17.1",
+    "axios": "^1.6.2",
     "bluebird": "^3.7.2",
     "cheerio": "^1.0.0-rc.2",
     "config": "^3.2.5",
@@ -56,6 +57,7 @@
     "lodash": "4.17.21",
     "mathjax-node": "^2.1.1",
     "mime-types": "^2.1.24",
+    "moment": "^2.29.4",
     "objection": "^2.2.15",
     "pubsweet": "^5.1.31",
     "ws": "^8.12.0",

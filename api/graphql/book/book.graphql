@@ -19,33 +19,33 @@ type Book {
   title: String
   subtitle: String
   podMetadata: PODMetadata
-  associatedTemplates: AssociatedTemplates
+  # associatedTemplates: AssociatedTemplates
   status: Int
   thumbnailId: ID
   thumbnailURL: String
 }
 
-type AssociatedTemplates {
-  pagedjs: [PreviewerConfiguration!]
-  epub: PreviewerConfiguration
-}
+# type AssociatedTemplates {
+#   pagedjs: [PreviewerConfiguration!]
+#   epub: PreviewerConfiguration
+# }
 
-type PreviewerConfiguration {
-  templateId: ID
-  trimSize: String
-  additionalExportOptions: AdditionalExportOptions
-}
+# type PreviewerConfiguration {
+#   templateId: ID
+#   trimSize: String
+#   additionalExportOptions: AdditionalExportOptions
+# }
 
-input AssociatedTemplatesInput {
-  pagedjs: [PreviewerConfigurationInput!]
-  epub: PreviewerConfigurationInput
-}
+# input AssociatedTemplatesInput {
+#   pagedjs: [PreviewerConfigurationInput!]
+#   epub: PreviewerConfigurationInput
+# }
 
-input PreviewerConfigurationInput {
-  templateId: ID!
-  trimSize: String
-  additionalExportOptions: AdditionalExportOptionsInput!
-}
+# input PreviewerConfigurationInput {
+#   templateId: ID!
+#   trimSize: String
+#   additionalExportOptions: AdditionalExportOptionsInput!
+# }
 
 type LicenseTypes {
   NC: Boolean
@@ -248,10 +248,10 @@ extend type Mutation {
   updateShowWelcome(bookId: ID!): Book!
   finalizeBookStructure(bookId: ID!): ID!
   exportBook(input: ExportBookInput!): ExportResult!
-  updateAssociatedTemplates(
-    bookId: ID!
-    associatedTemplates: AssociatedTemplatesInput!
-  ): Book!
+  # updateAssociatedTemplates(
+  #   bookId: ID!
+  #   associatedTemplates: AssociatedTemplatesInput!
+  # ): Book!
   updateBookStatus(bookId: ID!, status: Int!): Book!
   uploadBookThumbnail(bookId: ID!, file: Upload!): Book!
 }
