@@ -1,5 +1,9 @@
+const config = require('config')
+
 const featureAIEnabled =
   (process.env.AI_ENABLED && JSON.parse(process.env.AI_ENABLED)) || false
+
+const integrations = config.has('integrations') && config.get('integrations')
 
 module.exports = {
   instance: 'KETIDA_V2',
@@ -131,4 +135,5 @@ module.exports = {
   lockTrackChangesWhenReviewing: false,
   aiEnabled: featureAIEnabled,
   heartbeatInterval: process.env.WS_HEARTBEAT_INTERVAL || 5000,
+  integrations,
 }

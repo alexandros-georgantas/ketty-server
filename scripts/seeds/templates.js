@@ -15,6 +15,7 @@ const seedTemplates = async () => {
       ? config.get('templates').map(t => ({
           label: t.label.toLowerCase(),
           url: t.url,
+          default: t.default || false,
           assetsRoot: t.assetsRoot.replace(/^\/+/, '').replace(/\/+$/, ''),
           supportedNoteTypes: t.supportedNoteTypes,
         }))
@@ -81,11 +82,18 @@ const seedTemplates = async () => {
               target.pagedjs.map(async data => {
                 const { trimSize, file } = data
 
+                const foundTemplateConfig = find(normalizedTemplates, {
+                  label: name.toLowerCase(),
+                })
+
+                const shouldBeDefault = foundTemplateConfig?.default || false
+
                 const pagedData = {
                   name: name.toLowerCase(),
                   author,
                   target: 'pagedjs',
                   trimSize,
+                  isDefault: shouldBeDefault,
                 }
 
                 return createTemplate(sourceRoot, pagedData, file, noteType)
@@ -95,10 +103,17 @@ const seedTemplates = async () => {
         )
 
         if (get(target, 'epub.file')) {
+          const foundTemplateConfig = find(normalizedTemplates, {
+            label: name.toLowerCase(),
+          })
+
+          const shouldBeDefault = foundTemplateConfig?.default || false
+
           const epubData = {
             name,
             author,
             target: 'epub',
+            isDefault: shouldBeDefault,
           }
 
           logger.info('EPUB Templates')
