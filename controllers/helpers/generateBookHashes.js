@@ -77,7 +77,6 @@ const generateBookHashes = async (
       subtitle: preparedBook.subtitle,
     }),
   )
-  // console.log('8')
 
   return { contentHash, metadataHash, stylesheetHash }
 }

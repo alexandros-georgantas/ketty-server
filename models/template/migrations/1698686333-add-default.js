@@ -23,8 +23,6 @@ exports.up = async knex => {
 
     const defaultTemplate = find(normalizedTemplates, { default: true })
 
-    // console.log('eeeeee', defaultTemplate)
-
     if (defaultTemplate) {
       await Template.query()
         .patch({ default: true })
