@@ -1,7 +1,6 @@
 const hljs = require('highlight.js')
 const cheerio = require('cheerio')
 const find = require('lodash/find')
-const { uuid } = require('@coko/server')
 const config = require('config')
 
 module.exports = (
@@ -394,7 +393,7 @@ module.exports = (
     if ($elem.text() === '') {
       $elem.remove()
     } else {
-      const headingId = `comp-number-${bookComponent.id}_${uuid()}`
+      const headingId = `comp-number-${bookComponent.id}_h2_${i}`
       $elem.attr('id', headingId)
       h2s.push({ text: $elem.text(), id: headingId })
     }
