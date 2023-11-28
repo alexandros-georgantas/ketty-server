@@ -177,7 +177,41 @@ const modifyBooksInDashboardRule = rule()(
 )
 
 const interactWithExportProfileRule = rule()(
-  async (parent, { bookId }, ctx, info) => {
+  async (parent, { id }, ctx, info) => {
+    try {
+      const { user: userId } = ctx
+      if (!userId) return false
+
+      const isAuthenticatedUser = await isAuthenticated(userId)
+
+      if (!isAuthenticatedUser) {
+        return false
+      }
+
+      /* eslint-disable global-require */
+      const ExportProfile = require('../../models/exportProfile/exportProfile.model')
+      /* eslint-enable global-require */
+      const exportProfile = await ExportProfile.findById(id)
+
+      const { bookId } = exportProfile
+
+      const belongsToAdminTeam = await isAdmin(userId)
+
+      if (belongsToAdminTeam) {
+        return true
+      }
+
+      const belongsToBookOwnerTeam = await isOwner(userId, bookId)
+
+      return belongsToBookOwnerTeam
+    } catch (e) {
+      throw new Error(e.message)
+    }
+  },
+)
+
+const createExportProfileRule = rule()(
+  async (parent, { input: { bookId } }, ctx, info) => {
     try {
       const { user: userId } = ctx
       if (!userId) return false
@@ -717,7 +751,7 @@ const permissions = {
     '*': deny,
     addTeamMembers: addTeamMembersRule,
     createBook: createBookRule,
-    createExportProfile: interactWithExportProfileRule,
+    createExportProfile: createExportProfileRule,
     createOAuthIdentity: isAuthenticatedRule,
     deleteBook: modifyBooksInDashboardRule,
     deleteExportProfile: interactWithExportProfileRule,
