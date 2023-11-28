@@ -1,3 +1,10 @@
+## [1.13.1](https://gitlab.coko.foundation/ketida/server/compare/v1.13.0...v1.13.1) (2023-11-28)
+
+
+### Bug Fixes
+
+* **api/graphql:** export permissions fix ([9a254ff](https://gitlab.coko.foundation/ketida/server/commit/9a254fffa113a0df61999f74dd51ff595bf47225))
+
 # [1.13.0](https://gitlab.coko.foundation/ketida/server/compare/v1.12.4...v1.13.0) (2023-11-28)
 
 
