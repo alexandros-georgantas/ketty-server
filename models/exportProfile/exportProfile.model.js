@@ -78,7 +78,6 @@ class ExportProfile extends Base {
 
   static async beforeUpdate({ asFindQuery, inputItems }) {
     const affectedItems = await asFindQuery().select('*')
-
     affectedItems.forEach(item => {
       const { format: currentFormat, trimSize: currentTrimSize } = item
 
@@ -86,7 +85,9 @@ class ExportProfile extends Base {
         const { format: incomingFormat, trimSize: incomingTrimSize } = input
 
         const finalFormat = incomingFormat || currentFormat
-        const finalTrimSize = incomingTrimSize || currentTrimSize
+
+        const finalTrimSize =
+          incomingTrimSize === undefined ? currentTrimSize : incomingTrimSize
 
         if (finalFormat === 'epub') {
           if (finalTrimSize) {
