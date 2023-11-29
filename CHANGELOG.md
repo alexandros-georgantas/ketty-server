@@ -1,3 +1,10 @@
+## [1.13.2](https://gitlab.coko.foundation/ketida/server/compare/v1.13.1...v1.13.2) (2023-11-29)
+
+
+### Bug Fixes
+
+* **models:** trimsize null is valid option ([eccbfa0](https://gitlab.coko.foundation/ketida/server/commit/eccbfa0045416cc5335c209f91d081444d4b5718))
+
 ## [1.13.1](https://gitlab.coko.foundation/ketida/server/compare/v1.13.0...v1.13.1) (2023-11-28)
 
 
