@@ -1,3 +1,10 @@
+## [1.13.3](https://gitlab.coko.foundation/ketida/server/compare/v1.13.2...v1.13.3) (2023-11-30)
+
+
+### Bug Fixes
+
+* always fetch new template css and create thumbnail ([2b1d67b](https://gitlab.coko.foundation/ketida/server/commit/2b1d67be7b658c680db950a29c8945d912c105ac))
+
 ## [1.13.2](https://gitlab.coko.foundation/ketida/server/compare/v1.13.1...v1.13.2) (2023-11-29)
 
 
