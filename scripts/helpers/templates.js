@@ -7,11 +7,17 @@ const config = require('config')
 const map = require('lodash/map')
 const find = require('lodash/find')
 
+const {
+  connectToFileStorage,
+} = require('@coko/server/src/services/fileStorage')
+
 const Template = require('../../models/template/template.model')
 
-const { createFile } = require('../../controllers/file.controller')
+const { createFile, deleteFiles } = require('../../controllers/file.controller')
 
 const { dirContents } = require('../../utilities/filesystem')
+
+const File = require('../../models/file/file.model')
 
 const execute = async command =>
   new Promise((resolve, reject) => {
@@ -75,7 +81,7 @@ const createTemplate = async (sourceRoot, data, cssFile, notes) => {
       assetsRoot: t.assetsRoot.replace(/^\/+/, '').replace(/\/+$/, ''),
     }))
 
-    const { isDefault, name, author, target, trimSize } = data
+    const { isDefault, name, author, target, trimSize, thumbnailFile } = data
 
     const foundTemplate = find(normalizedTemplates, {
       label: name.toLowerCase(),
@@ -182,15 +188,124 @@ const createTemplate = async (sourceRoot, data, cssFile, notes) => {
             )
           }
 
+          const thumbnailPath = path.join(assetsRoot, thumbnailFile)
+
+          if (fs.existsSync(thumbnailPath)) {
+            // const absoluteThumbnailPath = path.join(cssPath, cssFile)
+
+            const thumbnail = await createFile(
+              fs.createReadStream(thumbnailPath),
+              thumbnailFile,
+              null,
+              null,
+              [],
+              newTemplate.id,
+              {
+                trx,
+                // forceObjectKeyValue: `templates/${newTemplate.id}/${thumbnailFile}`,
+              },
+            )
+
+            await Template.patchAndFetchById(
+              newTemplate.id,
+              { thumbnailId: thumbnail.id },
+              { trx },
+            )
+          }
+
           return true
         },
         { trx: undefined },
       )
     }
 
-    logger.info(`Template with name ${name} (${notes}) already exists`)
+    return useTransaction(
+      async trx => {
+        // logger.info('About to create a new template')
 
-    return true
+        // logger.info(`Template created with id ${templateExists.id}`)
+
+        const files = await File.find({ objectId: templateExists.id }, { trx })
+
+        const fileIds = files.result.map(file => file.id)
+
+        await connectToFileStorage()
+
+        logger.info(
+          `deleting files with ids ${fileIds} associated with template id ${templateExists.id}`,
+        )
+        await deleteFiles(fileIds, true, { trx })
+
+        const fontsPath = path.join(assetsRoot, 'fonts')
+
+        if (fs.existsSync(fontsPath)) {
+          const contents = await dirContents(fontsPath)
+
+          await Promise.all(
+            contents.map(async font => {
+              const absoluteFontPath = path.join(fontsPath, font)
+
+              return createFile(
+                fs.createReadStream(absoluteFontPath),
+                font,
+                null,
+                null,
+                [],
+                templateExists.id,
+                {
+                  trx,
+                  forceObjectKeyValue: `templates/${templateExists.id}/${font}`,
+                },
+              )
+            }),
+          )
+        }
+
+        const cssPath = path.join(assetsRoot, 'css')
+
+        if (fs.existsSync(cssPath)) {
+          const absoluteCSSPath = path.join(cssPath, cssFile)
+
+          await createFile(
+            fs.createReadStream(absoluteCSSPath),
+            cssFile,
+            null,
+            null,
+            [],
+            templateExists.id,
+            {
+              trx,
+              forceObjectKeyValue: `templates/${templateExists.id}/${cssFile}`,
+            },
+          )
+        }
+
+        const thumbnailPath = path.join(assetsRoot, thumbnailFile)
+
+        if (fs.existsSync(thumbnailPath)) {
+          const thumbnail = await createFile(
+            fs.createReadStream(thumbnailPath),
+            thumbnailFile,
+            null,
+            null,
+            [],
+            templateExists.id,
+            {
+              trx,
+            },
+          )
+
+          await Template.patchAndFetchById(
+            templateExists.id,
+            { thumbnailId: thumbnail.id },
+            { trx },
+          )
+        }
+
+        return true
+      },
+      { trx: undefined },
+    )
   } catch (e) {
     throw new Error(e)
   }
