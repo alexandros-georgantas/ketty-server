@@ -51,7 +51,7 @@ const seedTemplates = async () => {
         const raw = fs.readFileSync(path.join(sourceRoot, 'template.json'))
         const manifest = JSON.parse(raw)
 
-        const { name, author, target } = manifest
+        const { name, author, target, thumbnailFile } = manifest
 
         const templateConfig = find(normalizedTemplates, {
           label: name.toLowerCase(),
@@ -86,6 +86,8 @@ const seedTemplates = async () => {
                   label: name.toLowerCase(),
                 })
 
+                // console.log('here1', foundTemplateConfig, thumbnailFile)
+
                 const shouldBeDefault = foundTemplateConfig?.default || false
 
                 const pagedData = {
@@ -93,6 +95,7 @@ const seedTemplates = async () => {
                   author,
                   target: 'pagedjs',
                   trimSize,
+                  thumbnailFile,
                   isDefault: shouldBeDefault,
                 }
 
@@ -114,6 +117,7 @@ const seedTemplates = async () => {
             author,
             target: 'epub',
             isDefault: shouldBeDefault,
+            thumbnailFile,
           }
 
           logger.info('EPUB Templates')
