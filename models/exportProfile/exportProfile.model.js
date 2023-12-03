@@ -123,6 +123,7 @@ class ExportProfile extends Base {
         format,
         trimSize,
         providerInfo,
+        isbn: stringNotEmpty,
       },
     }
   }

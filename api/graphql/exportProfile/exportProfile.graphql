@@ -49,6 +49,7 @@ type ExportProfile {
   format: Format!
   trimSize: String
   providerInfo: [ProviderInfo!]!
+  isbn: String
 }
 
 input ExportProfileInput {
@@ -60,6 +61,7 @@ input ExportProfileInput {
   format: Format!
   trimSize: String
   providerInfo: [ProviderInfoInput]
+  isbn: String
 }
 
 input CreateExportProfileInput {
@@ -70,6 +72,7 @@ input CreateExportProfileInput {
   format: Format!
   trimSize: String
   providerInfo: [ProviderInfoInput]
+  isbn: String
 }
 
 input UpdateExportProfileInput {
@@ -79,6 +82,7 @@ input UpdateExportProfileInput {
   format: Format
   trimSize: String
   providerInfo: [ProviderInfoInput]
+  isbn: String
 }
 
 extend type Query {

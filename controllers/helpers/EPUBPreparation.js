@@ -707,8 +707,7 @@ const EPUBPreparation = async (
     }
 
     isbnIndex = findIndex(
-      book.podMetadata.isbns,
-      item => item.isbn === withISBN.isbn && item.label === withISBN.label,
+      book.podMetadata.isbns, item => item.isbn === withISBN,
     )
 
     if (isbnIndex < 0) {
