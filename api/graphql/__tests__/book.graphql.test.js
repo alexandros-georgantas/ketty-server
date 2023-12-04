@@ -59,7 +59,6 @@ describe('Book GraphQL Query', () => {
     publicationDate
     subtitle
     podMetadata{isbns{isbn, label}}
-    associatedTemplates{epub{templateId}}
     status
     title
     thumbnailId
@@ -70,7 +69,6 @@ describe('Book GraphQL Query', () => {
     expect(res.errors).toBe(undefined)
     expect(_.sortBy(Object.keys(bookData))).toEqual([
       'archived',
-      'associatedTemplates',
       'authors',
       'bookStructure',
       'collectionId',
@@ -300,7 +298,6 @@ describe('Book GraphQL Query', () => {
     publicationDate
     subtitle
     podMetadata{isbns{isbn, label}}
-    associatedTemplates{epub{templateId}}
     status
     title
     thumbnailId
@@ -313,7 +310,6 @@ describe('Book GraphQL Query', () => {
     expect(bookData.id).toEqual(bookId)
     expect(_.sortBy(Object.keys(bookData))).toEqual([
       'archived',
-      'associatedTemplates',
       'authors',
       'bookStructure',
       'collectionId',

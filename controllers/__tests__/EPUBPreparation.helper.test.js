@@ -78,14 +78,18 @@ describe('Book HTML Generator', () => {
 
   it('renders the TOC using the podMetadata isbns', async () => {
     book.metadata.isbn = null
-    const $ = cheerio.load(await generateTOCNCX(book, false), { xmlMode: true })
+    const isbnIndex = 1 // 978-3-16-148410-2
+
+    const $ = cheerio.load(await generateTOCNCX(book, false, isbnIndex), {
+      xmlMode: true,
+    })
 
     // Validate meta data
     let meta = $('ncx > head > meta')
     expect(meta.length).toEqual(4)
     // uid should be the first isbn in podMetadata.isbns
     meta = $('ncx > head > meta[name="dtb:uid"]')
-    expect(meta.attr('content')).toEqual('urn:isbn:978-3-16-148410-1')
+    expect(meta.attr('content')).toEqual('urn:isbn:978-3-16-148410-2')
     meta = $('ncx > head > meta[name="dtb:depth"]')
     expect(meta.attr('content')).toEqual('1')
     meta = $('ncx > head > meta[name="dtb:totalPageCount"]')
@@ -161,13 +165,14 @@ describe('Book HTML Generator', () => {
 
   it('renders the OPF using the podMetadata isbns', async () => {
     book.metadata.isbn = null
+    const isbnIndex = 1 // Softcover, 978-3-16-148410-2
 
-    const $ = cheerio.load(await generateContentOPF(book, false), {
+    const $ = cheerio.load(await generateContentOPF(book, false, isbnIndex), {
       xmlMode: true,
     })
 
     // "BookId-Hardcover" is the unique identifier; this is the first ISBN
-    expect($('package').attr('unique-identifier')).toEqual('BookId-Hardcover')
+    expect($('package').attr('unique-identifier')).toEqual('BookId-Softcover')
 
     // package.metadata, package.manifest, package.spine
     expect($('package').children().length).toEqual(3)
