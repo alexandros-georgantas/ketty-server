@@ -81,7 +81,6 @@ const RESTEndpoints = app => {
         bookUpdated: belongingBook.id,
       })
     } catch (error) {
-      // the service will not care if something went wrong in Ketida
       const pubsub = await pubsubManager.getPubsub()
       const { body } = req
 
@@ -92,7 +91,6 @@ const RESTEndpoints = app => {
         await updateUploading(bookComponentId, false)
         await setStatus(bookComponentId, STATUSES.CONVERSION_ERROR)
 
-        // await deleteBookComponent(bookComp)
         const belongingBook = await Book.findById(bookComp.bookId)
 
         pubsub.publish(BOOK_COMPONENT_UPDATED, {
@@ -104,7 +102,7 @@ const RESTEndpoints = app => {
         })
       }
 
-      // throw something which will only be displayed in server's logs
+      // log error
       logger.error(error)
     }
   })
