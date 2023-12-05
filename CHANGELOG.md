@@ -1,3 +1,11 @@
+# [1.14.0](https://gitlab.coko.foundation/ketida/server/compare/v1.13.3...v1.14.0) (2023-12-05)
+
+
+### Bug Fixes
+
+* **server:** delete book in processing crashes app ([bc46b9a](https://gitlab.coko.foundation/ketida/server/commit/bc46b9acf9117ffb8d2bc149fba71bc89dede66f))
+* **server:** delete book in processing crashes app ([61c94d5](https://gitlab.coko.foundation/ketida/server/commit/61c94d529f300253573403c728ab5e5e763e9315))
+
 ## [1.13.3](https://gitlab.coko.foundation/ketida/server/compare/v1.13.2...v1.13.3) (2023-11-30)
 
 
