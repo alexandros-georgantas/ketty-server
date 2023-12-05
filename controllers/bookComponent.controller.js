@@ -1,5 +1,5 @@
 const { logger, useTransaction } = require('@coko/server')
-const { raw } = require('objection')
+const { NotFoundError, raw } = require('objection')
 const config = require('config')
 const findIndex = require('lodash/findIndex')
 const find = require('lodash/find')
@@ -26,29 +26,26 @@ const { isEmptyString } = require('../utilities/generic')
 const { isAdmin } = require('./user.controller')
 
 const getBookComponent = async (bookComponentId, options = {}) => {
-  try {
-    const { trx } = options
-    logger.info(`>>> fetching book component with id ${bookComponentId}`)
+  const { trx } = options
+  logger.info(`>>> fetching book component with id ${bookComponentId}`)
 
-    const bookComponent = await useTransaction(
-      async tr =>
-        BookComponent.findOne(
-          { id: bookComponentId, deleted: false },
-          { trx: tr },
-        ),
-      { trx, passedTrxOnly: true },
-    )
+  const bookComponent = await useTransaction(
+    async tr =>
+      BookComponent.findOne(
+        { id: bookComponentId, deleted: false },
+        { trx: tr },
+      ),
+    { trx, passedTrxOnly: true },
+  )
 
-    if (!bookComponent) {
-      throw new Error(
-        `book component with id: ${bookComponentId} does not exist`,
-      )
-    }
-
-    return bookComponent
-  } catch (e) {
-    throw new Error(e)
+  if (!bookComponent) {
+    throw new NotFoundError({
+      message: `book component with id: ${bookComponentId} does not exist`,
+      data: { BookComponentId: bookComponentId },
+    })
   }
+
+  return bookComponent
 }
 
 const getBookComponentAndAcquireLock = async (

@@ -1,4 +1,4 @@
-const { logger } = require('@coko/server')
+const { logger, useTransaction } = require('@coko/server')
 const find = require('lodash/find')
 const get = require('lodash/get')
 const path = require('path')
@@ -37,106 +37,110 @@ const seedTemplates = async () => {
     }
 
     const fetchedTemplates = await fs.readdir(templatesFolder)
-
-    await Promise.all(
-      fetchedTemplates.map(async templateFolder => {
-        const sourceRoot = path.join(
-          __dirname,
-          '..',
-          '..',
-          'templates',
-          templateFolder,
-        )
-
-        const raw = fs.readFileSync(path.join(sourceRoot, 'template.json'))
-        const manifest = JSON.parse(raw)
-
-        const { name, author, target, thumbnailFile } = manifest
-
-        const templateConfig = find(normalizedTemplates, {
-          label: name.toLowerCase(),
-        })
-
-        if (!templateConfig) {
-          return
-        }
-
-        logger.info('******* Create Templates script is starting ********')
-
-        if (
-          !templateConfig.supportedNoteTypes ||
-          templateConfig.supportedNoteTypes.length === 0
-        ) {
-          throw new Error(
-            'supportedNoteTypes is required for the creation of templates, please check your templates config',
+    await useTransaction(async trx =>
+      Promise.all(
+        fetchedTemplates.map(async templateFolder => {
+          const sourceRoot = path.join(
+            __dirname,
+            '..',
+            '..',
+            'templates',
+            templateFolder,
           )
-        }
 
-        const { supportedNoteTypes } = templateConfig
+          const raw = fs.readFileSync(path.join(sourceRoot, 'template.json'))
+          const manifest = JSON.parse(raw)
 
-        logger.info('PagedJS Templates')
+          const { name, author, target, thumbnailFile } = manifest
 
-        await Promise.all(
-          supportedNoteTypes.map(async noteType => {
-            return Promise.all(
-              target.pagedjs.map(async data => {
-                const { trimSize, file } = data
-
-                const foundTemplateConfig = find(normalizedTemplates, {
-                  label: name.toLowerCase(),
-                })
-
-                // console.log('here1', foundTemplateConfig, thumbnailFile)
-
-                const shouldBeDefault = foundTemplateConfig?.default || false
-
-                const pagedData = {
-                  name: name.toLowerCase(),
-                  author,
-                  target: 'pagedjs',
-                  trimSize,
-                  thumbnailFile,
-                  isDefault: shouldBeDefault,
-                }
-
-                return createTemplate(sourceRoot, pagedData, file, noteType)
-              }),
-            )
-          }),
-        )
-
-        if (get(target, 'epub.file')) {
-          const foundTemplateConfig = find(normalizedTemplates, {
+          const templateConfig = find(normalizedTemplates, {
             label: name.toLowerCase(),
           })
 
-          const shouldBeDefault = foundTemplateConfig?.default || false
-
-          const epubData = {
-            name,
-            author,
-            target: 'epub',
-            isDefault: shouldBeDefault,
-            thumbnailFile,
+          if (!templateConfig) {
+            return
           }
 
-          logger.info('EPUB Templates')
-          await Promise.all(
-            supportedNoteTypes.map(async noteType =>
-              createTemplate(
-                sourceRoot,
-                epubData,
-                get(target, 'epub.file'),
-                noteType,
-              ),
-            ),
-          )
-        }
+          logger.info('******* Create Templates script is starting ********')
 
-        logger.info(
-          '******* Create Templates script finished successfully ********',
-        )
-      }),
+          if (
+            !templateConfig.supportedNoteTypes ||
+            templateConfig.supportedNoteTypes.length === 0
+          ) {
+            throw new Error(
+              'supportedNoteTypes is required for the creation of templates, please check your templates config',
+            )
+          }
+
+          const { supportedNoteTypes } = templateConfig
+
+          logger.info('PagedJS Templates')
+
+          await Promise.all(
+            supportedNoteTypes.map(async noteType => {
+              return Promise.all(
+                target.pagedjs.map(async data => {
+                  const { trimSize, file } = data
+
+                  const foundTemplateConfig = find(normalizedTemplates, {
+                    label: name.toLowerCase(),
+                  })
+
+                  // console.log('here1', foundTemplateConfig, thumbnailFile)
+
+                  const shouldBeDefault = foundTemplateConfig?.default || false
+
+                  const pagedData = {
+                    name: name.toLowerCase(),
+                    author,
+                    target: 'pagedjs',
+                    trimSize,
+                    thumbnailFile,
+                    isDefault: shouldBeDefault,
+                  }
+
+                  return createTemplate(sourceRoot, pagedData, file, noteType, {
+                    trx,
+                  })
+                }),
+              )
+            }),
+          )
+
+          if (get(target, 'epub.file')) {
+            const foundTemplateConfig = find(normalizedTemplates, {
+              label: name.toLowerCase(),
+            })
+
+            const shouldBeDefault = foundTemplateConfig?.default || false
+
+            const epubData = {
+              name,
+              author,
+              target: 'epub',
+              isDefault: shouldBeDefault,
+              thumbnailFile,
+            }
+
+            logger.info('EPUB Templates')
+            await Promise.all(
+              supportedNoteTypes.map(async noteType =>
+                createTemplate(
+                  sourceRoot,
+                  epubData,
+                  get(target, 'epub.file'),
+                  noteType,
+                  { trx },
+                ),
+              ),
+            )
+          }
+
+          logger.info(
+            '******* Create Templates script finished successfully ********',
+          )
+        }),
+      ),
     )
     await fs.remove(templatesFolder)
     logger.info('******* Templates folder removed ********')

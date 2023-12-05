@@ -1,4 +1,4 @@
-const { logger } = require('@coko/server')
+const { logger, useTransaction } = require('@coko/server')
 const config = require('config')
 const Team = require('../../models/team/team.model')
 
@@ -11,28 +11,34 @@ const seedGlobalTeams = async () => {
     }
 
     const configGlobalTeams = config.get('teams.global')
+    return useTransaction(async trx =>
+      Promise.all(
+        Object.keys(configGlobalTeams).map(async k => {
+          const teamData = configGlobalTeams[k]
 
-    await Promise.all(
-      Object.keys(configGlobalTeams).map(async k => {
-        const teamData = configGlobalTeams[k]
+          const exists = await Team.findOne(
+            {
+              global: true,
+              role: teamData.role,
+            },
+            { trx },
+          )
 
-        const exists = await Team.findOne({
-          global: true,
-          role: teamData.role,
-        })
+          if (exists) {
+            logger.info(`Global team "${teamData.role}" already exists`)
+            return false
+          }
 
-        if (exists) {
-          logger.info(`Global team "${teamData.role}" already exists`)
-          return
-        }
-
-        await Team.insert({
-          ...teamData,
-          global: true,
-        })
-
-        logger.info(`Added global team "${teamData.role}"`)
-      }),
+          logger.info(`Added global team "${teamData.role}"`)
+          return Team.insert(
+            {
+              ...teamData,
+              global: true,
+            },
+            { trx },
+          )
+        }),
+      ),
     )
   } catch (err) {
     throw new Error(err)

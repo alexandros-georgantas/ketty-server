@@ -3,6 +3,7 @@ const fs = require('fs-extra')
 const config = require('config')
 const mime = require('mime-types')
 const get = require('lodash/get')
+const { NotFoundError } = require('objection')
 
 const uploadsDir = get(config, ['pubsweet-server', 'uploads'], 'uploads')
 const { readFile } = require('../../utilities/filesystem')
@@ -80,27 +81,28 @@ const RESTEndpoints = app => {
         bookUpdated: belongingBook.id,
       })
     } catch (error) {
-      // the service will not care if something went wrong in Ketida
       const pubsub = await pubsubManager.getPubsub()
       const { body } = req
 
       const { objectId: bookComponentId } = body
 
-      const bookComp = await getBookComponent(bookComponentId)
-      await updateUploading(bookComponentId, false)
-      await setStatus(bookComponentId, STATUSES.CONVERSION_ERROR)
+      if (!(error instanceof NotFoundError)) {
+        const bookComp = await getBookComponent(bookComponentId)
+        await updateUploading(bookComponentId, false)
+        await setStatus(bookComponentId, STATUSES.CONVERSION_ERROR)
 
-      // await deleteBookComponent(bookComp)
-      const belongingBook = await Book.findById(bookComp.bookId)
+        const belongingBook = await Book.findById(bookComp.bookId)
 
-      pubsub.publish(BOOK_COMPONENT_UPDATED, {
-        bookComponentUpdated: bookComponentId,
-      })
+        pubsub.publish(BOOK_COMPONENT_UPDATED, {
+          bookComponentUpdated: bookComponentId,
+        })
 
-      pubsub.publish(BOOK_UPDATED, {
-        bookUpdated: belongingBook.id,
-      })
-      // throw something which will only be displayed in server's logs
+        pubsub.publish(BOOK_UPDATED, {
+          bookUpdated: belongingBook.id,
+        })
+      }
+
+      // log error
       logger.error(error)
     }
   })

@@ -30,58 +30,54 @@ const fileStorageImageGatherer = book => {
 }
 
 const xsweetImagesHandler = async (content, bookComponentId) => {
-  try {
-    const { bookId } = await getBookComponent(bookComponentId)
+  const { bookId } = await getBookComponent(bookComponentId)
 
-    if (!bookId) {
-      throw new Error(`book with id ${bookId} does not exists`)
-    }
-
-    const imageMapper = {}
-    const imageToFileMapper = {}
-
-    if (content && content.length > 0) {
-      const $ = cheerio.load(content)
-      // first run aggregate
-      $('img').each((_, elem) => {
-        const $elem = $(elem)
-        const src = $elem.attr('src')
-
-        if (src && src.includes('data:image') && src.includes('base64')) {
-          const pseudoId = uuid()
-          $elem.attr('pseudo-id', pseudoId)
-          imageMapper[pseudoId] = src
-        }
-      })
-
-      await Promise.all(
-        Object.keys(imageMapper).map(async imageId => {
-          const file = await recreateImageFromBlob(imageMapper[imageId], bookId)
-          imageToFileMapper[imageId] = file.id
-          return true
-        }),
-      ).catch(e => {
-        throw new Error(e.message)
-      })
-
-      // second run replace
-      $('img').each((_, elem) => {
-        const $elem = $(elem)
-        const pseudoId = $elem.attr('pseudo-id')
-
-        if (pseudoId) {
-          $elem.attr('data-fileid', imageToFileMapper[pseudoId])
-          $elem.removeAttr('pseudo-id')
-          $elem.removeAttr('src')
-        }
-      })
-      return $('body').html()
-    }
-
-    return content
-  } catch (e) {
-    throw new Error(e.message)
+  if (!bookId) {
+    throw new Error(`book with id ${bookId} does not exists`)
   }
+
+  const imageMapper = {}
+  const imageToFileMapper = {}
+
+  if (content && content.length > 0) {
+    const $ = cheerio.load(content)
+    // first run aggregate
+    $('img').each((_, elem) => {
+      const $elem = $(elem)
+      const src = $elem.attr('src')
+
+      if (src && src.includes('data:image') && src.includes('base64')) {
+        const pseudoId = uuid()
+        $elem.attr('pseudo-id', pseudoId)
+        imageMapper[pseudoId] = src
+      }
+    })
+
+    await Promise.all(
+      Object.keys(imageMapper).map(async imageId => {
+        const file = await recreateImageFromBlob(imageMapper[imageId], bookId)
+        imageToFileMapper[imageId] = file.id
+        return true
+      }),
+    ).catch(e => {
+      throw new Error(e.message)
+    })
+
+    // second run replace
+    $('img').each((_, elem) => {
+      const $elem = $(elem)
+      const pseudoId = $elem.attr('pseudo-id')
+
+      if (pseudoId) {
+        $elem.attr('data-fileid', imageToFileMapper[pseudoId])
+        $elem.removeAttr('pseudo-id')
+        $elem.removeAttr('src')
+      }
+    })
+    return $('body').html()
+  }
+
+  return content
 }
 
 const imageFinder = (content, fileId) => {
