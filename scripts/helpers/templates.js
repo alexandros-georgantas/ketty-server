@@ -1,4 +1,4 @@
-const { logger, useTransaction } = require('@coko/server')
+const { logger } = require('@coko/server')
 const { exec } = require('child_process')
 const fs = require('fs-extra')
 const path = require('path')
@@ -68,8 +68,16 @@ const filesChecker = async folder => {
   return !everythingChecked.includes(false)
 }
 
-const createTemplate = async (sourceRoot, data, cssFile, notes) => {
+const createTemplate = async (
+  sourceRoot,
+  data,
+  cssFile,
+  notes,
+  options = {},
+) => {
   try {
+    const { trx } = options
+
     const featurePODEnabled =
       config.has('featurePOD') &&
       ((config.get('featurePOD') && JSON.parse(config.get('featurePOD'))) ||
@@ -126,186 +134,176 @@ const createTemplate = async (sourceRoot, data, cssFile, notes) => {
     }
 
     if (!templateExists) {
-      return useTransaction(
-        async trx => {
-          logger.info('About to create a new template')
+      logger.info('About to create a new template')
 
-          const newTemplate = await Template.insert(
-            {
-              name: featurePODEnabled ? name : `${name} (${notes})`,
-              author,
-              target,
-              trimSize,
-              default: isDefault,
-              notes,
-            },
-            { trx },
-          )
-
-          logger.info(`New template created with id ${newTemplate.id}`)
-
-          const fontsPath = path.join(assetsRoot, 'fonts')
-
-          if (fs.existsSync(fontsPath)) {
-            const contents = await dirContents(fontsPath)
-
-            await Promise.all(
-              contents.map(async font => {
-                const absoluteFontPath = path.join(fontsPath, font)
-
-                return createFile(
-                  fs.createReadStream(absoluteFontPath),
-                  font,
-                  null,
-                  null,
-                  [],
-                  newTemplate.id,
-                  {
-                    trx,
-                    forceObjectKeyValue: `templates/${newTemplate.id}/${font}`,
-                  },
-                )
-              }),
-            )
-          }
-
-          const cssPath = path.join(assetsRoot, 'css')
-
-          if (fs.existsSync(cssPath)) {
-            const absoluteCSSPath = path.join(cssPath, cssFile)
-
-            await createFile(
-              fs.createReadStream(absoluteCSSPath),
-              cssFile,
-              null,
-              null,
-              [],
-              newTemplate.id,
-              {
-                trx,
-                forceObjectKeyValue: `templates/${newTemplate.id}/${cssFile}`,
-              },
-            )
-          }
-
-          const thumbnailPath = path.join(assetsRoot, thumbnailFile)
-
-          if (fs.existsSync(thumbnailPath)) {
-            // const absoluteThumbnailPath = path.join(cssPath, cssFile)
-
-            const thumbnail = await createFile(
-              fs.createReadStream(thumbnailPath),
-              thumbnailFile,
-              null,
-              null,
-              [],
-              newTemplate.id,
-              {
-                trx,
-                // forceObjectKeyValue: `templates/${newTemplate.id}/${thumbnailFile}`,
-              },
-            )
-
-            await Template.patchAndFetchById(
-              newTemplate.id,
-              { thumbnailId: thumbnail.id },
-              { trx },
-            )
-          }
-
-          return true
+      const newTemplate = await Template.insert(
+        {
+          name: featurePODEnabled ? name : `${name} (${notes})`,
+          author,
+          target,
+          trimSize,
+          default: isDefault,
+          notes,
         },
-        { trx: undefined },
+        { trx },
+      )
+
+      logger.info(`New template created with id ${newTemplate.id}`)
+
+      const fontsPath = path.join(assetsRoot, 'fonts')
+
+      if (fs.existsSync(fontsPath)) {
+        const contents = await dirContents(fontsPath)
+
+        await Promise.all(
+          contents.map(async font => {
+            const absoluteFontPath = path.join(fontsPath, font)
+
+            return createFile(
+              fs.createReadStream(absoluteFontPath),
+              font,
+              null,
+              null,
+              [],
+              newTemplate.id,
+              {
+                trx,
+                forceObjectKeyValue: `templates/${newTemplate.id}/${font}`,
+              },
+            )
+          }),
+        )
+      }
+
+      const cssPath = path.join(assetsRoot, 'css')
+
+      if (fs.existsSync(cssPath)) {
+        const absoluteCSSPath = path.join(cssPath, cssFile)
+
+        await createFile(
+          fs.createReadStream(absoluteCSSPath),
+          cssFile,
+          null,
+          null,
+          [],
+          newTemplate.id,
+          {
+            trx,
+            forceObjectKeyValue: `templates/${newTemplate.id}/${cssFile}`,
+          },
+        )
+      }
+
+      const thumbnailPath = path.join(assetsRoot, thumbnailFile)
+
+      if (fs.existsSync(thumbnailPath)) {
+        // const absoluteThumbnailPath = path.join(cssPath, cssFile)
+
+        const thumbnail = await createFile(
+          fs.createReadStream(thumbnailPath),
+          thumbnailFile,
+          null,
+          null,
+          [],
+          newTemplate.id,
+          {
+            trx,
+            // forceObjectKeyValue: `templates/${newTemplate.id}/${thumbnailFile}`,
+          },
+        )
+
+        await Template.patchAndFetchById(
+          newTemplate.id,
+          { thumbnailId: thumbnail.id },
+          { trx },
+        )
+      }
+
+      return true
+    }
+
+    // logger.info('About to create a new template')
+
+    // logger.info(`Template created with id ${templateExists.id}`)
+
+    const files = await File.find({ objectId: templateExists.id }, { trx })
+
+    const fileIds = files.result.map(file => file.id)
+
+    await connectToFileStorage()
+
+    logger.info(
+      `deleting files with ids ${fileIds} associated with template id ${templateExists.id}`,
+    )
+    await deleteFiles(fileIds, true, { trx })
+
+    const fontsPath = path.join(assetsRoot, 'fonts')
+
+    if (fs.existsSync(fontsPath)) {
+      const contents = await dirContents(fontsPath)
+
+      await Promise.all(
+        contents.map(async font => {
+          const absoluteFontPath = path.join(fontsPath, font)
+
+          return createFile(
+            fs.createReadStream(absoluteFontPath),
+            font,
+            null,
+            null,
+            [],
+            templateExists.id,
+            {
+              trx,
+              forceObjectKeyValue: `templates/${templateExists.id}/${font}`,
+            },
+          )
+        }),
       )
     }
 
-    return useTransaction(
-      async trx => {
-        // logger.info('About to create a new template')
+    const cssPath = path.join(assetsRoot, 'css')
 
-        // logger.info(`Template created with id ${templateExists.id}`)
+    if (fs.existsSync(cssPath)) {
+      const absoluteCSSPath = path.join(cssPath, cssFile)
 
-        const files = await File.find({ objectId: templateExists.id }, { trx })
+      await createFile(
+        fs.createReadStream(absoluteCSSPath),
+        cssFile,
+        null,
+        null,
+        [],
+        templateExists.id,
+        {
+          trx,
+          forceObjectKeyValue: `templates/${templateExists.id}/${cssFile}`,
+        },
+      )
+    }
 
-        const fileIds = files.result.map(file => file.id)
+    const thumbnailPath = path.join(assetsRoot, thumbnailFile)
 
-        await connectToFileStorage()
+    if (fs.existsSync(thumbnailPath)) {
+      const thumbnail = await createFile(
+        fs.createReadStream(thumbnailPath),
+        thumbnailFile,
+        null,
+        null,
+        [],
+        templateExists.id,
+        {
+          trx,
+        },
+      )
 
-        logger.info(
-          `deleting files with ids ${fileIds} associated with template id ${templateExists.id}`,
-        )
-        await deleteFiles(fileIds, true, { trx })
+      await Template.patchAndFetchById(
+        templateExists.id,
+        { thumbnailId: thumbnail.id },
+        { trx },
+      )
+    }
 
-        const fontsPath = path.join(assetsRoot, 'fonts')
-
-        if (fs.existsSync(fontsPath)) {
-          const contents = await dirContents(fontsPath)
-
-          await Promise.all(
-            contents.map(async font => {
-              const absoluteFontPath = path.join(fontsPath, font)
-
-              return createFile(
-                fs.createReadStream(absoluteFontPath),
-                font,
-                null,
-                null,
-                [],
-                templateExists.id,
-                {
-                  trx,
-                  forceObjectKeyValue: `templates/${templateExists.id}/${font}`,
-                },
-              )
-            }),
-          )
-        }
-
-        const cssPath = path.join(assetsRoot, 'css')
-
-        if (fs.existsSync(cssPath)) {
-          const absoluteCSSPath = path.join(cssPath, cssFile)
-
-          await createFile(
-            fs.createReadStream(absoluteCSSPath),
-            cssFile,
-            null,
-            null,
-            [],
-            templateExists.id,
-            {
-              trx,
-              forceObjectKeyValue: `templates/${templateExists.id}/${cssFile}`,
-            },
-          )
-        }
-
-        const thumbnailPath = path.join(assetsRoot, thumbnailFile)
-
-        if (fs.existsSync(thumbnailPath)) {
-          const thumbnail = await createFile(
-            fs.createReadStream(thumbnailPath),
-            thumbnailFile,
-            null,
-            null,
-            [],
-            templateExists.id,
-            {
-              trx,
-            },
-          )
-
-          await Template.patchAndFetchById(
-            templateExists.id,
-            { thumbnailId: thumbnail.id },
-            { trx },
-          )
-        }
-
-        return true
-      },
-      { trx: undefined },
-    )
+    return true
   } catch (e) {
     throw new Error(e)
   }
