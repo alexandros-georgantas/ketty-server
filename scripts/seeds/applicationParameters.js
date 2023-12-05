@@ -55,9 +55,9 @@ const seedApplicationParameters = async () => {
 
     const areas = Object.keys(selectedConfig)
     await truncate()
-    await Promise.all(
-      areas.map(async area =>
-        useTransaction(async trx => {
+    return useTransaction(async trx =>
+      Promise.all(
+        areas.map(async area => {
           logger.info(
             `New Application Parameter created: ${JSON.stringify(
               selectedConfig[area],
