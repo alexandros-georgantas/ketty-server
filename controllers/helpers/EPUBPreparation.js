@@ -270,13 +270,22 @@ const decorateText = async (book, hasEndnotes) => {
   })
 }
 
-const generateTOCNCX = async (book, epubFolder, isbnIndex = 0) => {
+const generateTOCNCX = async (book, epubFolder, isbnIndex = null) => {
   const navPoints = []
   const { metadata, podMetadata } = book
   const { isbn, issn, issnL } = metadata
 
-  const identifier =
-    isbn || get(podMetadata, ['isbns', isbnIndex, 'isbn']) || issn || issnL
+  // Lookup for EPub unique id; if undefined, a uuid is used
+  let identifier
+
+  if (!isbn && !isEmpty(podMetadata.isbns)) {
+    if (isbnIndex !== null) {
+      identifier = get(podMetadata, ['isbns', isbnIndex, 'isbn'])
+    }
+  } else {
+    // Coerce to an array of identifiers with empty labels
+    identifier = isbn || issn || issnL
+  }
 
   let counter = 0
   book.divisions.forEach(division => {
@@ -385,7 +394,7 @@ const generateTOCNCX = async (book, epubFolder, isbnIndex = 0) => {
   return writeFile(`${epubFolder.oebps}/toc.ncx`, output)
 }
 
-const generateContentOPF = async (book, epubFolder, isbnIndex = 0) => {
+const generateContentOPF = async (book, epubFolder, isbnIndex = null) => {
   const { metadata, title, updated, podMetadata } = book
 
   const {
@@ -402,14 +411,16 @@ const generateContentOPF = async (book, epubFolder, isbnIndex = 0) => {
   const spineData = []
   const manifestData = []
 
+  // Lookup for EPub unique id; if undefined, a uuid is used
   let identifiers
 
   if (!isbn && !isEmpty(podMetadata.isbns)) {
     // Content of "podMetadata.isbns"
     identifiers = podMetadata.isbns.map(item => {
       return {
+        // Qualify/extend idenifier names when there are multiple identifiers
         idExtension:
-          podMetadata.isbns.length > 1
+          podMetadata.isbns.length > 1 || isbnIndex === null
             ? `-${trim(item.label.replace(/[^A-Za-z0-9]+/g, '-'), '-')}`
             : '',
         number: item.isbn,
@@ -529,9 +540,10 @@ const generateContentOPF = async (book, epubFolder, isbnIndex = 0) => {
         'rendition: http://www.idpf.org/vocab/rendition/# schema: http://schema.org/ ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/ a11y: http://www.idpf.org/epub/vocab/package/a11y/#',
       '@xmlns': 'http://www.idpf.org/2007/opf',
       '@version': '3.0',
-      '@unique-identifier': isEmpty(identifiers)
-        ? 'BookId'
-        : `BookId${identifiers[isbnIndex].idExtension}`,
+      '@unique-identifier':
+        isbnIndex === null || isEmpty(identifiers)
+          ? 'BookId'
+          : `BookId${identifiers[isbnIndex].idExtension}`,
       '@xml:lang': 'en',
       metadata: {
         '@xmlns:opf': 'http://www.idpf.org/2007/opf',
@@ -561,6 +573,11 @@ const generateContentOPF = async (book, epubFolder, isbnIndex = 0) => {
     )
   }
 
+  const uuidBook = {
+    '@id': 'BookId',
+    '#text': `urn:uuid:${book.id}`,
+  }
+
   if (identifiers) {
     contentOPF.package.metadata['dc:identifier'] = identifiers.map(item => {
       metaTemp.push({
@@ -574,11 +591,13 @@ const generateContentOPF = async (book, epubFolder, isbnIndex = 0) => {
         '#text': `urn:isbn:${item.number}`,
       }
     })
-  } else {
-    contentOPF.package.metadata['dc:identifier'] = {
-      '@id': 'BookId',
-      '#text': `urn:uuid:${book.id}`,
+
+    if (isbnIndex === null) {
+      // None of the isbns have been selected so use Book.uuid as the unique id
+      contentOPF.package.metadata['dc:identifier'].push(uuidBook)
     }
+  } else {
+    contentOPF.package.metadata['dc:identifier'] = uuidBook
   }
 
   if (publicationDate) {
@@ -698,7 +717,8 @@ const EPUBPreparation = async (
   EPUBtempFolderAssetsPath,
   isbn,
 ) => {
-  let isbnIndex = 0
+  // If an isbn has been selected as a unique identifier, store it here
+  let isbnIndex = null
 
   if (isbn) {
     // Bind book to a specific ISBN in book.podMetadata

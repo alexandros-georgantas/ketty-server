@@ -52,6 +52,7 @@ describe('Book HTML Generator', () => {
     }
 
     book = {
+      id: 'fake-book-uuid',
       title: 'The book that never was',
       updated: new Date(),
       divisions,
@@ -149,8 +150,10 @@ describe('Book HTML Generator', () => {
 
     // 1 ISBN identifier
     const identifier = $('package > metadata > dc\\:identifier')
-    expect(identifier.length).toEqual(1)
-    expect(identifier.text()).toEqual('urn:isbn:978-3-16-148410-0')
+    expect(identifier.length).toEqual(2)
+    expect(identifier.text()).toEqual(
+      'urn:isbn:978-3-16-148410-0urn:uuid:fake-book-uuid',
+    )
     expect(identifier.attr('id')).toEqual('BookId')
 
     const identifierMeta = $(
