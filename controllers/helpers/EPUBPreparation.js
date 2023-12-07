@@ -706,10 +706,7 @@ const EPUBPreparation = async (
       throw new Error('Failed to export book with unconfigured ISBN metadata')
     }
 
-    isbnIndex = findIndex(
-      book.podMetadata.isbns,
-      item => item.isbn === isbn,
-    )
+    isbnIndex = findIndex(book.podMetadata.isbns, item => item.isbn === isbn)
 
     if (isbnIndex < 0) {
       throw new Error('Failed to export book with unknown ISBN')

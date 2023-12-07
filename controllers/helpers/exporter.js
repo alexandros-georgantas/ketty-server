@@ -65,7 +65,7 @@ const ExporterService = async (
   previewer,
   fileExtension,
   icmlNotes,
-  {isbn, ...additionalExportOptions},
+  { isbn, ...additionalExportOptions },
 ) => {
   try {
     let template
