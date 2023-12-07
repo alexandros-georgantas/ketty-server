@@ -2,7 +2,7 @@
 const objection = require('objection')
 
 const Base = require('../ketidaBase')
-const { id, stringNotEmpty, date } = require('../helpers').schema
+const { id, date, string, stringNotEmpty } = require('../helpers').schema
 
 const format = {
   enum: ['epub', 'pdf'],
@@ -123,7 +123,7 @@ class ExportProfile extends Base {
         format,
         trimSize,
         providerInfo,
-        isbn: stringNotEmpty,
+        isbn: string,
       },
     }
   }

@@ -65,8 +65,7 @@ const ExporterService = async (
   previewer,
   fileExtension,
   icmlNotes,
-  additionalExportOptions,
-  withISBN,
+  {isbn, ...additionalExportOptions},
 ) => {
   try {
     let template
@@ -104,7 +103,7 @@ const ExporterService = async (
         EPUBFileTimestamp,
       )
 
-      await EPUBPreparation(book, template, EPUBtempFolderAssetsPath, withISBN)
+      await EPUBPreparation(book, template, EPUBtempFolderAssetsPath, isbn)
 
       const filename = await EPUBArchiver(
         EPUBtempFolderAssetsPath,

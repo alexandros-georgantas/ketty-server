@@ -696,11 +696,11 @@ const EPUBPreparation = async (
   book,
   template,
   EPUBtempFolderAssetsPath,
-  withISBN,
+  isbn,
 ) => {
   let isbnIndex = 0
 
-  if (withISBN) {
+  if (isbn) {
     // Bind book to a specific ISBN in book.podMetadata
     if (isEmpty(book.podMetadata?.isbns)) {
       throw new Error('Failed to export book with unconfigured ISBN metadata')
@@ -708,7 +708,7 @@ const EPUBPreparation = async (
 
     isbnIndex = findIndex(
       book.podMetadata.isbns,
-      item => item.isbn === withISBN,
+      item => item.isbn === isbn,
     )
 
     if (isbnIndex < 0) {
@@ -740,12 +740,8 @@ const EPUBPreparation = async (
   }
 }
 
-if (process.env.NODE_ENV === 'test') {
-  module.exports = {
-    EPUBPreparation,
-    generateTOCNCX,
-    generateContentOPF,
-  }
-} else {
-  module.exports = { EPUBPreparation }
+module.exports = {
+  EPUBPreparation,
+  generateTOCNCX,
+  generateContentOPF,
 }

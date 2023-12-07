@@ -113,6 +113,7 @@ input AdditionalExportOptionsInput {
   includeTOC: Boolean
   includeCopyrights: Boolean
   includeTitlePage: Boolean
+  isbn: String
 }
 
 input ExportBookInput {
@@ -122,7 +123,6 @@ input ExportBookInput {
   fileExtension: String
   icmlNotes: String
   additionalExportOptions: AdditionalExportOptionsInput
-  withISBN: String
 }
 
 type ContentStructure {
