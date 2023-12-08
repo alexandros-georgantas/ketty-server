@@ -298,7 +298,7 @@ const createTemplate = async (
 
       await Template.patchAndFetchById(
         templateExists.id,
-        { thumbnailId: thumbnail.id },
+        { thumbnailId: thumbnail.id, default: isDefault },
         { trx },
       )
     }
