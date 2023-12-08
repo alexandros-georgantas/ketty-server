@@ -75,7 +75,7 @@ module.exports = {
   },
   'pubsweet-server': {
     useGraphQLServer: true,
-    useJobQueue: false,
+    useJobQueue: true,
     useFileStorage: true,
     serveClient: false,
     graphiql: true,
