@@ -107,6 +107,7 @@ type AdditionalExportOptions {
   includeTOC: Boolean
   includeCopyrights: Boolean
   includeTitlePage: Boolean
+  isbn: String
 }
 
 input AdditionalExportOptionsInput {

@@ -388,6 +388,9 @@ const generateTOCNCX = async (book, epubFolder, isbnIndex = null) => {
   })
 
   if (epubFolder === false) {
+    // Testing ONLY - return the output directly; there is no test export folder
+    // TODO - setup an export folder for tests and then have the tests load the
+    //        output from the test export files
     return output
   }
 
@@ -621,6 +624,9 @@ const generateContentOPF = async (book, epubFolder, isbnIndex = null) => {
   })
 
   if (epubFolder === false) {
+    // Testing ONLY - return the output directly; there is no test export folder
+    // TODO - setup an export folder for tests and then have the tests load the
+    //        output from the test export files
     return output
   }
 
