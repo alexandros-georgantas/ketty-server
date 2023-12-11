@@ -1,3 +1,36 @@
+# [1.15.0](https://gitlab.coko.foundation/ketida/server/compare/v1.14.1...v1.15.0) (2023-12-11)
+
+
+### Bug Fixes
+
+* add space between isbns, clean args from function ([4cacbc6](https://gitlab.coko.foundation/ketida/server/commit/4cacbc640ba72315a28fdfcc7e40631ddc60ca31))
+* export page isbn ([a23c20e](https://gitlab.coko.foundation/ketida/server/commit/a23c20e51a8a2bb6b8e3ab00691b37c33815cae2))
+* export profile ([08f16a8](https://gitlab.coko.foundation/ketida/server/commit/08f16a8aeab3bdb6d758a48e48e46494835af603))
+* export profile isbn ([0159a88](https://gitlab.coko.foundation/ketida/server/commit/0159a887c65ed55813297b0b259836d85f4aefba))
+* export profile page ([80de985](https://gitlab.coko.foundation/ketida/server/commit/80de98525500bc6527be1690046731d7b19e8075))
+* **server:** export multiple isbn fields ([e01b1d5](https://gitlab.coko.foundation/ketida/server/commit/e01b1d5699aca1b87683a8461c10dea13e9a4eda))
+* **server:** export multiple isbn fields ([f2036c5](https://gitlab.coko.foundation/ketida/server/commit/f2036c57aa0448318f83d78639826a51b618cea2))
+* **server:** multiple isbn fields ([dd67022](https://gitlab.coko.foundation/ketida/server/commit/dd6702209a7c1adb6504c8fb213694b405b06621))
+* **server:** multiple isbn fields ([7fa33b6](https://gitlab.coko.foundation/ketida/server/commit/7fa33b6c626c450c72796064d558851c6c181658))
+* set default value of job queue flag to true ([2a9d1f0](https://gitlab.coko.foundation/ketida/server/commit/2a9d1f0023efc66f2529ff32298b4008175f28c4))
+* take into account isbn flag for the case of epub ([b164a1f](https://gitlab.coko.foundation/ketida/server/commit/b164a1f678d938e9750df031a98a41644dc8d7cf))
+
+
+### Features
+
+* export profile isbn ([cd84a22](https://gitlab.coko.foundation/ketida/server/commit/cd84a22be4391e613f41a62bb52f8292030d6081))
+* export profile isbn ([3609471](https://gitlab.coko.foundation/ketida/server/commit/3609471196e3342900c82e9270a32e07d2ecdc4a))
+* multiple isbns ([d8b50f1](https://gitlab.coko.foundation/ketida/server/commit/d8b50f1f6ea1208f0c5e51ef9de0945de9d7e3ba))
+* **server:** export multiple isbn fields ([937912d](https://gitlab.coko.foundation/ketida/server/commit/937912dbec6b65ce8206b960185d2c4e1744b83e))
+* **server:** export multiple isbn fields ([5ac980e](https://gitlab.coko.foundation/ketida/server/commit/5ac980e7c7a9540ac6080ae1af3038e0c62cce89))
+* **server:** multiple isbn fields ([a13cf29](https://gitlab.coko.foundation/ketida/server/commit/a13cf29b36779a4b42f0c94b4277042762c88810))
+* **server:** multiple isbn fields ([6fa95c3](https://gitlab.coko.foundation/ketida/server/commit/6fa95c3b8a8fe73ba4fc5497637a6083e0f6a29b))
+* **server:** multiple isbn fields ([d30c865](https://gitlab.coko.foundation/ketida/server/commit/d30c86532b16facbb2f207f7cc7756feb64405e0))
+* **server:** multiple isbn fields ([aa6aa69](https://gitlab.coko.foundation/ketida/server/commit/aa6aa69720c09c12333ff445476f0f64ec3ce006))
+* **server:** multiple isbn fields ([cf98b3e](https://gitlab.coko.foundation/ketida/server/commit/cf98b3e87271fe447e603bc962badb021be6f8c0))
+* **server:** multiple isbn fields ([d215ed5](https://gitlab.coko.foundation/ketida/server/commit/d215ed57084a44de3a8bd691916f7e460e06d9c4))
+* **server:** multiple isbn fields ([0da8907](https://gitlab.coko.foundation/ketida/server/commit/0da8907b5e4dedc73ecf8f84c1654d46fd65c02e))
+
 # [1.14.0](https://gitlab.coko.foundation/ketida/server/compare/v1.14.0...v1.14.1) (2023-12-06)
 
 ### Chore
