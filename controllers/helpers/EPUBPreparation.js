@@ -5,9 +5,8 @@ const builder = require('xmlbuilder')
 const fs = require('fs-extra')
 const tidy = require('libtidy-updated')
 const mime = require('mime-types')
-const map = require('lodash/map')
-const filter = require('lodash/filter')
-const find = require('lodash/find')
+const { get, isEmpty, map, filter, find, findIndex, trim } = require('lodash')
+
 const config = require('config')
 
 const beautify = require('js-beautify').html
@@ -84,7 +83,7 @@ const createMimetype = async rootPath => {
   }
 }
 
-const createContainer = async metaInfPath => {
+const createContainer = async () => {
   try {
     const container = builder
       .create(
@@ -106,7 +105,7 @@ const createContainer = async metaInfPath => {
         pretty: true,
       })
 
-    return writeFile(`${metaInfPath}/container.xml`, container)
+    return container
   } catch (e) {
     throw new Error(e)
   }
@@ -271,12 +270,23 @@ const decorateText = async (book, hasEndnotes) => {
   })
 }
 
-const generateTOCNCX = async (book, epubFolder) => {
+const generateTOCNCX = async (book, isbnIndex = null) => {
   const navPoints = []
   const { metadata, podMetadata } = book
   const { isbn, issn, issnL } = metadata
 
-  const identifier = isbn || podMetadata?.isbn || issn || issnL
+  // Lookup for EPub unique id; if undefined, a uuid is used
+  let identifier
+
+  if (!isbn && !isEmpty(podMetadata.isbns)) {
+    if (isbnIndex !== null) {
+      identifier = get(podMetadata, ['isbns', isbnIndex, 'isbn'])
+    }
+  } else {
+    // Coerce to an array of identifiers with empty labels
+    identifier = isbn || issn || issnL
+  }
+
   let counter = 0
   book.divisions.forEach(division => {
     division.bookComponents.forEach(bookComponent => {
@@ -377,10 +387,10 @@ const generateTOCNCX = async (book, epubFolder) => {
     pretty: true,
   })
 
-  return writeFile(`${epubFolder.oebps}/toc.ncx`, output)
+  return output
 }
 
-const generateContentOPF = async (book, epubFolder) => {
+const generateContentOPF = async (book, isbnIndex = null) => {
   const { metadata, title, updated, podMetadata } = book
 
   const {
@@ -396,7 +406,26 @@ const generateContentOPF = async (book, epubFolder) => {
 
   const spineData = []
   const manifestData = []
-  const identifier = isbn || podMetadata?.isbn || issn || issnL
+
+  // Lookup for EPub unique id; if undefined, a uuid is used
+  let identifiers
+
+  if (!isbn && !isEmpty(podMetadata.isbns)) {
+    // Content of "podMetadata.isbns"
+    identifiers = podMetadata.isbns.map(item => {
+      return {
+        // Qualify/extend idenifier names when there are multiple identifiers
+        idExtension:
+          podMetadata.isbns.length > 1 || isbnIndex === null
+            ? `-${trim(item.label.replace(/[^A-Za-z0-9]+/g, '-'), '-')}`
+            : '',
+        number: item.isbn,
+      }
+    })
+  } else if (isbn || issn || issnL) {
+    // Coerce to an array of identifiers with empty labels
+    identifiers = [{ idExtension: '', number: isbn || issn || issnL }]
+  }
 
   const rights = filter(
     [copyrightYear, copyrightHolder, copyrightStatement],
@@ -507,7 +536,10 @@ const generateContentOPF = async (book, epubFolder) => {
         'rendition: http://www.idpf.org/vocab/rendition/# schema: http://schema.org/ ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/ a11y: http://www.idpf.org/epub/vocab/package/a11y/#',
       '@xmlns': 'http://www.idpf.org/2007/opf',
       '@version': '3.0',
-      '@unique-identifier': 'BookId',
+      '@unique-identifier':
+        isbnIndex === null || isEmpty(identifiers)
+          ? 'BookId'
+          : `BookId${identifiers[isbnIndex].idExtension}`,
       '@xml:lang': 'en',
       metadata: {
         '@xmlns:opf': 'http://www.idpf.org/2007/opf',
@@ -537,23 +569,31 @@ const generateContentOPF = async (book, epubFolder) => {
     )
   }
 
-  if (identifier) {
-    contentOPF.package.metadata['dc:identifier'] = {
-      '@id': 'BookId',
-      '#text': `urn:isbn:${identifier}`,
-    }
+  const uuidBook = {
+    '@id': 'BookId',
+    '#text': `urn:uuid:${book.id}`,
+  }
 
-    metaTemp.push({
-      '@refines': '#BookId',
-      '@property': 'identifier-type',
-      '@scheme': 'onix:codelist5',
-      '#text': 15,
+  if (identifiers) {
+    contentOPF.package.metadata['dc:identifier'] = identifiers.map(item => {
+      metaTemp.push({
+        '@refines': `#BookId${item.idExtension}`,
+        '@property': 'identifier-type',
+        '@scheme': 'onix:codelist5',
+        '#text': 15,
+      })
+      return {
+        '@id': `BookId${item.idExtension}`,
+        '#text': `urn:isbn:${item.number}`,
+      }
     })
-  } else {
-    contentOPF.package.metadata['dc:identifier'] = {
-      '@id': 'BookId',
-      '#text': `urn:uuid:${book.id}`,
+
+    if (isbnIndex === null) {
+      // None of the isbns have been selected so use Book.uuid as the unique id
+      contentOPF.package.metadata['dc:identifier'].push(uuidBook)
     }
+  } else {
+    contentOPF.package.metadata['dc:identifier'] = uuidBook
   }
 
   if (publicationDate) {
@@ -576,7 +616,7 @@ const generateContentOPF = async (book, epubFolder) => {
     pretty: true,
   })
 
-  return writeFile(`${epubFolder.oebps}/content.opf`, output)
+  return output
 }
 
 const convertToXML = async content => {
@@ -663,23 +703,51 @@ const cleaner = () => {
   xhtmls = []
 }
 
-const EPUBPreparation = async (book, template, EPUBtempFolderAssetsPath) => {
+const EPUBPreparation = async (
+  book,
+  template,
+  EPUBtempFolderAssetsPath,
+  isbn,
+) => {
+  // If an isbn has been selected as a unique identifier, store it here
+  let isbnIndex = null
+
+  if (isbn) {
+    // Bind book to a specific ISBN in book.podMetadata
+    if (isEmpty(book.podMetadata?.isbns)) {
+      throw new Error('Failed to export book with unconfigured ISBN metadata')
+    }
+
+    isbnIndex = findIndex(book.podMetadata.isbns, item => item.isbn === isbn)
+
+    if (isbnIndex < 0) {
+      throw new Error('Failed to export book with unknown ISBN')
+    }
+  }
+
   try {
     const templateFiles = await template.getFiles()
     const hasEndnotes = template.notes === 'endnotes'
     const epubFolder = await createEPUBFolder(EPUBtempFolderAssetsPath)
 
     await createMimetype(epubFolder.root)
-    await createContainer(epubFolder.metaInf)
+
+    const container = await createContainer(epubFolder.metaInf)
+    await writeFile(`${epubFolder.metaInf}/container.xml`, container)
+
     await gatherAssets(book, templateFiles, epubFolder)
-    // const uniqueImages = uniqBy(images, 'key')
-    // images = uniqueImages
+
     await transferAssets(images, stylesheets, fonts)
     await decorateText(book, hasEndnotes)
     await gatherTexts(book, epubFolder)
     await transferTexts(xhtmls)
-    await generateTOCNCX(book, epubFolder)
-    await generateContentOPF(book, epubFolder)
+
+    const TOCNCX = await generateTOCNCX(book, isbnIndex)
+    await writeFile(`${epubFolder.oebps}/toc.ncx`, TOCNCX)
+
+    const OPF = await generateContentOPF(book, isbnIndex)
+    await writeFile(`${epubFolder.oebps}/content.opf`, OPF)
+
     cleaner()
 
     return epubFolder.root
@@ -688,4 +756,8 @@ const EPUBPreparation = async (book, template, EPUBtempFolderAssetsPath) => {
   }
 }
 
-module.exports = EPUBPreparation
+module.exports = {
+  EPUBPreparation,
+  generateTOCNCX,
+  generateContentOPF,
+}

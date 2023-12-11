@@ -312,7 +312,7 @@ const exportBookRule = rule()(
         return canInteractWithBookAndRelevantAssets(userId, bookId)
       }
 
-      return isOwner(userId, bookId)
+      return canEditBookAndRelevantAssets(userId, bookId)
     } catch (e) {
       throw new Error(e.message)
     }

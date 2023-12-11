@@ -20,7 +20,7 @@ const crypto = require('crypto')
 //   generateCopyrightsPage,
 // } = require('./htmlGenerators')
 
-const EPUBPreparation = require('./EPUBPreparation')
+const { EPUBPreparation } = require('./EPUBPreparation')
 const ICMLPreparation = require('./ICMLPreparation')
 const PagedJSPreparation = require('./PagedJSPreparation')
 const EPUBArchiver = require('./EPUBArchiver')
@@ -65,7 +65,7 @@ const ExporterService = async (
   previewer,
   fileExtension,
   icmlNotes,
-  additionalExportOptions,
+  { isbn, ...additionalExportOptions },
 ) => {
   try {
     let template
@@ -80,6 +80,7 @@ const ExporterService = async (
       ...(featurePODEnabled &&
         additionalExportOptions && {
           ...additionalExportOptions,
+          isbn,
         }),
     })
 
@@ -103,7 +104,7 @@ const ExporterService = async (
         EPUBFileTimestamp,
       )
 
-      await EPUBPreparation(book, template, EPUBtempFolderAssetsPath)
+      await EPUBPreparation(book, template, EPUBtempFolderAssetsPath, isbn)
 
       const filename = await EPUBArchiver(
         EPUBtempFolderAssetsPath,

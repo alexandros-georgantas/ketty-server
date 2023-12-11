@@ -207,7 +207,7 @@ const createBook = async (data = {}) => {
             authors: '',
             bottomPage: '',
             copyrightLicense: '',
-            isbn: '',
+            isbns: [],
             licenseTypes: {
               NC: false,
               SA: false,

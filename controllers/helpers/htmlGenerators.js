@@ -1,3 +1,4 @@
+const { isEmpty } = require('lodash')
 const cheerio = require('cheerio')
 const config = require('config')
 
@@ -163,7 +164,7 @@ const generateCopyrightsPage = (bookTitle, bookComponent, podMetadata) => {
     copyrightLicense,
     licenseTypes,
     publicDomainType,
-    isbn,
+    isbns,
     topPage,
     bottomPage,
     ncCopyrightHolder,
@@ -308,6 +309,24 @@ const generateCopyrightsPage = (bookTitle, bookComponent, podMetadata) => {
 
   //   </section>`,
   // )
+
+  // If there is copyright text, it should include all isbns
+  let isbnText
+
+  if (copyrightText && !isEmpty(isbns)) {
+    isbnText = isbns
+      .map(
+        item =>
+          '<span class="isbn-item">' +
+          `<span class="isbn-label">${item.label}</span>` +
+          `<span class="isbn-number"> ${item.isbn} </span>` +
+          '</span>',
+      )
+      .join('')
+  } else {
+    isbnText = ''
+  }
+
   const output = cheerio.load(
     `<section id="comp-number-${id}"  class="component-${division} ${componentType} ${
       !featurePODEnabled ? paginationExtractor(pagination) : ''
@@ -316,7 +335,7 @@ const generateCopyrightsPage = (bookTitle, bookComponent, podMetadata) => {
     ${
       copyrightText
         ? `<section class="book-copyrights">${
-            isbn ? `<p class="isbn">${isbn}</p>` : ''
+            isbnText ? `<p class="isbns">${isbnText}</p>` : ''
           }<p class="main-content">${copyrightText}</p></section>`
         : ''
     }
@@ -325,7 +344,7 @@ const generateCopyrightsPage = (bookTitle, bookComponent, podMetadata) => {
         ? `<section class="copyright-after">${bottomPage}</section>`
         : ''
     }
-    
+
     </section>`,
   )
 

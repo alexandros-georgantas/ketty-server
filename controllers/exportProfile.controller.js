@@ -426,8 +426,14 @@ const uploadToLulu = async (exportProfileId, userId, options = {}) => {
           )
         }
 
-        const { bookId, providerInfo, templateId, includedComponents, format } =
-          exportProfile
+        const {
+          bookId,
+          providerInfo,
+          templateId,
+          includedComponents,
+          format,
+          isbn,
+        } = exportProfile
 
         const bookTranslation = await BookTranslation.findOne(
           { bookId, languageIso: 'en' },
@@ -494,7 +500,7 @@ const uploadToLulu = async (exportProfileId, userId, options = {}) => {
           // })
         }
 
-        const { localPath: PDFPath } = await exporter(
+        const { localPath } = await exporter(
           bookId,
           templateId,
           undefined,
@@ -504,6 +510,7 @@ const uploadToLulu = async (exportProfileId, userId, options = {}) => {
             includeTitlePage: includedComponents.titlePage,
             includeTOC: includedComponents.toc,
             includeCopyrights: includedComponents.copyright,
+            isbn,
           },
         )
 
@@ -512,11 +519,12 @@ const uploadToLulu = async (exportProfileId, userId, options = {}) => {
           templateId,
           format,
           includedComponents,
+          isbn,
         )
 
-        const fileMD5Hash = await generateHash(fs.createReadStream(PDFPath))
+        const fileMD5Hash = await generateHash(fs.createReadStream(localPath))
         const form = new FormData()
-        form.append('file', fs.createReadStream(PDFPath))
+        form.append('file', fs.createReadStream(localPath))
         form.append('file_md5', fileMD5Hash)
 
         const providerIndex = findIndex(providerInfo, { providerLabel: 'lulu' })
