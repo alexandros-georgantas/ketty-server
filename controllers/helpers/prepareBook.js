@@ -30,6 +30,7 @@ const prepareBook = async (bookId, template, options) => {
     includeTOC,
     includeCopyrights,
     includeTitlePage,
+    isbn,
   } = options
 
   const featureBookStructure =
@@ -54,7 +55,10 @@ const prepareBook = async (bookId, template, options) => {
   // The produced representation of the book holds two Map data types one
   // for the division and one for the book components of each division to
   // ensure the order of things
-  const book = await bookConstructor(bookId, templateHasEndnotes)
+  const book = await bookConstructor(bookId, {
+    templateHasEndnotes,
+    forceISBN: isbn,
+  })
 
   const frontDivision = book.divisions.get('front')
   const backDivision = book.divisions.get('back')

@@ -22,8 +22,9 @@ const divisionTypeMapper = {
   Backmatter: 'back',
 }
 
-module.exports = async bookId => {
+module.exports = async (bookId, options = {}) => {
   try {
+    const { forceISBN } = options
     const finalBook = {}
     const book = await Book.findById(bookId)
     const authors = []
@@ -140,7 +141,17 @@ module.exports = async bookId => {
         forEach(deconstructAuthors, author => authors.push(author))
       }
 
-      finalBook.podMetadata = book.podMetadata
+      const clonePODMetadata = { ...book.podMetadata }
+
+      if (forceISBN) {
+        const found = find(book?.podMetadata?.isbns, { isbn: forceISBN })
+
+        if (found) {
+          clonePODMetadata.isbns = [found]
+        }
+      }
+
+      finalBook.podMetadata = clonePODMetadata
     } else {
       const authorTeam = await getObjectTeam('author', bookId, true)
 

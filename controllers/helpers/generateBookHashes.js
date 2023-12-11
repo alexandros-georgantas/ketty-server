@@ -3,6 +3,7 @@ const fs = require('fs-extra')
 const config = require('config')
 const path = require('path')
 const get = require('lodash/get')
+const find = require('lodash/find')
 const crypto = require('crypto')
 
 const Template = require('../../models/template/template.model')
@@ -21,6 +22,7 @@ const generateBookHashes = async (
   templateId,
   format,
   includedComponents,
+  isbn,
 ) => {
   const template = await Template.findById(templateId)
   const book = await Book.findById(bookId)
@@ -65,14 +67,25 @@ const generateBookHashes = async (
     includeTOC: includedComponents.toc,
     includeCopyrights: includedComponents.copyright,
     includeTitlePage: includedComponents.titlePage,
+    isbn,
   })
 
   const bookHTML = await createBookHTML(preparedBook)
+
   const contentHash = await generateHash(bookHTML)
+  const clonePODMetadata = { ...book.podMetadata }
+
+  if (isbn) {
+    const found = find(book?.podMetadata?.isbns, { isbn })
+
+    if (found) {
+      clonePODMetadata.isbns = [found]
+    }
+  }
 
   const metadataHash = await generateHash(
     JSON.stringify({
-      ...book.podMetadata,
+      clonePODMetadata,
       title: preparedBook.title,
       subtitle: preparedBook.subtitle,
     }),

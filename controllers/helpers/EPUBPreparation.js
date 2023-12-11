@@ -105,7 +105,7 @@ const createContainer = async metaInfPath => {
         pretty: true,
       })
 
-    return writeFile(`${metaInfPath}/container.xml`, container)
+    return container
   } catch (e) {
     throw new Error(e)
   }
@@ -270,7 +270,7 @@ const decorateText = async (book, hasEndnotes) => {
   })
 }
 
-const generateTOCNCX = async (book, epubFolder, isbnIndex = null) => {
+const generateTOCNCX = async (book, isbnIndex = null) => {
   const navPoints = []
   const { metadata, podMetadata } = book
   const { isbn, issn, issnL } = metadata
@@ -387,17 +387,10 @@ const generateTOCNCX = async (book, epubFolder, isbnIndex = null) => {
     pretty: true,
   })
 
-  if (epubFolder === false) {
-    // Testing ONLY - return the output directly; there is no test export folder
-    // TODO - setup an export folder for tests and then have the tests load the
-    //        output from the test export files
-    return output
-  }
-
-  return writeFile(`${epubFolder.oebps}/toc.ncx`, output)
+  return output
 }
 
-const generateContentOPF = async (book, epubFolder, isbnIndex = null) => {
+const generateContentOPF = async (book, isbnIndex = null) => {
   const { metadata, title, updated, podMetadata } = book
 
   const {
@@ -623,14 +616,7 @@ const generateContentOPF = async (book, epubFolder, isbnIndex = null) => {
     pretty: true,
   })
 
-  if (epubFolder === false) {
-    // Testing ONLY - return the output directly; there is no test export folder
-    // TODO - setup an export folder for tests and then have the tests load the
-    //        output from the test export files
-    return output
-  }
-
-  return writeFile(`${epubFolder.oebps}/content.opf`, output)
+  return output
 }
 
 const convertToXML = async content => {
@@ -745,16 +731,23 @@ const EPUBPreparation = async (
     const epubFolder = await createEPUBFolder(EPUBtempFolderAssetsPath)
 
     await createMimetype(epubFolder.root)
-    await createContainer(epubFolder.metaInf)
+
+    const container = await createContainer(epubFolder.metaInf)
+    await writeFile(`${epubFolder.metaInf}/container.xml`, container)
+
     await gatherAssets(book, templateFiles, epubFolder)
-    // const uniqueImages = uniqBy(images, 'key')
-    // images = uniqueImages
+
     await transferAssets(images, stylesheets, fonts)
     await decorateText(book, hasEndnotes)
     await gatherTexts(book, epubFolder)
     await transferTexts(xhtmls)
-    await generateTOCNCX(book, epubFolder, isbnIndex)
-    await generateContentOPF(book, epubFolder, isbnIndex)
+
+    const TOCNCX = await generateTOCNCX(book, isbnIndex)
+    await writeFile(`${epubFolder.oebps}/toc.ncx`, TOCNCX)
+
+    const OPF = await generateContentOPF(book, isbnIndex)
+    await writeFile(`${epubFolder.oebps}/content.opf`, OPF)
+
     cleaner()
 
     return epubFolder.root

@@ -216,6 +216,7 @@ const providerInfoHandler = parent => {
     bookId: parent.bookId,
     format: parent.format,
     includedComponents: parent.includedComponents,
+    isbn: parent.isbn,
   }))
 }
 
@@ -228,6 +229,7 @@ const projectInSync = async (parent, _, ctx, info) => {
     bookContentHash,
     bookMetadataHash,
     templateHash,
+    isbn,
   } = parent
 
   const bookHashes = await generateBookHashes(
@@ -235,6 +237,7 @@ const projectInSync = async (parent, _, ctx, info) => {
     templateId,
     format,
     includedComponents,
+    isbn,
   )
 
   const { contentHash, metadataHash, stylesheetHash } = bookHashes

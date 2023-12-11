@@ -80,6 +80,7 @@ const ExporterService = async (
       ...(featurePODEnabled &&
         additionalExportOptions && {
           ...additionalExportOptions,
+          isbn,
         }),
     })
 
