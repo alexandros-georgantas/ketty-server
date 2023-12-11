@@ -83,7 +83,7 @@ const createMimetype = async rootPath => {
   }
 }
 
-const createContainer = async metaInfPath => {
+const createContainer = async () => {
   try {
     const container = builder
       .create(
