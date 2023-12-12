@@ -58,6 +58,7 @@ const prepareBook = async (bookId, template, options) => {
   const book = await bookConstructor(bookId, {
     templateHasEndnotes,
     forceISBN: isbn,
+    isEPUB: fileExtension === 'epub',
   })
 
   const frontDivision = book.divisions.get('front')

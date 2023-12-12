@@ -46,7 +46,9 @@ module.exports = (
     .attr('type', 'text/css')
     .attr('rel', 'stylesheet')
     .appendTo('head')
-  $('<title/>').text(bookTitle).prependTo('head')
+  $('<title/>')
+    .text(bookTitle || 'Untitled')
+    .prependTo('head')
   $('body').attr({
     'xml:lang': 'en',
     'epub:type': ketidaToEPUBPropertiesMapper[division],

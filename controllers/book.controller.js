@@ -2,6 +2,7 @@ const { useTransaction, logger, pubsubManager } = require('@coko/server')
 const map = require('lodash/map')
 const indexOf = require('lodash/indexOf')
 const findIndex = require('lodash/findIndex')
+const find = require('lodash/find')
 const assign = require('lodash/assign')
 const omitBy = require('lodash/omitBy')
 const isNil = require('lodash/isNil')
@@ -36,6 +37,7 @@ const {
   Division,
   BookComponentTranslation,
   TeamMember,
+  ExportProfile,
 } = require('../models').models
 
 const {
@@ -45,6 +47,7 @@ const {
 const { createDivision } = require('./division.controller')
 
 const { createTeam, getObjectTeam, deleteTeam } = require('./team.controller')
+const { updateExportProfile } = require('./exportProfile.controller')
 
 // const { getSpecificTemplates } = require('./template.controller')
 
@@ -934,7 +937,15 @@ const updatePODMetadata = async (bookId, metadata, options = {}) => {
     const { trx } = options
     return useTransaction(
       async tr => {
+        // console.log('aaaa', metadata)
         const clean = omitBy(metadata, isNil)
+        // console.log('bbbb', clean)
+
+        const exportProfiles = await ExportProfile.query(trx)
+          .where({ bookId, format: 'epub' })
+          .whereNotNull('isbn')
+
+        // console.log('4444', exportProfiles)
 
         const updatedBook = await Book.patchAndFetchById(
           bookId,
@@ -942,6 +953,27 @@ const updatePODMetadata = async (bookId, metadata, options = {}) => {
             podMetadata: clean,
           },
           { trx: tr },
+        )
+
+        await Promise.all(
+          exportProfiles.map(async exportProfile => {
+            const { id, isbn } = exportProfile
+
+            if (!isbn) {
+              return false
+            }
+
+            const found = find(updatedBook.podMetadata?.isbns, { isbn })
+
+            if (!found) {
+              logger.info(
+                `${BOOK_CONTROLLER} updatePODMetadata: cleaning orphan isbn from export profile with id ${id}`,
+              )
+              return updateExportProfile(id, { isbn: null }, { trx })
+            }
+
+            return true
+          }),
         )
 
         logger.info(

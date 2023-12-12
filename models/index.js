@@ -12,6 +12,7 @@ const customTag = require('./customTag')
 const division = require('./division')
 const team = require('./team')
 const teamMember = require('./teamMember')
+const exportProfile = require('./exportProfile')
 const user = require('./user')
 const lock = require('./lock')
 const serviceCallbackToken = require('./serviceCallbackToken')
@@ -32,6 +33,7 @@ module.exports = {
   bookComponentState,
   bookComponentTranslation,
   bookTranslation,
+  exportProfile,
   division,
   file,
   lock,
@@ -57,5 +59,6 @@ module.exports = {
     Lock: lock.model,
     loader,
     ServiceCallbackToken: serviceCallbackToken.model,
+    ExportProfile: exportProfile.model,
   },
 }
