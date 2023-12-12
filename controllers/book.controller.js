@@ -2,6 +2,7 @@ const { useTransaction, logger, pubsubManager } = require('@coko/server')
 const map = require('lodash/map')
 const indexOf = require('lodash/indexOf')
 const findIndex = require('lodash/findIndex')
+const find = require('lodash/find')
 const assign = require('lodash/assign')
 const omitBy = require('lodash/omitBy')
 const isNil = require('lodash/isNil')
@@ -36,6 +37,7 @@ const {
   Division,
   BookComponentTranslation,
   TeamMember,
+  ExportProfile,
 } = require('../models').models
 
 const {
@@ -45,6 +47,7 @@ const {
 const { createDivision } = require('./division.controller')
 
 const { createTeam, getObjectTeam, deleteTeam } = require('./team.controller')
+const { updateExportProfile } = require('./exportProfile.controller')
 
 // const { getSpecificTemplates } = require('./template.controller')
 
@@ -59,6 +62,29 @@ const toCamelCase = string =>
       return x.substr(0, 1).toUpperCase() + x.substr(1).toLowerCase()
     })
     .join('')
+
+const isbnSorter = (a, b) => {
+  const labelA = a.label.toLowerCase()
+  const labelB = b.label.toLowerCase()
+
+  if (labelA < labelB) {
+    return -1
+  }
+
+  if (labelA > labelB) {
+    return 1
+  }
+
+  // names must be equal
+  return 0
+}
+
+const equalArrays = (a, b) => {
+  a.sort(isbnSorter)
+  b.sort(isbnSorter)
+
+  return JSON.stringify(a) === JSON.stringify(b)
+}
 
 const defaultLevelOneItem = {
   type: 'part',
@@ -936,6 +962,13 @@ const updatePODMetadata = async (bookId, metadata, options = {}) => {
       async tr => {
         const clean = omitBy(metadata, isNil)
 
+        const existingBook = await getBook(bookId, { trx: tr })
+
+        const hasDiffInISBNs = !equalArrays(
+          existingBook?.podMetadata?.isbns,
+          clean.isbns,
+        )
+
         const updatedBook = await Book.patchAndFetchById(
           bookId,
           {
@@ -943,6 +976,33 @@ const updatePODMetadata = async (bookId, metadata, options = {}) => {
           },
           { trx: tr },
         )
+
+        if (hasDiffInISBNs) {
+          const exportProfiles = await ExportProfile.query(tr)
+            .where({ bookId, format: 'epub' })
+            .whereNotNull('isbn')
+
+          await Promise.all(
+            exportProfiles.map(async exportProfile => {
+              const { id, isbn } = exportProfile
+
+              if (!isbn) {
+                return false
+              }
+
+              const found = find(updatedBook.podMetadata?.isbns, { isbn })
+
+              if (!found) {
+                logger.info(
+                  `${BOOK_CONTROLLER} updatePODMetadata: cleaning orphan isbn from export profile with id ${id}`,
+                )
+                return updateExportProfile(id, { isbn: null }, { trx: tr })
+              }
+
+              return true
+            }),
+          )
+        }
 
         logger.info(
           `${BOOK_CONTROLLER} updatePODMetadata: book with id ${updatedBook.id} has new POD metadata`,

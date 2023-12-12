@@ -24,7 +24,7 @@ const divisionTypeMapper = {
 
 module.exports = async (bookId, options = {}) => {
   try {
-    const { forceISBN } = options
+    const { forceISBN, isEPUB } = options
     const finalBook = {}
     const book = await Book.findById(bookId)
     const authors = []
@@ -143,11 +143,13 @@ module.exports = async (bookId, options = {}) => {
 
       const clonePODMetadata = { ...book.podMetadata }
 
-      if (forceISBN) {
+      if (isEPUB) {
         const found = find(book?.podMetadata?.isbns, { isbn: forceISBN })
 
         if (found) {
           clonePODMetadata.isbns = [found]
+        } else {
+          clonePODMetadata.isbns = []
         }
       }
 
