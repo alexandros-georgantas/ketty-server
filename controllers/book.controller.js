@@ -63,6 +63,29 @@ const toCamelCase = string =>
     })
     .join('')
 
+const isbnSorter = (a, b) => {
+  const labelA = a.label.toLowerCase()
+  const labelB = b.label.toLowerCase()
+
+  if (labelA < labelB) {
+    return -1
+  }
+
+  if (labelA > labelB) {
+    return 1
+  }
+
+  // names must be equal
+  return 0
+}
+
+const equalArrays = (a, b) => {
+  a.sort(isbnSorter)
+  b.sort(isbnSorter)
+
+  return JSON.stringify(a) === JSON.stringify(b)
+}
+
 const defaultLevelOneItem = {
   type: 'part',
   displayName: 'Part',
@@ -937,15 +960,14 @@ const updatePODMetadata = async (bookId, metadata, options = {}) => {
     const { trx } = options
     return useTransaction(
       async tr => {
-        // console.log('aaaa', metadata)
         const clean = omitBy(metadata, isNil)
-        // console.log('bbbb', clean)
 
-        const exportProfiles = await ExportProfile.query(trx)
-          .where({ bookId, format: 'epub' })
-          .whereNotNull('isbn')
+        const existingBook = await getBook(bookId, { trx: tr })
 
-        // console.log('4444', exportProfiles)
+        const hasDiffInISBNs = !equalArrays(
+          existingBook?.podMetadata?.isbns,
+          clean.isbns,
+        )
 
         const updatedBook = await Book.patchAndFetchById(
           bookId,
@@ -955,26 +977,32 @@ const updatePODMetadata = async (bookId, metadata, options = {}) => {
           { trx: tr },
         )
 
-        await Promise.all(
-          exportProfiles.map(async exportProfile => {
-            const { id, isbn } = exportProfile
+        if (hasDiffInISBNs) {
+          const exportProfiles = await ExportProfile.query(tr)
+            .where({ bookId, format: 'epub' })
+            .whereNotNull('isbn')
 
-            if (!isbn) {
-              return false
-            }
+          await Promise.all(
+            exportProfiles.map(async exportProfile => {
+              const { id, isbn } = exportProfile
 
-            const found = find(updatedBook.podMetadata?.isbns, { isbn })
+              if (!isbn) {
+                return false
+              }
 
-            if (!found) {
-              logger.info(
-                `${BOOK_CONTROLLER} updatePODMetadata: cleaning orphan isbn from export profile with id ${id}`,
-              )
-              return updateExportProfile(id, { isbn: null }, { trx })
-            }
+              const found = find(updatedBook.podMetadata?.isbns, { isbn })
 
-            return true
-          }),
-        )
+              if (!found) {
+                logger.info(
+                  `${BOOK_CONTROLLER} updatePODMetadata: cleaning orphan isbn from export profile with id ${id}`,
+                )
+                return updateExportProfile(id, { isbn: null }, { trx: tr })
+              }
+
+              return true
+            }),
+          )
+        }
 
         logger.info(
           `${BOOK_CONTROLLER} updatePODMetadata: book with id ${updatedBook.id} has new POD metadata`,
