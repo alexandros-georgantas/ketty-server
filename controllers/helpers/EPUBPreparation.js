@@ -374,7 +374,7 @@ const generateTOCNCX = async (book, isbnIndex = null) => {
       },
       docTitle: {
         text: {
-          '#text': book.title,
+          '#text': book.title || 'Untitled',
         },
       },
       navMap: {
@@ -546,7 +546,7 @@ const generateContentOPF = async (book, isbnIndex = null) => {
         '@xmlns:dcterms': 'http://purl.org/dc/terms/',
         '@xmlns:dc': 'http://purl.org/dc/elements/1.1/',
         '@xmlns:ibooks': 'http://apple.com/ibooks/html-extensions',
-        'dc:title': { '#text': title },
+        'dc:title': { '#text': title || 'Untitled' },
         'dc:language': { '#text': 'en' },
 
         meta: metaTemp,
@@ -710,20 +710,10 @@ const EPUBPreparation = async (
   isbn,
 ) => {
   // If an isbn has been selected as a unique identifier, store it here
-  let isbnIndex = null
-
-  if (isbn) {
-    // Bind book to a specific ISBN in book.podMetadata
-    if (isEmpty(book.podMetadata?.isbns)) {
-      throw new Error('Failed to export book with unconfigured ISBN metadata')
-    }
-
-    isbnIndex = findIndex(book.podMetadata.isbns, item => item.isbn === isbn)
-
-    if (isbnIndex < 0) {
-      throw new Error('Failed to export book with unknown ISBN')
-    }
-  }
+  const isbnIndex =
+    findIndex(book?.podMetadata?.isbns, item => item.isbn === isbn) < 0
+      ? null
+      : findIndex(book?.podMetadata?.isbns, item => item.isbn === isbn)
 
   try {
     const templateFiles = await template.getFiles()

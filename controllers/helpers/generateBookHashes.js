@@ -61,6 +61,7 @@ const generateBookHashes = async (
   const stylesheetHash = await generateHash(fs.readFileSync(tempStylesheetPath))
 
   await fs.remove(tempStylesheetPath)
+  const isEPUB = format === 'epub'
 
   const preparedBook = await prepareBook(bookId, template, {
     fileExtension: format,
@@ -75,11 +76,13 @@ const generateBookHashes = async (
   const contentHash = await generateHash(bookHTML)
   const clonePODMetadata = { ...book.podMetadata }
 
-  if (isbn) {
+  if (isEPUB) {
     const found = find(book?.podMetadata?.isbns, { isbn })
 
     if (found) {
       clonePODMetadata.isbns = [found]
+    } else {
+      clonePODMetadata.isbns = []
     }
   }
 
