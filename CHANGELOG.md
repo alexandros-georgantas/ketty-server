@@ -1,3 +1,11 @@
+## [1.15.1](https://gitlab.coko.foundation/ketida/server/compare/v1.15.0...v1.15.1) (2023-12-12)
+
+
+### Bug Fixes
+
+* better handling of isbns for epubs and orphan isbn clean-ups ([d6a481d](https://gitlab.coko.foundation/ketida/server/commit/d6a481d850c8454248d5d74f367b26c17546e019))
+* improvment on orhpan isbn clean-up ([eb99e29](https://gitlab.coko.foundation/ketida/server/commit/eb99e296a21a715dcbdd030b0688de1d27e81c5a))
+
 # [1.15.0](https://gitlab.coko.foundation/ketida/server/compare/v1.14.1...v1.15.0) (2023-12-11)
 
 
