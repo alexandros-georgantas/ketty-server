@@ -1,3 +1,10 @@
+## [1.16.1](https://gitlab.coko.foundation/ketida/server/compare/v1.16.0...v1.16.1) (2023-12-13)
+
+
+### Bug Fixes
+
+* missing custom env variable ([651b47e](https://gitlab.coko.foundation/ketida/server/commit/651b47ea4c76922c8de11c0ac276ec75acc37a6b))
+
 # [1.16.0](https://gitlab.coko.foundation/ketida/server/compare/v1.15.1...v1.16.0) (2023-12-13)
 
 ## [1.15.1](https://gitlab.coko.foundation/ketida/server/compare/v1.15.0...v1.15.1) (2023-12-12)
