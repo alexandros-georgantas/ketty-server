@@ -13,6 +13,10 @@ module.exports = {
             type: 'refactor',
             release: 'minor',
           },
+          {
+            type: 'chore',
+            release: 'minor',
+          },
         ],
       },
     ],
