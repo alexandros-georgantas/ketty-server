@@ -317,10 +317,10 @@ const generateCopyrightsPage = (bookTitle, bookComponent, podMetadata) => {
     isbnText = isbns
       .map(
         item =>
-          '<span class="isbn-item">' +
+          '<li class="isbn-item">' +
           `<span class="isbn-label">${item.label}</span>` +
           `<span class="isbn-number"> ${item.isbn} </span>` +
-          '</span>',
+          '</li>',
       )
       .join('')
   } else {
@@ -335,7 +335,7 @@ const generateCopyrightsPage = (bookTitle, bookComponent, podMetadata) => {
     ${
       copyrightText
         ? `<section class="book-copyrights">${
-            isbnText ? `<p class="isbns">${isbnText}</p>` : ''
+            isbnText ? `<ul class="isbns">${isbnText}</ul>` : ''
           }<p class="main-content">${copyrightText}</p></section>`
         : ''
     }
