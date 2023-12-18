@@ -26,12 +26,12 @@ module.exports = (
       JSON.parse(config.get('featureBookStructure'))) ||
       false)
 
-  if (!content) return { content: container, hasMath }
+  if (!content && !includeInTOC) return { content: container, hasMath }
 
   let $
 
-  if (bookComponent && content) {
-    $ = cheerio.load(bookComponent.content)
+  if (bookComponent) {
+    $ = cheerio.load(bookComponent.content || '<p></p>')
   }
 
   if (componentType === 'endnotes') {
