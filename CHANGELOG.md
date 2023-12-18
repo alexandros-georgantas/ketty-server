@@ -1,3 +1,13 @@
+# [1.17.0](https://gitlab.coko.foundation/ketida/server/compare/v1.16.1...v1.17.0) (2023-12-18)
+
+
+### Bug Fixes
+
+* copyright page isbn list ([7fc56a6](https://gitlab.coko.foundation/ketida/server/commit/7fc56a62da55adefdbae56803522f651b3d829aa))
+* export empty book ([f8be87c](https://gitlab.coko.foundation/ketida/server/commit/f8be87c481eafd3e6950241944ffd4b5f4d00935))
+* isbn html list structure ([288145d](https://gitlab.coko.foundation/ketida/server/commit/288145d64fdb9872abdeb414b748fae216a16c94))
+* isbn html structure ([5716a00](https://gitlab.coko.foundation/ketida/server/commit/5716a00325411119d124595f98d5c2e111e858d1))
+
 ## [1.16.1](https://gitlab.coko.foundation/ketida/server/compare/v1.16.0...v1.16.1) (2023-12-13)
 
 
