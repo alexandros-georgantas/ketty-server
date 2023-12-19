@@ -463,10 +463,10 @@
     stylelint-order "^5.0.0"
     stylelint-processor-styled-components "^1.10.0"
 
-"@coko/server@^3.4.1":
-  version "3.4.1"
-  resolved "https://registry.yarnpkg.com/@coko/server/-/server-3.4.1.tgz#49ce295ee1307edf76ab15368b93402f38b95451"
-  integrity sha512-WBbOtxfR+Al8Ohk3Zg3icb1EUtQJM8y/QYLedLv59lYPyrqOuzbKwHY1fGR4+mPbgEERs57XWp9fhyP9FvQknA==
+"@coko/server@^3.5.0":
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/@coko/server/-/server-3.5.0.tgz#2fa7d874d8004f23af95ebdd36db7e48e51c309a"
+  integrity sha512-jOkOpR4vZl3t1C0uI3+ps43MlbPrdY1v5/My/HB/iTAZJdid2WOhGreSa6HdLQqjC9fVVbIpcUtE2bI/4RkCeg==
   dependencies:
     "@pubsweet/base-model" "^4.0.10"
     "@pubsweet/component-send-email" "^0.4.13"
