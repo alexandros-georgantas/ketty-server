@@ -7,9 +7,9 @@ const config = require('config')
 const map = require('lodash/map')
 const find = require('lodash/find')
 
-const {
-  connectToFileStorage,
-} = require('@coko/server/src/services/fileStorage')
+// const {
+//   connectToFileStorage,
+// } = require('@coko/server/src/services/fileStorage')
 
 const Template = require('../../models/template/template.model')
 
@@ -197,8 +197,6 @@ const createTemplate = async (
       const thumbnailPath = path.join(assetsRoot, thumbnailFile)
 
       if (fs.existsSync(thumbnailPath)) {
-        // const absoluteThumbnailPath = path.join(cssPath, cssFile)
-
         const thumbnail = await createFile(
           fs.createReadStream(thumbnailPath),
           thumbnailFile,
@@ -208,7 +206,6 @@ const createTemplate = async (
           newTemplate.id,
           {
             trx,
-            // forceObjectKeyValue: `templates/${newTemplate.id}/${thumbnailFile}`,
           },
         )
 
@@ -222,19 +219,16 @@ const createTemplate = async (
       return true
     }
 
-    // logger.info('About to create a new template')
-
-    // logger.info(`Template created with id ${templateExists.id}`)
-
     const files = await File.find({ objectId: templateExists.id }, { trx })
 
     const fileIds = files.result.map(file => file.id)
 
-    await connectToFileStorage()
+    // await connectToFileStorage()
 
     logger.info(
       `deleting files with ids ${fileIds} associated with template id ${templateExists.id}`,
     )
+
     await deleteFiles(fileIds, true, { trx })
 
     const fontsPath = path.join(assetsRoot, 'fonts')
