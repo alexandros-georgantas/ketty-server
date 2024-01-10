@@ -1,3 +1,10 @@
+## [1.19.1](https://gitlab.coko.foundation/ketida/server/compare/v1.19.0...v1.19.1) (2024-01-10)
+
+
+### Bug Fixes
+
+* try to recreate template files ([5702010](https://gitlab.coko.foundation/ketida/server/commit/5702010ecf7d331871084a9d7a1cf5be333ddc41))
+
 # [1.19.0](https://gitlab.coko.foundation/ketida/server/compare/v1.18.0...v1.19.0) (2023-12-22)
 
 # [1.18.0](https://gitlab.coko.foundation/ketida/server/compare/v1.17.0...v1.18.0) (2023-12-19)
