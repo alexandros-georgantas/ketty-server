@@ -233,14 +233,10 @@ const createTemplate = async (
       await deleteFiles(fileIds, true, { trx })
     } catch (e) {
       if (e.message.includes('The specified key does not exist.')) {
-        // logger.error(
-        //   `Corrupted template with id ${templateExists.id}. All the associated db records representing the files of this template will be removed. The template itself will be removed too. If you want to create this template again you should manually run the templates seed script`,
-        // )
         logger.error(
           `Corrupted template with id ${templateExists.id}. All the associated files will be removed from the db and will be recreated`,
         )
         await File.deleteByIds(fileIds)
-        // return Template.deleteById(templateExists.id)
       }
     }
 
