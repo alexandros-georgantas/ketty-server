@@ -115,7 +115,7 @@ const seedTemplates = async () => {
             const shouldBeDefault = foundTemplateConfig?.default || false
 
             const epubData = {
-              name,
+              name: name.toLowerCase(),
               author,
               target: 'epub',
               isDefault: shouldBeDefault,

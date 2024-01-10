@@ -78,7 +78,7 @@ const epubcheckerHandler = async epubPath => {
               )
             }
 
-            return reject(new Error(`Request failed with message: ${err.code}`))
+            return reject(err.message)
           }
 
           const { status, data } = response
@@ -127,7 +127,7 @@ const icmlHandler = async icmlTempPath => {
               )
             }
 
-            return reject(new Error(`Request failed with message: ${err.code}`))
+            return reject(err.message)
           }
 
           const { status, data } = response
@@ -184,7 +184,7 @@ const pdfHandler = async (zipPath, outputPath, PDFFilename) => {
               )
             }
 
-            return reject(new Error(`Request failed with message: ${err.code}`))
+            return reject(err.message)
           }
 
           const { status, data } = response
@@ -248,7 +248,7 @@ const xsweetHandler = async (bookComponentId, filePath) => {
               )
             }
 
-            return reject(new Error(`Request failed with message: ${err.code}`))
+            return reject(err.message)
           }
 
           const { status, data } = response
@@ -305,7 +305,7 @@ const pagedPreviewerLink = async (dirPath, previewerOptions = undefined) => {
               )
             }
 
-            return reject(new Error(`Request failed with message: ${err.code}`))
+            return reject(err.message)
           }
 
           const { status, data } = response

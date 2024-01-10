@@ -15,15 +15,20 @@ const {
 } = require('../api/graphql/bookComponent/constants')
 
 const tempDirectoryCleanUp =
-  JSON.parse(config.get('tempDirectoryCleanUp')) || false
+  (config.has('tempDirectoryCleanUp') &&
+    JSON.parse(config.get('tempDirectoryCleanUp'))) ||
+  false
 
 // default run every one hour
 const tempDirectoryCRONJobSchedule =
-  config.get('tempDirectoryCRONJobSchedule') || '0 * * * *'
+  (config.has('tempDirectoryCRONJobSchedule') &&
+    config.get('tempDirectoryCRONJobSchedule')) ||
+  '0 * * * *'
 
 // default is 30 minutes
 const tempDirectoryCRONJobOffset =
-  (config.get('tempDirectoryCRONJobOffset') &&
+  (config.has('tempDirectoryCRONJobOffset') &&
+    config.get('tempDirectoryCRONJobOffset') &&
     parseInt(config.get('tempDirectoryCRONJobOffset'), 10)) ||
   1800000
 
