@@ -7,9 +7,9 @@ const config = require('config')
 const map = require('lodash/map')
 const find = require('lodash/find')
 
-// const {
-//   connectToFileStorage,
-// } = require('@coko/server/src/services/fileStorage')
+const {
+  connectToFileStorage,
+} = require('@coko/server/src/services/fileStorage')
 
 const Template = require('../../models/template/template.model')
 
@@ -77,6 +77,8 @@ const createTemplate = async (
 ) => {
   try {
     const { trx } = options
+
+    await connectToFileStorage()
 
     const featurePODEnabled =
       config.has('featurePOD') &&
@@ -223,13 +225,20 @@ const createTemplate = async (
 
     const fileIds = files.result.map(file => file.id)
 
-    // await connectToFileStorage()
-
     logger.info(
       `deleting files with ids ${fileIds} associated with template id ${templateExists.id}`,
     )
 
-    await deleteFiles(fileIds, true, { trx })
+    try {
+      await deleteFiles(fileIds, true, { trx })
+    } catch (e) {
+      if (e.message.includes('The specified key does not exist.')) {
+        logger.error(
+          `Corrupted template with id ${templateExists.id}. All the associated files will be removed from the db and will be recreated`,
+        )
+        await File.deleteByIds(fileIds)
+      }
+    }
 
     const fontsPath = path.join(assetsRoot, 'fonts')
 
