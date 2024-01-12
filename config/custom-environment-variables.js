@@ -33,6 +33,7 @@ module.exports = {
     },
   },
   clientUrl: 'CLIENT_URL',
+  WSServerURL: 'WEBSOCKET_SERVER_URL',
   services: {
     epubChecker: {
       clientId: 'SERVICE_EPUB_CHECKER_CLIENT_ID',
