@@ -1,3 +1,11 @@
+# [1.20.0](https://gitlab.coko.foundation/ketida/server/compare/v1.19.1...v1.20.0) (2024-01-12)
+
+
+### Bug Fixes
+
+* remove unused title from addBookComponent ([7d602bf](https://gitlab.coko.foundation/ketida/server/commit/7d602bfb624c70922d9c5fb7cf6a190ef1d31d74))
+* **services:** added new env variable for fixing ws function ([024a86f](https://gitlab.coko.foundation/ketida/server/commit/024a86ff03d958d716b5273de24f555a889e04ec))
+
 ## [1.19.1](https://gitlab.coko.foundation/ketida/server/compare/v1.19.0...v1.19.1) (2024-01-10)
 
 
