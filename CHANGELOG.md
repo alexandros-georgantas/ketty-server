@@ -1,3 +1,10 @@
+## [1.20.1](https://gitlab.coko.foundation/ketida/server/compare/v1.20.0...v1.20.1) (2024-01-12)
+
+
+### Bug Fixes
+
+* fix export to epub for ketida v1 ([d3d5d32](https://gitlab.coko.foundation/ketida/server/commit/d3d5d32fd46ddabfb14e2263219510c731e8fdd2))
+
 # [1.20.0](https://gitlab.coko.foundation/ketida/server/compare/v1.19.1...v1.20.0) (2024-01-12)
 
 
