@@ -278,7 +278,7 @@ const generateTOCNCX = async (book, isbnIndex = null) => {
   // Lookup for EPub unique id; if undefined, a uuid is used
   let identifier
 
-  if (!isbn && !isEmpty(podMetadata.isbns)) {
+  if (!isbn && !isEmpty(podMetadata?.isbns)) {
     if (isbnIndex !== null) {
       identifier = get(podMetadata, ['isbns', isbnIndex, 'isbn'])
     }
@@ -410,11 +410,11 @@ const generateContentOPF = async (book, isbnIndex = null) => {
   // Lookup for EPub unique id; if undefined, a uuid is used
   let identifiers
 
-  if (!isbn && !isEmpty(podMetadata.isbns)) {
+  if (!isbn && !isEmpty(podMetadata?.isbns)) {
     // Content of "podMetadata.isbns"
     identifiers = podMetadata.isbns.map(item => {
       return {
-        // Qualify/extend idenifier names when there are multiple identifiers
+        // Qualify/extend identifiers names when there are multiple identifiers
         idExtension:
           podMetadata.isbns.length > 1 || isbnIndex === null
             ? `-${trim(item.label.replace(/[^A-Za-z0-9]+/g, '-'), '-')}`
