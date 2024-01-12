@@ -212,14 +212,13 @@ const ingestWordFileHandler = async (_, { bookComponentFiles }, ctx) => {
 
 const addBookComponentHandler = async (_, { input }, ctx, info) => {
   try {
-    const { divisionId, bookId, componentType, title } = input
+    const { divisionId, bookId, componentType } = input
     const pubsub = await pubsubManager.getPubsub()
 
     const newBookComponent = await addBookComponent(
       divisionId,
       bookId,
       componentType,
-      title,
     )
 
     pubsub.publish(BOOK_COMPONENT_ADDED, {
@@ -239,14 +238,13 @@ const addBookComponentHandler = async (_, { input }, ctx, info) => {
 
 const podAddBookComponentHandler = async (_, { input }, ctx, info) => {
   try {
-    const { divisionId, bookId, componentType, title } = input
+    const { divisionId, bookId, componentType } = input
     const pubsub = await pubsubManager.getPubsub()
 
     const newBookComponent = await addBookComponent(
       divisionId,
       bookId,
       componentType,
-      title,
     )
 
     pubsub.publish(BOOK_COMPONENT_ADDED, {
