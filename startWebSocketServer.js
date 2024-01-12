@@ -26,6 +26,13 @@ const startWSServer = async () => {
         )
       }
 
+      const WSServerURL = config.has('WSServerURL')
+        ? config.get('WSServerURL')
+        : undefined
+
+      if (!WSServerURL)
+        throw new Error('WSServerURL variable should not be undefined')
+
       const wsPort = config['pubsweet-server'].WSServerPort || 3333
 
       WSServer = new WebSocketServer({
@@ -35,6 +42,7 @@ const startWSServer = async () => {
       })
 
       logger.info(`WS server started on port ${wsPort}`)
+      logger.info(`Websocket server public URL is ${WSServerURL}`)
     }
 
     // WS_SERVER EVENT LISTENERS SECTION
