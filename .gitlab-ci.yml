@@ -40,7 +40,7 @@ release:
   stage: release
   only:
     - main
-  image: node:18-bullseye
+  image: node:20-bullseye
   before_script:
     - npm i -g semantic-release @semantic-release/changelog @semantic-release/git @semantic-release/gitlab
   script:
