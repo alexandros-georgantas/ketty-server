@@ -12,17 +12,18 @@ const deleteTemplates = async () => {
   try {
     const templates = await Template.query()
 
+    await connectToFileStorage()
+
     await Promise.all(
       templates.map(async template => {
         const files = await File.find({ objectId: template.id })
 
         const fileIds = files.result.map(file => file.id)
 
-        await connectToFileStorage()
-
         logger.info(
           `deleting files with ids ${fileIds} associated with template id ${template.id}`,
         )
+
         await deleteFiles(fileIds, true)
 
         logger.info(`deleting template with id ${template.id}`)

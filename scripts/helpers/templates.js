@@ -120,22 +120,25 @@ const createTemplate = async (
 
     let templateExists
 
+    const constructedName = featurePODEnabled
+      ? name
+      : `${name} (${notes})`.toLowerCase()
+
     if (trimSize) {
-      templateExists = await Template.findOne({
-        name: featurePODEnabled ? name : `${name} (${notes})`,
-        target,
-        trimSize,
-        notes,
-      })
+      templateExists = await Template.query(trx)
+        .whereRaw('lower("name") = ?', constructedName)
+        .andWhere({ target, trimSize, notes })
     } else {
-      templateExists = await Template.findOne({
-        name: featurePODEnabled ? name : `${name} (${notes})`,
-        target,
-        notes,
-      })
+      templateExists = await Template.query(trx)
+        .whereRaw('lower("name") = ?', constructedName)
+        .andWhere({ target, notes })
     }
 
-    if (!templateExists) {
+    if (templateExists.length > 1) {
+      throw new Error('multiple records found for the same template')
+    }
+
+    if (templateExists.length === 0) {
       logger.info('About to create a new template')
 
       const newTemplate = await Template.insert(
@@ -196,37 +199,39 @@ const createTemplate = async (
         )
       }
 
-      const thumbnailPath = path.join(assetsRoot, thumbnailFile)
+      if (thumbnailFile) {
+        const thumbnailPath = path.join(assetsRoot, thumbnailFile)
 
-      if (fs.existsSync(thumbnailPath)) {
-        const thumbnail = await createFile(
-          fs.createReadStream(thumbnailPath),
-          thumbnailFile,
-          null,
-          null,
-          [],
-          newTemplate.id,
-          {
-            trx,
-          },
-        )
+        if (fs.existsSync(thumbnailPath)) {
+          const thumbnail = await createFile(
+            fs.createReadStream(thumbnailPath),
+            thumbnailFile,
+            null,
+            null,
+            [],
+            newTemplate.id,
+            {
+              trx,
+            },
+          )
 
-        await Template.patchAndFetchById(
-          newTemplate.id,
-          { thumbnailId: thumbnail.id },
-          { trx },
-        )
+          await Template.patchAndFetchById(
+            newTemplate.id,
+            { thumbnailId: thumbnail.id },
+            { trx },
+          )
+        }
       }
 
       return true
     }
 
-    const files = await File.find({ objectId: templateExists.id }, { trx })
+    const files = await File.find({ objectId: templateExists[0].id }, { trx })
 
     const fileIds = files.result.map(file => file.id)
 
     logger.info(
-      `deleting files with ids ${fileIds} associated with template id ${templateExists.id}`,
+      `deleting files with ids ${fileIds} associated with template id ${templateExists[0].id}`,
     )
 
     try {
@@ -234,7 +239,7 @@ const createTemplate = async (
     } catch (e) {
       if (e.message.includes('The specified key does not exist.')) {
         logger.error(
-          `Corrupted template with id ${templateExists.id}. All the associated files will be removed from the db and will be recreated`,
+          `Corrupted template with id ${templateExists[0].id}. All the associated files will be removed from the db and will be recreated`,
         )
         await File.deleteByIds(fileIds)
       }
@@ -255,10 +260,10 @@ const createTemplate = async (
             null,
             null,
             [],
-            templateExists.id,
+            templateExists[0].id,
             {
               trx,
-              forceObjectKeyValue: `templates/${templateExists.id}/${font}`,
+              forceObjectKeyValue: `templates/${templateExists[0].id}/${font}`,
             },
           )
         }),
@@ -276,34 +281,36 @@ const createTemplate = async (
         null,
         null,
         [],
-        templateExists.id,
+        templateExists[0].id,
         {
           trx,
-          forceObjectKeyValue: `templates/${templateExists.id}/${cssFile}`,
+          forceObjectKeyValue: `templates/${templateExists[0].id}/${cssFile}`,
         },
       )
     }
 
-    const thumbnailPath = path.join(assetsRoot, thumbnailFile)
+    if (thumbnailFile) {
+      const thumbnailPath = path.join(assetsRoot, thumbnailFile)
 
-    if (fs.existsSync(thumbnailPath)) {
-      const thumbnail = await createFile(
-        fs.createReadStream(thumbnailPath),
-        thumbnailFile,
-        null,
-        null,
-        [],
-        templateExists.id,
-        {
-          trx,
-        },
-      )
+      if (fs.existsSync(thumbnailPath)) {
+        const thumbnail = await createFile(
+          fs.createReadStream(thumbnailPath),
+          thumbnailFile,
+          null,
+          null,
+          [],
+          templateExists[0].id,
+          {
+            trx,
+          },
+        )
 
-      await Template.patchAndFetchById(
-        templateExists.id,
-        { thumbnailId: thumbnail.id, default: isDefault },
-        { trx },
-      )
+        await Template.patchAndFetchById(
+          templateExists[0].id,
+          { thumbnailId: thumbnail.id, default: isDefault },
+          { trx },
+        )
+      }
     }
 
     return true
