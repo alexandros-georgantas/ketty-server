@@ -1,3 +1,10 @@
+## [1.20.2](https://gitlab.coko.foundation/ketida/server/compare/v1.20.1...v1.20.2) (2024-01-15)
+
+
+### Bug Fixes
+
+* make template checks case insensitive and migrate everything to lower case ([b2325ba](https://gitlab.coko.foundation/ketida/server/commit/b2325ba1a470944f9674b2b13c560986c54ef08b))
+
 ## [1.20.1](https://gitlab.coko.foundation/ketida/server/compare/v1.20.0...v1.20.1) (2024-01-12)
 
 
