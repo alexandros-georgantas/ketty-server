@@ -148,7 +148,7 @@ const unlockOrphanLocks = async bookComponentIdsWithLock => {
   }
 }
 
-const cleanUpLocks = async (immediate = false) => {
+const cleanUpLocks = async () => {
   try {
     const pubsub = await pubsubManager.getPubsub()
     const serverIdentifier = config.get('serverIdentifier')

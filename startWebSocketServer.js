@@ -11,6 +11,7 @@ const {
 } = require('./services/websocket.service')
 
 const { unlockBookComponent } = require('./services/bookComponentLock.service')
+const { updateIsActiveAt } = require('./controllers/lock.controller')
 
 let WSServer
 
@@ -53,13 +54,23 @@ const startWSServer = async () => {
       // INITIALIZATION SECTION END
 
       // WS EVENT LISTENERS SECTION
-      ws.on('pong', () => heartbeat(ws))
+      ws.on('pong', async () => {
+        heartbeat(ws)
 
+        const { bookComponentId, userId, tabId } = ws
+
+        return updateIsActiveAt(bookComponentId, tabId, userId)
+      })
+
+      logger.info(
+        `current connected clients via WS are ${WSServer.clients.size}`,
+      )
       ws.on('open', () => {
         logger.info(
           `WS open event for book component with id ${ws.bookComponentId}, tabId ${ws.tabId} and userId ${ws.userId}`,
         )
       })
+
       ws.on('close', async () => {
         logger.info(
           `WS close event for book component with id ${ws.bookComponentId}, tabId ${ws.tabId} and userId ${ws.userId}`,
@@ -69,12 +80,17 @@ const startWSServer = async () => {
           return unlockBookComponent(ws.bookComponentId, ws.userId, ws.tabId)
         }
 
+        logger.info(
+          `current connected clients via WS are ${WSServer.clients.size}`,
+        )
+
         return false
       })
       // WS EVENT LISTENERS SECTION END
     })
-
+    logger.info(`############ INIT WS HEARTBEAT ############`)
     HEARTBEAT_INTERVAL_REFERENCE = initializeHeartbeat(WSServer)
+    logger.info(`########### INIT LOCK FAIL-SAFE ###########`)
     FAILSAFE_UNLOCK_REFERENCE = initializeFailSafeUnlocking(WSServer)
 
     WSServer.on('close', async () => {

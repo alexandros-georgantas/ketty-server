@@ -8,6 +8,11 @@ const foreignType = {
   enum: ['book', 'bookCollection', 'bookComponent', 'division', 'file'],
 }
 
+const dateNotNullable = {
+  type: ['string', 'object'],
+  format: 'date-time',
+}
+
 class Lock extends Base {
   constructor(properties) {
     super(properties)
@@ -32,6 +37,7 @@ class Lock extends Base {
         userAgent: string,
         userId: id,
         tabId: id,
+        isActiveAt: dateNotNullable,
         serverIdentifier: id,
       },
     }
