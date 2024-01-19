@@ -61,10 +61,11 @@ const startWSServer = async () => {
 
         return updateIsActiveAt(bookComponentId, tabId, userId)
       })
-
+      logger.info(`############ WEBSOCKET SERVER INFO ############`)
       logger.info(
         `current connected clients via WS are ${WSServer.clients.size}`,
       )
+      logger.info(`##################### END #####################`)
       ws.on('open', () => {
         logger.info(
           `WS open event for book component with id ${ws.bookComponentId}, tabId ${ws.tabId} and userId ${ws.userId}`,
@@ -77,12 +78,13 @@ const startWSServer = async () => {
         )
 
         if (ws.bookComponentId && ws.userId && ws.tabId) {
+          logger.info(`############ WEBSOCKET SERVER INFO ############`)
+          logger.info(
+            `current connected clients via WS are ${WSServer.clients.size}`,
+          )
+          logger.info(`##################### END #####################`)
           return unlockBookComponent(ws.bookComponentId, ws.userId, ws.tabId)
         }
-
-        logger.info(
-          `current connected clients via WS are ${WSServer.clients.size}`,
-        )
 
         return false
       })
@@ -90,9 +92,10 @@ const startWSServer = async () => {
     })
     logger.info(`############ INIT WS HEARTBEAT ############`)
     HEARTBEAT_INTERVAL_REFERENCE = initializeHeartbeat(WSServer)
+    logger.info(`################## DONE ###################`)
     logger.info(`########### INIT LOCK FAIL-SAFE ###########`)
     FAILSAFE_UNLOCK_REFERENCE = initializeFailSafeUnlocking(WSServer)
-
+    logger.info(`################## DONE ###################`)
     WSServer.on('close', async () => {
       clearInterval(HEARTBEAT_INTERVAL_REFERENCE)
       clearInterval(FAILSAFE_UNLOCK_REFERENCE)

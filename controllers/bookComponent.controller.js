@@ -544,7 +544,7 @@ const unlockBookComponent = async (
   actingUserId = undefined,
 ) => {
   try {
-    const serverIdentifier = config.get('serverIdentifier')
+    // const serverIdentifier = config.get('serverIdentifier')
 
     return useTransaction(async tr => {
       let status = STATUSES.UNLOCKED_BY_OWNER
@@ -553,7 +553,7 @@ const unlockBookComponent = async (
         {
           foreignId: bookComponentId,
           foreignType: 'bookComponent',
-          serverIdentifier,
+          // serverIdentifier,
         },
         { trx: tr },
       )
@@ -570,7 +570,7 @@ const unlockBookComponent = async (
         return Lock.query(tr).delete().where({
           foreignId: bookComponentId,
           foreignType: 'bookComponent',
-          serverIdentifier,
+          // serverIdentifier,
         })
       }
 
@@ -591,7 +591,7 @@ const unlockBookComponent = async (
       return Lock.query(tr).delete().where({
         foreignId: bookComponentId,
         foreignType: 'bookComponent',
-        serverIdentifier,
+        // serverIdentifier,
       })
     }, {})
   } catch (e) {
@@ -602,7 +602,7 @@ const unlockBookComponent = async (
 
 const lockBookComponent = async (bookComponentId, tabId, userAgent, userId) => {
   try {
-    const serverIdentifier = config.get('serverIdentifier')
+    // const serverIdentifier = config.get('serverIdentifier')
 
     const { result: locks } = await Lock.find({ foreignId: bookComponentId })
 
@@ -649,7 +649,7 @@ const lockBookComponent = async (bookComponentId, tabId, userAgent, userId) => {
       userAgent,
       tabId,
       userId,
-      serverIdentifier,
+      // serverIdentifier,
     })
 
     const status = STATUSES.FINE

@@ -1,5 +1,4 @@
 const { pubsubManager, useTransaction, logger } = require('@coko/server')
-const config = require('config')
 
 const { BookComponent, Lock, BookComponentState } = require('../models').models
 
@@ -11,9 +10,14 @@ const {
   STATUSES,
 } = require('../api/graphql/bookComponent/constants')
 
+const {
+  getOrphanLocks,
+  getInactiveLocks,
+} = require('../controllers/lock.controller')
+
 const unlockBookComponent = async (bookComponentId, userId, tabId) => {
   try {
-    const serverIdentifier = config.get('serverIdentifier')
+    // const serverIdentifier = config.get('serverIdentifier')
     const pubsub = await pubsubManager.getPubsub()
 
     const updatedBookComponent = await useTransaction(async tr => {
@@ -21,9 +25,13 @@ const unlockBookComponent = async (bookComponentId, userId, tabId) => {
         `server remove lock for book component ${bookComponentId} with tabId ${tabId} and user ${userId}`,
       )
 
+      // const affectedRows = await Lock.query(tr)
+      //   .delete()
+      //   .where({ foreignId: bookComponentId, userId, tabId, serverIdentifier })
+
       const affectedRows = await Lock.query(tr)
         .delete()
-        .where({ foreignId: bookComponentId, userId, tabId, serverIdentifier })
+        .where({ foreignId: bookComponentId, userId, tabId })
 
       logger.info(`locks removed ${affectedRows}`)
       await BookComponentState.query(tr)
@@ -50,17 +58,20 @@ const unlockBookComponent = async (bookComponentId, userId, tabId) => {
   }
 }
 
-const unlockOrphanLocks = async bookComponentIdsWithLock => {
+const unlockOrphanLocks = async bookComponentIdsWithActiveConnection => {
   try {
     const pubsub = await pubsubManager.getPubsub()
-    const serverIdentifier = config.get('serverIdentifier')
+    // const serverIdentifier = config.get('serverIdentifier')
     logger.info(`executing locks clean-up procedure for orphan locks`)
     let removeCounter = 0
 
     await useTransaction(async tr => {
-      const orphanLocks = await Lock.query(tr)
-        .whereNotIn('foreignId', bookComponentIdsWithLock)
-        .andWhere({ serverIdentifier })
+      const orphanLocks = await getOrphanLocks(
+        bookComponentIdsWithActiveConnection,
+        {
+          trx: tr,
+        },
+      )
 
       const orphanBookComponentIds = orphanLocks.map(lock => lock.foreignId)
 
@@ -75,8 +86,12 @@ const unlockOrphanLocks = async bookComponentIdsWithLock => {
           orphanLockedBookComponents.map(async lockedBookComponent => {
             const { id: bookComponentId } = lockedBookComponent
 
+            // const affected = await Lock.query(tr).delete().where({
+            //   serverIdentifier,
+            //   foreignId: bookComponentId,
+            //   foreignType: 'bookComponent',
+            // })
             const affected = await Lock.query(tr).delete().where({
-              serverIdentifier,
               foreignId: bookComponentId,
               foreignType: 'bookComponent',
             })
@@ -123,8 +138,12 @@ const unlockOrphanLocks = async bookComponentIdsWithLock => {
                 `removing lock for unknown book component with id ${unknownBC}`,
               )
 
+              // const affected = await Lock.query(tr).delete().where({
+              //   serverIdentifier,
+              //   foreignId: unknownBC,
+              //   foreignType: 'bookComponent',
+              // })
               const affected = await Lock.query(tr).delete().where({
-                serverIdentifier,
                 foreignId: unknownBC,
                 foreignType: 'bookComponent',
               })
@@ -151,15 +170,16 @@ const unlockOrphanLocks = async bookComponentIdsWithLock => {
 const cleanUpLocks = async () => {
   try {
     const pubsub = await pubsubManager.getPubsub()
-    const serverIdentifier = config.get('serverIdentifier')
+    // const serverIdentifier = config.get('serverIdentifier')
     logger.info(`executing locks clean-up procedure`)
     let removeCounter = 0
 
     await useTransaction(async tr => {
-      const { result: locks } = await Lock.find(
-        { serverIdentifier },
-        { trx: tr },
-      )
+      // const { result: locks } = await Lock.find(
+      //   { serverIdentifier },
+      //   { trx: tr },
+      // )
+      const locks = await getInactiveLocks({ trx: tr })
 
       const bookComponentIds = locks.map(lock => lock.foreignId)
 
@@ -175,8 +195,12 @@ const cleanUpLocks = async () => {
           lockedBookComponents.map(async lockedBookComponent => {
             const { id: bookComponentId } = lockedBookComponent
 
+            // const affected = await Lock.query(tr).delete().where({
+            //   serverIdentifier,
+            //   foreignId: bookComponentId,
+            //   foreignType: 'bookComponent',
+            // })
             const affected = await Lock.query(tr).delete().where({
-              serverIdentifier,
               foreignId: bookComponentId,
               foreignType: 'bookComponent',
             })
@@ -223,8 +247,12 @@ const cleanUpLocks = async () => {
                 `removing lock for unknown book component with id ${unknownBC}`,
               )
 
+              // const affected = await Lock.query(tr).delete().where({
+              //   serverIdentifier,
+              //   foreignId: unknownBC,
+              //   foreignType: 'bookComponent',
+              // })
               const affected = await Lock.query(tr).delete().where({
-                serverIdentifier,
                 foreignId: unknownBC,
                 foreignType: 'bookComponent',
               })

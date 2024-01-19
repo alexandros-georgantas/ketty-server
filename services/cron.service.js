@@ -9,6 +9,7 @@ const { BookComponent, Lock, BookComponentState, BookComponentTranslation } =
   require('../models').models
 
 const { BOOK_UPDATED } = require('../api/graphql/book/constants')
+const { getInactiveLocks } = require('../controllers/lock.controller')
 
 const {
   BOOK_COMPONENT_UPDATED,
@@ -102,14 +103,15 @@ cron.schedule('*/10 * * * *', async () => {
   // run every 10 minutes
   try {
     const pubsub = await pubsubManager.getPubsub()
-    const serverIdentifier = config.get('serverIdentifier')
+    // const serverIdentifier = config.get('serverIdentifier')
     logger.info(`executing locks clean-up procedure for idle locks`)
 
     await useTransaction(async tr => {
-      const { result: locks } = await Lock.find(
-        { serverIdentifier },
-        { trx: tr },
-      )
+      // const { result: locks } = await Lock.find(
+      //   { serverIdentifier },
+      //   { trx: tr },
+      // )
+      const locks = await getInactiveLocks({ trx: tr })
 
       const bookComponentIds = locks.map(lock => lock.foreignId)
 
@@ -124,8 +126,11 @@ cron.schedule('*/10 * * * *', async () => {
             const lastUpdate = new Date(updated).getTime()
             const now = new Date().getTime()
 
+            // const associatedLock = find(locks, {
+            //   serverIdentifier,
+            //   foreignId: bookComponentId,
+            // })
             const associatedLock = find(locks, {
-              serverIdentifier,
               foreignId: bookComponentId,
             })
 
@@ -140,11 +145,13 @@ cron.schedule('*/10 * * * *', async () => {
               timeElapsedFromLockAcquirement > 1800000
             ) {
               // one day of inactivity in content and 30 minutes since lock acquired
+              // await Lock.query(tr).delete().where({
+              //   serverIdentifier,
+              //   foreignId: bookComponentId,
+              // })
               await Lock.query(tr).delete().where({
-                serverIdentifier,
                 foreignId: bookComponentId,
               })
-
               await BookComponentState.query(tr)
                 .patch({ status: 102 })
                 .where({ bookComponentId })
