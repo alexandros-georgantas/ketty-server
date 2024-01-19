@@ -588,7 +588,7 @@ const generateContentOPF = async (book, isbnIndex = null) => {
       }
     })
 
-    if (isbnIndex === null) {
+    if (isbnIndex === null && !isbn) {
       // None of the isbns have been selected so use Book.uuid as the unique id
       contentOPF.package.metadata['dc:identifier'].push(uuidBook)
     }
