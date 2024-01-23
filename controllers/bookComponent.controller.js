@@ -56,8 +56,6 @@ const getBookComponentAndAcquireLock = async (
 ) => {
   try {
     const { trx } = options
-    const serverIdentifier = config.get('serverIdentifier')
-
     logger.info(`>>> fetching book component with id ${bookComponentId}`)
 
     const bookComponent = await useTransaction(
@@ -80,7 +78,6 @@ const getBookComponentAndAcquireLock = async (
             foreignType: 'bookComponent',
             tabId,
             userId,
-            serverIdentifier,
           })
 
           logger.info(
@@ -544,8 +541,6 @@ const unlockBookComponent = async (
   actingUserId = undefined,
 ) => {
   try {
-    // const serverIdentifier = config.get('serverIdentifier')
-
     return useTransaction(async tr => {
       let status = STATUSES.UNLOCKED_BY_OWNER
 
@@ -553,7 +548,6 @@ const unlockBookComponent = async (
         {
           foreignId: bookComponentId,
           foreignType: 'bookComponent',
-          // serverIdentifier,
         },
         { trx: tr },
       )
@@ -570,7 +564,6 @@ const unlockBookComponent = async (
         return Lock.query(tr).delete().where({
           foreignId: bookComponentId,
           foreignType: 'bookComponent',
-          // serverIdentifier,
         })
       }
 
@@ -591,7 +584,6 @@ const unlockBookComponent = async (
       return Lock.query(tr).delete().where({
         foreignId: bookComponentId,
         foreignType: 'bookComponent',
-        // serverIdentifier,
       })
     }, {})
   } catch (e) {
@@ -602,8 +594,6 @@ const unlockBookComponent = async (
 
 const lockBookComponent = async (bookComponentId, tabId, userAgent, userId) => {
   try {
-    // const serverIdentifier = config.get('serverIdentifier')
-
     const { result: locks } = await Lock.find({ foreignId: bookComponentId })
 
     if (locks.length > 1) {
@@ -612,13 +602,6 @@ const lockBookComponent = async (bookComponentId, tabId, userAgent, userId) => {
       )
 
       await Lock.deleteByIds(map(locks, lock => lock.id))
-      // .query()
-      //   .delete()
-      //   .whereIn(
-      //     'id',
-      //     map(locks, lock => lock.id),
-      //   )
-      //   .andWhere(serverIdentifier)
 
       throw new Error(
         `corrupted lock for the book component with id ${bookComponentId}, all locks deleted`,
@@ -629,7 +612,6 @@ const lockBookComponent = async (bookComponentId, tabId, userAgent, userId) => {
       if (locks[0].userId !== userId) {
         const errorMsg = `There is a lock already for this book component for the user with id ${locks[0].userId}`
         logger.error(errorMsg)
-        // throw new Error(errorMsg)
       }
 
       logger.info(
@@ -649,7 +631,6 @@ const lockBookComponent = async (bookComponentId, tabId, userAgent, userId) => {
       userAgent,
       tabId,
       userId,
-      // serverIdentifier,
     })
 
     const status = STATUSES.FINE
