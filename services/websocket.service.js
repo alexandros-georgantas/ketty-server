@@ -3,10 +3,7 @@ const { logger } = require('@coko/server')
 const jwt = require('jsonwebtoken')
 const config = require('config')
 
-const {
-  unlockOrphanLocks,
-  cleanUpLocks,
-} = require('./bookComponentLock.service')
+const { cleanUpLocks } = require('./bookComponentLock.service')
 
 const userExists = async userId => {
   try {
@@ -70,11 +67,6 @@ const heartbeat = ws => (ws.isAlive = true)
 const initializeHeartbeat = async WSServer => {
   try {
     return setInterval(async () => {
-      // logger.info(`############ WS HEARTBEAT ############`)
-      // logger.info(
-      //   `current connected clients via WS are ${WSServer.clients.size}`,
-      // )
-
       WSServer.clients.forEach(ws => {
         if (ws.isAlive === false) {
           logger.info(`########### BROKEN CONNECTION DETECTED ###########`)
@@ -88,7 +80,6 @@ const initializeHeartbeat = async WSServer => {
 
         return ws.ping()
       })
-      // logger.info(`########## WS HEARTBEAT END ##########`)
     }, config['pubsweet-server'].wsHeartbeatInterval || 5000)
   } catch (e) {
     throw new Error(e)
@@ -97,27 +88,10 @@ const initializeHeartbeat = async WSServer => {
 
 const initializeFailSafeUnlocking = async WSServer => {
   try {
-    return setInterval(async () => {
-      // logger.info(`########### LOCK FAIL-SAFE ###########`)
-
-      const lockedBookComponentIds = []
-      WSServer.clients.forEach(ws => {
-        if (ws.bookComponentId) {
-          lockedBookComponentIds.push(ws.bookComponentId)
-        }
-      })
-
-      if (lockedBookComponentIds.length === 0) {
-        await cleanUpLocks(true)
-      }
-
-      if (lockedBookComponentIds.length > 0) {
-        await unlockOrphanLocks(lockedBookComponentIds)
-      }
-
-      // logger.info(`######### LOCK FAIL-SAFE END #########`)
-      return true
-    }, config['pubsweet-server'].failSafeUnlockingInterval || 7000)
+    return setInterval(
+      async () => cleanUpLocks(),
+      config['pubsweet-server'].failSafeUnlockingInterval || 7000,
+    )
   } catch (e) {
     throw new Error(e)
   }

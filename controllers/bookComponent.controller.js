@@ -762,50 +762,65 @@ const deleteBookComponent = async bookComponent => {
       )
     }
 
-    const deletedBookComponent = await BookComponent.patchAndFetchById(id, {
-      deleted: true,
-    })
-
-    await BookComponentState.query()
-      .patch({
-        deleted: true,
-      })
-      .where('bookComponentId', id)
-    await BookComponentTranslation.query()
-      .patch({
-        deleted: true,
-      })
-      .where('bookComponentId', id)
-
-    logger.info(`book component with id ${deletedBookComponent.id} deleted`)
-
-    const componentDivision = await Division.findById(divisionId)
-
-    if (!componentDivision) {
-      throw new Error(
-        `division does not exists for the book component with id ${id}`,
+    return useTransaction(async tr => {
+      const deletedBookComponent = await BookComponent.patchAndFetchById(
+        id,
+        {
+          deleted: true,
+        },
+        { trx: tr },
       )
-    }
 
-    const clonedBookComponents = clone(componentDivision.bookComponents)
+      await BookComponentState.query(tr)
+        .patch({
+          deleted: true,
+        })
+        .where('bookComponentId', id)
 
-    pullAll(clonedBookComponents, [id])
+      await BookComponentTranslation.query(tr)
+        .patch({
+          deleted: true,
+        })
+        .where('bookComponentId', id)
 
-    const updatedDivision = await Division.patchAndFetchById(
-      componentDivision.id,
-      {
-        bookComponents: clonedBookComponents,
-      },
-    )
+      const affected = await Lock.query(tr).delete().where({
+        foreignId: id,
+        foreignType: 'bookComponent',
+      })
 
-    logger.info(
-      `division's book component array before [${componentDivision.bookComponents}]`,
-    )
-    logger.info(
-      `division's book component array after cleaned [${updatedDivision.bookComponents}]`,
-    )
+      logger.info(`deleted ${affected} lock/s for book component with id ${id}`)
 
-    return deletedBookComponent
+      logger.info(`book component with id ${deletedBookComponent.id} deleted`)
+
+      const componentDivision = await Division.findById(divisionId, { trx: tr })
+
+      if (!componentDivision) {
+        throw new Error(
+          `division does not exists for the book component with id ${id}`,
+        )
+      }
+
+      const clonedBookComponents = clone(componentDivision.bookComponents)
+
+      pullAll(clonedBookComponents, [id])
+
+      const updatedDivision = await Division.patchAndFetchById(
+        componentDivision.id,
+        {
+          bookComponents: clonedBookComponents,
+        },
+        { trx: tr },
+      )
+
+      logger.info(
+        `division's book component array before [${componentDivision.bookComponents}]`,
+      )
+      logger.info(
+        `division's book component array after cleaned [${updatedDivision.bookComponents}]`,
+      )
+
+      return deletedBookComponent
+    })
   } catch (e) {
     logger.error(e.message)
     throw new Error(e)

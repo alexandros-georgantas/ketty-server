@@ -1,4 +1,4 @@
-const { pubsubManager, useTransaction, logger, cron } = require('@coko/server')
+const { useTransaction, logger, cron } = require('@coko/server')
 
 const fs = require('fs-extra')
 const path = require('path')
@@ -8,12 +8,9 @@ const find = require('lodash/find')
 const { BookComponent, Lock, BookComponentState, BookComponentTranslation } =
   require('../models').models
 
-const { BOOK_UPDATED } = require('../api/graphql/book/constants')
-const { getInactiveLocks } = require('../controllers/lock.controller')
+const { broadcastUnlock } = require('./bookComponentLock.service')
 
-const {
-  BOOK_COMPONENT_UPDATED,
-} = require('../api/graphql/bookComponent/constants')
+const { STATUSES } = require('../api/graphql/bookComponent/constants')
 
 const tempDirectoryCleanUp =
   (config.has('tempDirectoryCleanUp') &&
@@ -99,19 +96,13 @@ if (tempDirectoryCleanUp) {
   })
 }
 
+// run every 10 minutes
 cron.schedule('*/10 * * * *', async () => {
-  // run every 10 minutes
   try {
-    const pubsub = await pubsubManager.getPubsub()
-    // const serverIdentifier = config.get('serverIdentifier')
     logger.info(`executing locks clean-up procedure for idle locks`)
 
     await useTransaction(async tr => {
-      // const { result: locks } = await Lock.find(
-      //   { serverIdentifier },
-      //   { trx: tr },
-      // )
-      const locks = await getInactiveLocks({ trx: tr })
+      const { result: locks } = await Lock.find({}, { trx: tr })
 
       const bookComponentIds = locks.map(lock => lock.foreignId)
 
@@ -126,10 +117,6 @@ cron.schedule('*/10 * * * *', async () => {
             const lastUpdate = new Date(updated).getTime()
             const now = new Date().getTime()
 
-            // const associatedLock = find(locks, {
-            //   serverIdentifier,
-            //   foreignId: bookComponentId,
-            // })
             const associatedLock = find(locks, {
               foreignId: bookComponentId,
             })
@@ -140,32 +127,26 @@ cron.schedule('*/10 * * * *', async () => {
             const timeElapsedFromContentUpdate = now - lastUpdate
             const timeElapsedFromLockAcquirement = now - lockCreatedAt
 
+            // one day of inactivity in content and 30 minutes since lock acquired
             if (
               timeElapsedFromContentUpdate > 86400000 &&
               timeElapsedFromLockAcquirement > 1800000
             ) {
-              // one day of inactivity in content and 30 minutes since lock acquired
-              // await Lock.query(tr).delete().where({
-              //   serverIdentifier,
-              //   foreignId: bookComponentId,
-              // })
               await Lock.query(tr).delete().where({
                 foreignId: bookComponentId,
+                foreignType: 'bookComponent',
               })
+
               await BookComponentState.query(tr)
-                .patch({ status: 102 })
+                .patch({ status: STATUSES.UNLOCKED_DUE_INACTIVITY })
                 .where({ bookComponentId })
 
-              const updatedBookComponent = await BookComponent.query(
-                tr,
-              ).findById(bookComponentId)
+              const { id, bookId } = await BookComponent.query(tr).findById(
+                bookComponentId,
+              )
 
-              pubsub.publish(BOOK_COMPONENT_UPDATED, {
-                bookComponentUpdated: updatedBookComponent.id,
-              })
-              pubsub.publish(BOOK_UPDATED, {
-                bookUpdated: updatedBookComponent.bookId,
-              })
+              await broadcastUnlock(id, bookId)
+
               return true
             }
 

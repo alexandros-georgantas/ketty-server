@@ -37,8 +37,7 @@ class Lock extends Base {
         userAgent: string,
         userId: id,
         tabId: id,
-        isActiveAt: dateNotNullable,
-        serverIdentifier: id,
+        lastActiveAt: dateNotNullable,
       },
     }
   }

@@ -11,7 +11,7 @@ const heartbeatIntervalInSeconds =
 
 const inactiveLockTimeFactor = heartbeatIntervalInSeconds + timePadding
 
-const updateIsActiveAt = async (
+const updateLastActiveAt = async (
   bookComponentId,
   tabId,
   userId,
@@ -21,18 +21,18 @@ const updateIsActiveAt = async (
     const { trx } = options
 
     logger.info(
-      `>>> updating isActiveAt for lock of the book component with id ${bookComponentId}, tabId ${tabId} for user with id ${userId}`,
+      `>>> updating lastActiveAt for lock of the book component with id ${bookComponentId}, tabId ${tabId} for user with id ${userId}`,
     )
 
     if (!bookComponentId || !tabId || !userId) {
       throw new Error(
-        'bookComponentId, tabId and userId are required in order to update isActiveAt property',
+        'bookComponentId, tabId and userId are required in order to update lastActiveAt property',
       )
     }
 
     return useTransaction(
       async tr =>
-        Lock.query(tr).patch({ isActiveAt: moment().utc().toDate() }).where({
+        Lock.query(tr).patch({ lastActiveAt: moment().utc().toDate() }).where({
           foreignId: bookComponentId,
           userId,
           tabId,
@@ -44,27 +44,11 @@ const updateIsActiveAt = async (
   }
 }
 
-const getOrphanLocks = async (
-  bookComponentIdsWithActiveConnection,
-  options = {},
-) => {
-  try {
-    const { trx } = options
-    return Lock.query(trx)
-      .whereNotIn('foreignId', bookComponentIdsWithActiveConnection)
-      .whereRaw(
-        `TIMEZONE('UTC',is_active_at) < TIMEZONE('UTC',NOW()) - INTERVAL '${inactiveLockTimeFactor} SECONDS'`,
-      )
-  } catch (e) {
-    throw new Error(e)
-  }
-}
-
 const getInactiveLocks = async (options = {}) => {
   try {
     const { trx } = options
     return Lock.query(trx).whereRaw(
-      `TIMEZONE('UTC',is_active_at) < TIMEZONE('UTC',NOW()) - INTERVAL '${inactiveLockTimeFactor} SECONDS'`,
+      `TIMEZONE('UTC',last_active_at) < TIMEZONE('UTC',NOW()) - INTERVAL '${inactiveLockTimeFactor} SECONDS'`,
     )
   } catch (e) {
     throw new Error(e)
@@ -72,7 +56,6 @@ const getInactiveLocks = async (options = {}) => {
 }
 
 module.exports = {
-  updateIsActiveAt,
-  getOrphanLocks,
+  updateLastActiveAt,
   getInactiveLocks,
 }

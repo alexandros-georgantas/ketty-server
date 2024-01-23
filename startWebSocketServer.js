@@ -11,7 +11,7 @@ const {
 } = require('./services/websocket.service')
 
 const { unlockBookComponent } = require('./services/bookComponentLock.service')
-const { updateIsActiveAt } = require('./controllers/lock.controller')
+const { updateLastActiveAt } = require('./controllers/lock.controller')
 
 let WSServer
 
@@ -59,7 +59,11 @@ const startWSServer = async () => {
 
         const { bookComponentId, userId, tabId } = ws
 
-        return updateIsActiveAt(bookComponentId, tabId, userId)
+        if (bookComponentId && userId && tabId) {
+          return updateLastActiveAt(bookComponentId, tabId, userId)
+        }
+
+        return false
       })
       logger.info(`############ WEBSOCKET SERVER INFO ############`)
       logger.info(
