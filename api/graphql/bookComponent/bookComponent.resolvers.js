@@ -457,8 +457,6 @@ const podLockBookComponentHandler = async (
 
     const bookComponent = await getBookComponent(id)
 
-    // This should be replaced with book component updated, when refactor Book Builder
-
     pubsub.publish(BOOK_UPDATED, {
       bookUpdated: bookComponent.bookId,
     })

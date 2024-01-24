@@ -17,16 +17,8 @@ const { cleanUpLocks } = require('./services/bookComponentLock.service')
 
 const init = async () => {
   try {
-    if (
-      !config.has('serverIdentifier') ||
-      config.get('serverIdentifier') === undefined
-    ) {
-      throw new Error(
-        'server identifier should be provided as env variable in order for the server to function properly',
-      )
-    }
-
     await cleanUpLocks()
+
     await startServer()
 
     logger.info('starting WebSockets server')
