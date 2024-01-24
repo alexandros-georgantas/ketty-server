@@ -1,3 +1,10 @@
+# [1.21.0](https://gitlab.coko.foundation/ketida/server/compare/v1.20.3...v1.21.0) (2024-01-24)
+
+
+### Features
+
+* init locks improvements ([ebf86b6](https://gitlab.coko.foundation/ketida/server/commit/ebf86b6d05a1fa62853e125b9b05fd40137762bb))
+
 ## [1.20.3](https://gitlab.coko.foundation/ketida/server/compare/v1.20.2...v1.20.3) (2024-01-19)
 
 
