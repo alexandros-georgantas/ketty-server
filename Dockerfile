@@ -11,7 +11,8 @@ RUN chown -R node:node .
 USER node
 
 
-RUN yarn install
+RUN yarn cache clean
+RUN yarn install --frozen-lockfile --production=true
 # RUN yarn cache clean
 COPY --chown=node:node . .
 

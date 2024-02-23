@@ -60,7 +60,8 @@ const startWSServer = async () => {
         const { bookComponentId, userId, tabId } = ws
 
         if (bookComponentId && userId && tabId) {
-          return updateLastActiveAt(bookComponentId, tabId, userId)
+          await updateLastActiveAt(bookComponentId, tabId, userId)
+          return true
         }
 
         return false

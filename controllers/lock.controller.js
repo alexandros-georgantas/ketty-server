@@ -1,4 +1,4 @@
-const { logger, useTransaction } = require('@coko/server')
+const { useTransaction } = require('@coko/server')
 const moment = require('moment')
 const config = require('config')
 
@@ -19,10 +19,6 @@ const updateLastActiveAt = async (
 ) => {
   try {
     const { trx } = options
-
-    logger.info(
-      `>>> updating lastActiveAt for lock of the book component with id ${bookComponentId}, tabId ${tabId} for user with id ${userId}`,
-    )
 
     if (!bookComponentId || !tabId || !userId) {
       throw new Error(
