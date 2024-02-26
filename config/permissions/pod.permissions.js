@@ -731,6 +731,29 @@ const uploadToLuluRule = rule()(async (_, { id: exportProfileId }, ctx) => {
   }
 })
 
+const updateBookSettingsRule = rule()(async (parent, { bookId }, ctx, info) => {
+  try {
+    const { user: userId } = ctx
+    if (!userId) return false
+
+    const isAuthenticatedUser = await isAuthenticated(userId)
+
+    if (!isAuthenticatedUser) {
+      return false
+    }
+
+    const isAdminUser = await isAdmin(userId)
+
+    if (isAdminUser) {
+      return true
+    }
+
+    return isOwner(userId, bookId)
+  } catch (e) {
+    throw new Error(e.message)
+  }
+})
+
 const permissions = {
   Query: {
     '*': deny,
@@ -773,6 +796,7 @@ const permissions = {
     signUp: allow,
     unlockBookComponent: unlockBookComponentRule,
     updateBookComponentsOrder: updateBookComponentOrderRule,
+    updateBookSettings: updateBookSettingsRule,
     updateContent: updateContentRule,
     updateExportProfile: interactWithExportProfileRule,
     updatePODMetadata: updateMetadataRule,
