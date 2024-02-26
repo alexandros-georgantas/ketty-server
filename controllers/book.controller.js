@@ -48,6 +48,8 @@ const { createDivision } = require('./division.controller')
 
 const { createTeam, getObjectTeam, deleteTeam } = require('./team.controller')
 const { updateExportProfile } = require('./exportProfile.controller')
+const { createBookSettings } = require('./bookSettings.controller')
+const BookSettings = require('../models/bookSettings/bookSettings.model')
 
 // const { getSpecificTemplates } = require('./template.controller')
 
@@ -286,6 +288,15 @@ const createBook = async (data = {}) => {
           )
         }
         // END OF BOOK TRANSLATION SECTION
+
+        // SECTION FOR BOOK SETTINGS
+        await createBookSettings(
+          {
+            bookId,
+          },
+          { trx: tr },
+        )
+        // END OF BOOK SETTINGS SECTION
 
         // SECTION OF BOOK DIVISIONS CREATION
         const { config: divisions } = await getApplicationParameters(
@@ -864,6 +875,9 @@ const deleteBook = async (bookId, options = {}) => {
             ),
           )
         }
+
+        // Soft delete the corresponding book settings
+        await BookSettings.query(tr).patch({ deleted: true }).where({ bookId })
 
         return deletedBook
       },
