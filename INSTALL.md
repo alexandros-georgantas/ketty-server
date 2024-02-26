@@ -39,7 +39,7 @@ As the service is using `pgboss` (job queue manager), a specific extension is ne
 
 In order to add the extension you should execute `CREATE EXTENSION IF NOT EXISTS pgcrypto;`
 
-Create a compose file and use Ketida's server pre-built image that you can find it [here](https://hub.docker.com/r/cokoapps/ketida-server)
+Create a compose file and use Ketida's server pre-built image that you can find it [here](https://hub.docker.com/r/cokoapps/ketty-server)
 e.g. example docker compose file [here](https://gitlab.coko.foundation/ketida/server/-/blob/main/docker-compose.production.ymld)
 
 The server requires the following environment variables to be passed to its context:
