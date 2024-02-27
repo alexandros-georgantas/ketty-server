@@ -1,7 +1,7 @@
 variables:
   IMAGE_ORG: cokoapps
-  IMAGE_NAME_DEVELOP: ketida-server-develop
-  IMAGE_NAME_PRODUCTION: ketida-server
+  IMAGE_NAME_DEVELOP: ketty-server-develop
+  IMAGE_NAME_PRODUCTION: ketty-server
   WORKDIR: /home/node/server
 
 workflow:

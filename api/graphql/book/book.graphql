@@ -2,6 +2,7 @@ type Book {
   id: ID!
   authors: [User]
   archived: Boolean!
+  bookSettings: BookSettings
   bookStructure: BookStructure
   collectionId: ID
   copyrightStatement: String
@@ -168,6 +169,15 @@ input OutlineInput {
   children: [OutlineInput]
 }
 
+type BookSettings {
+  id: ID
+  aiOn: Boolean
+}
+
+input BookSettingsInput {
+  aiOn: Boolean
+}
+
 type BookStructure {
   id: ID!
   levels: [Level!]!
@@ -255,6 +265,7 @@ extend type Mutation {
   changeNumberOfLevels(bookId: ID!, levelsNumber: Int!): [Level!]!
   updateLevelContentStructure(bookId: ID!, levels: [LevelInput!]!): [Level!]!
   updateBookOutline(bookId: ID!, outline: [OutlineInput!]!): BookStructure!
+  updateBookSettings(bookId: ID!, settings: BookSettingsInput!): BookSettings!
   updateBookStructure(input: BookStructureInput!): BookStructure!
   updateRunningHeaders(input: [RunningHeadersInput!]!, bookId: ID!): Book!
   updateShowWelcome(bookId: ID!): Book!
@@ -275,5 +286,6 @@ extend type Subscription {
   bookRenamed: ID!
   bookMetadataUpdated: ID!
   bookRunningHeadersUpdated: ID!
+  bookSettingsUpdated: ID!
   bookUpdated(id: ID!): ID!
 }

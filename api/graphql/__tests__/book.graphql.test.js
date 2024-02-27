@@ -3,6 +3,7 @@
 /* eslint-disable jest/no-disabled-tests */
 const _ = require('lodash')
 const BookTranslation = require('../../../models/bookTranslation/bookTranslation.model')
+const BookSettings = require('../../../models/bookSettings/bookSettings.model')
 const seedAdmin = require('../../../scripts/seeds/admin')
 const seedGlobalTeams = require('../../../scripts/seeds/globalTeams')
 const seedApplicationParams = require('../../../scripts/seeds/applicationParameters')
@@ -16,6 +17,16 @@ const createBookGraphQL = async (
   return testServer.executeOperation({
     query: `mutation($input: CreateBookInput!){createBook(input: $input) ${resStructure}}`,
     variables: { input },
+  })
+}
+
+const deleteBookGraphQL = async (
+  testServer,
+  { id = '', resStructure = '{id}' },
+) => {
+  return testServer.executeOperation({
+    query: `mutation($id: ID!){deleteBook(id: $id) ${resStructure}}`,
+    variables: { id },
   })
 }
 
@@ -337,5 +348,34 @@ describe('Book GraphQL Query', () => {
       { isbn: '978-3-16-148410-0', label: 'hardcover' },
       { isbn: '978-3-16-148410-1', label: 'softcover' },
     ])
+  })
+
+  it('creates a corresponding book settings when a book is created', async () => {
+    const res = await createBookGraphQL(testServer, {
+      resStructure: '{id}',
+    })
+
+    const bookData = res.data.createBook
+
+    const bookSettings = await BookSettings.query().where('bookId', bookData.id)
+    expect(bookSettings.length).toEqual(1)
+    expect(bookSettings[0].bookId).toEqual(bookData.id)
+  })
+
+  it('deletes the corresponding book settings when a book is deleted', async () => {
+    const creationRes = await createBookGraphQL(testServer, {
+      resStructure: '{id}',
+    })
+
+    const bookData = creationRes.data.createBook
+
+    await deleteBookGraphQL(testServer, {
+      resStructure: '{id}',
+      id: bookData.id,
+    })
+
+    const bookSettings = await BookSettings.query().where('bookId', bookData.id)
+    expect(bookSettings.length).toEqual(1)
+    expect(bookSettings[0].deleted).toBeTruthy()
   })
 })

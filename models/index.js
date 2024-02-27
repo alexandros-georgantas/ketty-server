@@ -5,6 +5,7 @@ const bookCollectionTranslation = require('./bookCollectionTranslation')
 const bookComponent = require('./bookComponent')
 const bookComponentState = require('./bookComponentState')
 const bookComponentTranslation = require('./bookComponentTranslation')
+const bookSettings = require('./bookSettings')
 const bookTranslation = require('./bookTranslation')
 const file = require('./file')
 const template = require('./template')
@@ -32,6 +33,7 @@ module.exports = {
   bookComponent,
   bookComponentState,
   bookComponentTranslation,
+  bookSettings,
   bookTranslation,
   exportProfile,
   division,
@@ -48,6 +50,7 @@ module.exports = {
     BookComponent: bookComponent.model,
     BookComponentState: bookComponentState.model,
     BookComponentTranslation: bookComponentTranslation.model,
+    BookSettings: bookSettings.model,
     BookTranslation: bookTranslation.model,
     CustomTag: customTag.model,
     Division: division.model,

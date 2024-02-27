@@ -18,6 +18,7 @@ const {
   BOOK_ARCHIVED,
   BOOK_METADATA_UPDATED,
   BOOK_RUNNING_HEADERS_UPDATED,
+  BOOK_SETTINGS_UPDATED,
 } = require('./constants')
 
 const { getObjectTeam } = require('../../../controllers/team.controller')
@@ -56,6 +57,11 @@ const {
   getBookSubtitle,
   uploadBookThumbnail,
 } = require('../../../controllers/book.controller')
+
+const {
+  getBookSettings,
+  updateBookSettings,
+} = require('../../../controllers/bookSettings.controller')
 
 // const updateAssociatedTemplateHandler = async (
 //   _,
@@ -442,6 +448,24 @@ const uploadBookThumbnailHandler = async (_, { bookId, file }, cx) => {
   }
 }
 
+const updateBookSettingsHandler = async (_, { bookId, settings }, cx) => {
+  try {
+    logger.info('book resolver: executing updateBookSettings use case')
+
+    const pubsub = await pubsubManager.getPubsub()
+
+    const updatedBookSettings = await updateBookSettings(bookId, settings)
+
+    pubsub.publish(BOOK_SETTINGS_UPDATED, {
+      bookSettingsUpdated: updatedBookSettings.bookId,
+    })
+
+    return updatedBookSettings
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
 module.exports = {
   Query: {
     getBook: getBookHandler,
@@ -466,6 +490,7 @@ module.exports = {
     finalizeBookStructure: finalizeBookStructureHandler,
     // updateAssociatedTemplates: updateAssociatedTemplateHandler,
     updateBookStatus: updateBookStatusHandler,
+    updateBookSettings: updateBookSettingsHandler,
     uploadBookThumbnail: uploadBookThumbnailHandler,
   },
   Book: {
@@ -492,6 +517,10 @@ module.exports = {
     },
     archived(book, _, ctx) {
       return book.archived
+    },
+    async bookSettings(book, _, ctx) {
+      const bookSettings = await getBookSettings(book.id)
+      return bookSettings
     },
     async authors(book, args, ctx, info) {
       const authorsTeam = await getObjectTeam('author', book.id, true)
@@ -638,6 +667,12 @@ module.exports = {
       subscribe: async () => {
         const pubsub = await pubsubManager.getPubsub()
         return pubsub.asyncIterator(BOOK_RUNNING_HEADERS_UPDATED)
+      },
+    },
+    bookSettingsUpdated: {
+      subscribe: async () => {
+        const pubsub = await pubsubManager.getPubsub()
+        return pubsub.asyncIterator(BOOK_SETTINGS_UPDATED)
       },
     },
   },

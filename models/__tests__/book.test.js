@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-commented-out-tests */
 // // const uuid = require('uuid/v4')
 // const { dbCleaner } = require('./helpers')
 
