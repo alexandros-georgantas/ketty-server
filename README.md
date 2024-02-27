@@ -6,7 +6,7 @@ Ketida server is the core reusable component of our publishing platform build on
 - [Postgres](https://www.postgresql.org/) v14 (persistance layer)
 - [GraphQL](https://www.apollographql.com/)
 
-We provide a pre-built image of Ketida's server for easier deployment and you can find it [here](https://hub.docker.com/r/cokoapps/ketida-server)
+We provide a pre-built image of Ketida's server for easier deployment and you can find it [here](https://hub.docker.com/r/cokoapps/ketty-server)
 
 ## Docker
 
