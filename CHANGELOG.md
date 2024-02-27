@@ -1,3 +1,5 @@
+# [1.23.0](https://gitlab.coko.foundation/ketida/server/compare/v1.22.0...v1.23.0) (2024-02-27)
+
 # [1.22.0](https://gitlab.coko.foundation/ketida/server/compare/v1.21.0...v1.22.0) (2024-02-01)
 
 # [1.21.0](https://gitlab.coko.foundation/ketida/server/compare/v1.20.3...v1.21.0) (2024-01-24)
