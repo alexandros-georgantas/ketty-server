@@ -7,7 +7,7 @@ sh scripts/wait-for-it http://epubchecker:3001/healthcheck -t 60
 sh scripts/wait-for-it http://pagedjs:3003/healthcheck -t 60
 sh scripts/wait-for-it http://xsweet:3004/healthcheck -t 60
 
-node_modules/.bin/pubsweet migrate
+node_modules/.bin/coko-server migrate
 node scripts/runners/createGlobalTeams.js
 node scripts/runners/createAdmin.js
 node scripts/runners/createApplicationParameters.js

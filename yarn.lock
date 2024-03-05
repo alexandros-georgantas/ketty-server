@@ -463,10 +463,10 @@
     stylelint-order "^5.0.0"
     stylelint-processor-styled-components "^1.10.0"
 
-"@coko/server@3.9.1":
-  version "3.9.1"
-  resolved "https://registry.yarnpkg.com/@coko/server/-/server-3.9.1.tgz#81be5c1f66f72ff4abcdd2f2686c5cdf92215c11"
-  integrity sha512-9e+c47HagxAmQ8MwcMVSBSbe9j3+f0QyQT+9MKn8jmy03XZKBGQ7Py5UvFRlxASTqNzs8J9YxvmtLRMoMGvNCA==
+"@coko/server@3.10.1":
+  version "3.10.1"
+  resolved "https://registry.yarnpkg.com/@coko/server/-/server-3.10.1.tgz#0810161266ce21b0f902e8aa741b7cedeabb2212"
+  integrity sha512-QdKDhmqaW+4Ou2Uafx15KHrkrZb1UXIXYSGG42foYCvrNOBmtNQd0Txvs71zQl01BEZao9llGrnsMMy/mPEhmQ==
   dependencies:
     "@hapi/joi" "^14.3.0"
     "@pubsweet/models" "^0.3.21"
@@ -1155,24 +1155,7 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha1-p3c2C1s5oaLlEG+OhY8v0tBgxXA=
 
-"@pubsweet/component-password-reset-server@^2.2.26":
-  version "2.2.26"
-  resolved "https://registry.yarnpkg.com/@pubsweet/component-password-reset-server/-/component-password-reset-server-2.2.26.tgz#27e395900e9515a3c5ad04bbc89e5a591d27f048"
-  integrity sha512-yYNUB8bevNK+/YhlGhw8NTJ49TsX/0F2I8Zb0YoLekVxl6gR9iyNlMxi/Lo/t9LKLwWR2KwZ+zXLX7L77vEp8w==
-  dependencies:
-    "@pubsweet/component-send-email" "^0.4.18"
-    "@pubsweet/errors" "^2.0.51"
-    config "^3.0.1"
-    moment "^2.18.1"
-
-"@pubsweet/component-send-email@^0.4.18":
-  version "0.4.18"
-  resolved "https://registry.yarnpkg.com/@pubsweet/component-send-email/-/component-send-email-0.4.18.tgz#af2f6ff2881f1041a0235090820cd59d99bae1eb"
-  integrity sha512-7B8PM89aczSSwpnMh8HmWmd30yOq+6+6gpna7fdiRDSXkfmTKZfHjLRJ6rqcfknfLe6s9FjS9r4T2dVanvoiQg==
-  dependencies:
-    nodemailer "^6.4.18"
-
-"@pubsweet/db-manager@3.1.26", "@pubsweet/db-manager@^3.1.26":
+"@pubsweet/db-manager@^3.1.26":
   version "3.1.26"
   resolved "https://registry.yarnpkg.com/@pubsweet/db-manager/-/db-manager-3.1.26.tgz#59797ba78ef744fd83e4205a7ac9729f9459568d"
   integrity sha512-wCseWcdTeDAaYg8QntZxnzwd46Qb88kc8T2OwkzI62LKmBMcnKEmA+Q1T69U/t4Hg6mgcfgvunwOYcymJbfSGw==
@@ -8822,11 +8805,6 @@ mkdirp@^1.0.3, mkdirp@^1.0.4:
   resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-1.0.4.tgz#3eb5ed62622756d79a5f0e2a221dfebad75c2f7e"
   integrity sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==
 
-moment@^2.18.1:
-  version "2.28.0"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.28.0.tgz#cdfe73ce01327cee6537b0fafac2e0f21a237d75"
-  integrity sha512-Z5KOjYmnHyd/ukynmFd/WwyXHd7L4J9vTI/nn5Ap9AVUgaAE15VvQ9MOGmJJygEUklupqIrFnor/tjTwRU+tQw==
-
 moment@^2.29.1, moment@^2.29.4:
   version "2.29.4"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.4.tgz#3dbe052889fe7c1b2ed966fcb3a77328964ef108"
@@ -9136,9 +9114,9 @@ node-wait-for-it@^0.2.0:
   integrity sha512-y3EiZ5xUhbP3vhptMVjyaVVWPtmb0mgXJUVRpMY6TM+CGjDg1tc1+foxF8sgiUVHqwOKtRZfqcfxDPNElNLofQ==
 
 nodemailer@^6.4.18:
-  version "6.6.3"
-  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-6.6.3.tgz#31fb53dd4d8ae16fc088a65cb9ffa8d928a69b48"
-  integrity sha512-faZFufgTMrphYoDjvyVpbpJcYzwyFnbAMmQtj1lVBYAUSm3SOy2fIdd9+Mr4UxPosBa0JRw9bJoIwQn+nswiew==
+  version "6.9.9"
+  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-6.9.9.tgz#4549bfbf710cc6addec5064dd0f19874d24248d9"
+  integrity sha512-dexTll8zqQoVJEZPwQAKzxxtFn0qTnjdQTchoU6Re9BUUGBJiOy3YMn/0ShTW6J5M0dfQ1NeDeRTTl4oIWgQMA==
 
 nodemon@^1.19.1:
   version "1.19.4"
