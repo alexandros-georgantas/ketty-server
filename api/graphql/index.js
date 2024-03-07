@@ -12,6 +12,7 @@ const template = require('./template')
 const file = require('./file')
 const systemInfo = require('./systemInfo')
 const exportProfile = require('./exportProfile')
+const openAi = require('./openAi')
 
 module.exports = {
   typeDefs: [
@@ -28,6 +29,7 @@ module.exports = {
     template.typeDefs,
     systemInfo.typeDefs,
     exportProfile.typeDefs,
+    openAi.typeDefs,
   ].join(' '),
   resolvers: merge(
     {},
@@ -44,5 +46,6 @@ module.exports = {
     user.resolvers,
     systemInfo.resolvers,
     exportProfile.resolvers,
+    openAi.resolvers,
   ),
 }
