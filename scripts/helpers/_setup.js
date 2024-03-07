@@ -1,4 +1,4 @@
-const { migrate } = require('@pubsweet/db-manager')
+const { migrate } = require('@coko/server')
 
 // Ideally, instead of running a single worker, we should be spinning up
 // one db per worker, so that the tests run in parallel without interfering
