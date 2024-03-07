@@ -680,6 +680,7 @@ const permissions = {
     getTemplates: isAuthenticatedRule,
     getTemplate: isAuthenticatedRule,
     chatGPT: isAuthenticatedRule,
+    openAi: isAuthenticatedRule,
   },
   Mutation: {
     '*': false,
