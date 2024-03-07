@@ -172,10 +172,12 @@ input OutlineInput {
 type BookSettings {
   id: ID
   aiOn: Boolean
+  aiPdfDesignerOn: Boolean
 }
 
 input BookSettingsInput {
   aiOn: Boolean
+  aiPdfDesignerOn: Boolean
 }
 
 type BookStructure {
