@@ -21,8 +21,8 @@ const openAi = async (input, history = []) => {
     const response = await axios.post(
       CHAT_GPT_URL,
       {
-        model: 'gpt-3.5-turbo',
-        // model: 'gpt-4',
+        // model: 'gpt-3.5-turbo',
+        model: 'gpt-4',
         messages: [
           ...history,
           {
