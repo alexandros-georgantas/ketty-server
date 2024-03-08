@@ -1,14 +1,14 @@
-# Ketida Server
+# Ketty Server
 
 ## Quick Start
 
-If you want to check Ketida Platform you should check the quick start guide of `vanilla-client` found [here](https://gitlab.coko.foundation/ketida/vanilla-client/-/blob/main/)
+If you want to check Ketty Platform you should check the quick start guide [here](https://gitlab.coko.foundation/ketty/ketty/-/blob/main/).
 
 ## Prerequisites
 
-The following components should be up and running before Ketida Server:
+The following components should be up and running before Ketty Server:
 
-- Ketida Server database
+- Ketty Server database
 - EPUBchecker Service server
 - EPUBchecker Service database
 - PagedJS Service server
@@ -21,26 +21,26 @@ The following components should be up and running before Ketida Server:
 
 ## Process
 
-To deploy Ketida Server in production, the following steps should be followed:
+To deploy Ketty Server in production, the following steps should be followed:
 
 - Create a postgres database with a user
 
 ```
-CREATE DATABASE <ketida_db_name>;
-CREATE USER <ketida_db_user> WITH ENCRYPTED PASSWORD <ketida_db_user_password>;
-GRANT ALL PRIVILEGES ON DATABASE <ketida_db_name> TO <ketida_db_user>;
+CREATE DATABASE <ketty_db_name>;
+CREATE USER <ketty_db_user> WITH ENCRYPTED PASSWORD <ketty_db_user_password>;
+GRANT ALL PRIVILEGES ON DATABASE <ketty_db_name> TO <ketty_db_user>;
 ```
 
 - Alter the permissions of the created user
 
-`ALTER ROLE <ketida_db_user> SUPERUSER;`
+`ALTER ROLE <ketty_db_user> SUPERUSER;`
 
 As the service is using `pgboss` (job queue manager), a specific extension is needed for the database (you can read more [here](https://github.com/timgit/pg-boss/blob/master/docs/usage.md#database-install)).
 
 In order to add the extension you should execute `CREATE EXTENSION IF NOT EXISTS pgcrypto;`
 
-Create a compose file and use Ketida's server pre-built image that you can find it [here](https://hub.docker.com/r/cokoapps/ketty-server)
-e.g. example docker compose file [here](https://gitlab.coko.foundation/ketida/server/-/blob/main/docker-compose.production.ymld)
+Create a compose file and use Ketty's server pre-built image that you can find it [here](https://hub.docker.com/r/cokoapps/ketty-server)
+e.g. example docker compose file [here](https://gitlab.coko.foundation/ketty/server/-/blob/main/docker-compose.production.ymld)
 
 The server requires the following environment variables to be passed to its context:
 
