@@ -1,3 +1,16 @@
+# [1.24.0](https://gitlab.coko.foundation/ketida/server/compare/v1.23.1...v1.24.0) (2024-03-09)
+
+
+### Features
+
+* ai designer setting and api ([c6f5744](https://gitlab.coko.foundation/ketida/server/commit/c6f5744f342df742d10e439c2fa5ee9eb65174a6))
+* new openAi endpoint ([05367d5](https://gitlab.coko.foundation/ketida/server/commit/05367d5771f636418b8593d5dac02fa9cb5fb52b))
+
+
+### Performance Improvements
+
+* **controllers:** use model gpt-4 for open ai calls ([b6448bc](https://gitlab.coko.foundation/ketida/server/commit/b6448bc062356772c966f6ad6ffd9d70ce10de4c))
+
 # [1.23.0](https://gitlab.coko.foundation/ketida/server/compare/v1.22.0...v1.23.0) (2024-02-27)
 
 # [1.22.0](https://gitlab.coko.foundation/ketida/server/compare/v1.21.0...v1.22.0) (2024-02-01)
