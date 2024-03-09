@@ -40,6 +40,7 @@ class BookSettings extends Base {
       required: ['bookId'],
       properties: {
         aiOn: booleanDefaultFalse,
+        aiPdfDesignerOn: booleanDefaultFalse,
         bookId: id,
       },
     }

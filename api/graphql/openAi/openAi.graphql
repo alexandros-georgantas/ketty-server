@@ -1,0 +1,8 @@
+input OpenAiMessage {
+  role: String!
+  content: String!
+}
+
+extend type Query {
+  openAi(input: String!, history: [OpenAiMessage!]): String!
+}
