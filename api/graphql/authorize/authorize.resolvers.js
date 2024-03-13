@@ -4,6 +4,8 @@ const config = require('config')
 const { Book, BookComponent, BookComponentState, ApplicationParameter } =
   require('../../../models').models
 
+const { permissions, teams } = config.get('authorization')
+
 const {
   canAddBooks,
   canAssignMembers,
@@ -14,30 +16,39 @@ const {
   dashboard,
   bookBuilder,
   workFlowStages,
-} = require('./constants')
+} = permissions
+
+const flatPermissions = {}
+
+Object.keys(permissions).forEach(key => {
+  if (typeof permissions[key] === 'object') {
+    const innerObject = Object.keys(permissions[key]).map(
+      key2 => (flatPermissions[key2] = permissions[key][key2]),
+    )
+
+    return innerObject
+  }
+
+  return (flatPermissions[key] = permissions[key])
+})
 
 const executeMultipleAuthorizeRules = async (ctx, value, rules) => {
-  const permissions = await Promise.all(
-    map(rules, (rule, variable) =>
-      ctx.helpers
-        .can(ctx.user, rule, value)
+  const permissionsResult = await Promise.all(
+    map(rules, (_, key) => {
+      return flatPermissions[key](ctx, value)
         .then(result => {
-          const data = {}
-          data[variable] = true
-          return data
+          return { [key]: result }
         })
-        .catch(result => {
-          const data = {}
-          data[variable] = false
-          return data
-        }),
-    ),
+        .catch(() => {
+          return { [key]: false }
+        })
+    }),
   )
 
-  return permissions.reduce((r, c) => Object.assign(r, c), {})
+  return permissionsResult.reduce((r, c) => Object.assign(r, c), {})
 }
 
-const getDashBoardRules = async (_, args, ctx) => {
+const getDashBoardRules = async (_, __, ctx) => {
   await ctx.connectors.UserLoader.model.userTeams.clear()
 
   const { result: books } = await Book.find({ deleted: false })
@@ -97,7 +108,7 @@ const getBookBuilderRules = async (_, args, ctx) => {
   )
 
   const teamRoles = await Promise.all(
-    map(Object.keys(config.get('authsome.teams')), async role => {
+    map(Object.keys(teams), async role => {
       const rules = await executeMultipleAuthorizeRules(
         ctx,
         { id: book.id, role },
@@ -125,6 +136,8 @@ const getBookBuilderRules = async (_, args, ctx) => {
 
   result.bookComponentStateRules = await Promise.all(
     map(bookComponentState, async value => {
+      // console.log('value for canViewFragments edit  >>>>>>>>>>>>>>>>>');
+      // console.log(value);
       const stage = await Promise.all(
         map(bookBuilderAppConfig[0].config, async v => {
           const rules = await executeMultipleAuthorizeRules(
@@ -155,6 +168,8 @@ const getBookBuilderRules = async (_, args, ctx) => {
       }
     }),
   )
+
+  // console.log(result);
 
   return result
 }
