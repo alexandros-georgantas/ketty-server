@@ -1,3 +1,10 @@
+# [1.25.0](https://gitlab.coko.foundation/ketida/server/compare/v1.24.0...v1.25.0) (2024-03-13)
+
+
+### Features
+
+* remove authsome dependency, replace with custom authorization ([c698cd5](https://gitlab.coko.foundation/ketida/server/commit/c698cd5287b31f09fe3fe9631139e2934451a937))
+
 # [1.24.0](https://gitlab.coko.foundation/ketida/server/compare/v1.23.1...v1.24.0) (2024-03-09)
 
 
