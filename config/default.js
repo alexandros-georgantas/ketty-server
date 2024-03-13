@@ -1,8 +1,8 @@
 const path = require('path')
 
 const components = require('./components')
-const authsomeVanilla = require('./modules/authsomeVanilla')
-const authsomeBooksprints = require('./modules/authsomeBooksprints')
+const vanillaAuthorizations = require('./modules/vanillaAuthorizations')
+const booksprintsAuthorizations = require('./modules/booksprintAuthorizations')
 const bbVanilla = require('./modules/bookBuilderVanilla')
 const bbOEN = require('./modules/bookBuilderOEN')
 const bbBooksprints = require('./modules/bookBuilderBooksprints')
@@ -60,7 +60,13 @@ if (featurePODEnabled) {
 }
 
 module.exports = {
-  authsome: flavour === 'BOOKSPRINTS' ? authsomeBooksprints : authsomeVanilla,
+  authsome: {
+    mode: path.join(__dirname, 'authsome.js'),
+  },
+  authorization:
+    flavour === 'BOOKSPRINTS'
+      ? booksprintsAuthorizations
+      : vanillaAuthorizations,
   bookBuilder,
   'password-reset': {
     pathToPage: '/password-reset',
