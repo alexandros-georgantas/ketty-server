@@ -22,7 +22,7 @@ const openAi = async (input, history = []) => {
       CHAT_GPT_URL,
       {
         // model: 'gpt-3.5-turbo',
-        model: 'gpt-4',
+        model: 'gpt-4-1106-preview',
         messages: [
           ...history,
           {
@@ -30,6 +30,7 @@ const openAi = async (input, history = []) => {
             content: input,
           },
         ],
+        response_format: { type: 'json_object' },
         temperature: 0,
       },
       {
