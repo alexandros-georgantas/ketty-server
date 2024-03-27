@@ -299,7 +299,7 @@ const createBook = async (data = {}) => {
         // END OF BOOK SETTINGS SECTION
 
         // SECTION OF BOOK DIVISIONS CREATION
-        const { config: divisions } = await getApplicationParameters(
+        const [{ config: divisions }] = await getApplicationParameters(
           'bookBuilder',
           'divisions',
           {
@@ -418,7 +418,7 @@ const createBook = async (data = {}) => {
           },
         )
 
-        const { config: predefinedWorkflowStages } = workflowConfig
+        const [{ config: predefinedWorkflowStages }] = workflowConfig
 
         const defaultBookComponentWorkflowStages = {
           workflowStages: predefinedWorkflowStages
@@ -1340,7 +1340,7 @@ const finalizeBookStructure = async (bookId, options = {}) => {
           },
         )
 
-        const { config: workflowStages } = workflowConfig
+        const [{ config: workflowStages }] = workflowConfig
 
         // find book's body division to append book components declared in bookStructure outline
         const bodyDivision = await Division.findOne(
