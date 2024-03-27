@@ -760,7 +760,7 @@ const permissions = {
     chatGPT: isAuthenticatedRule,
     openAi: isAuthenticatedRule,
     currentUser: isAuthenticatedRule,
-    getApplicationParameters: isAuthenticatedRule,
+    getApplicationParameters: allow,
     getBook: getBookRule,
     getBookComponent: getBookComponentRule,
     getBooks: isAuthenticatedRule,

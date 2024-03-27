@@ -86,7 +86,7 @@ const updateBookComponentOrder = async (
           { trx: tr },
         )
 
-        const { config: divisions } = applicationParameters
+        const [{ config: divisions }] = applicationParameters
 
         const bookComponent = await getBookComponent(bookComponentId, {
           trx: tr,

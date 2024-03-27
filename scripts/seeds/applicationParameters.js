@@ -8,7 +8,7 @@ const ApplicationParameter = require('../../models/applicationParameter/applicat
 const configBooksprints = require('../../config/modules/bookBuilderBooksprints')
 const configVanilla = require('../../config/modules/bookBuilderVanilla')
 const configOEN = require('../../config/modules/bookBuilderOEN')
-const configKetidaV2 = require('../../config/modules/applicationParametersKetida2')
+// let configKetidaV2 = await require('../../config/modules/applicationParametersKetida2')
 
 const featureBookStructureEnabled =
   (process.env.FEATURE_BOOK_STRUCTURE &&
@@ -20,7 +20,7 @@ const featurePODEnabled =
 
 const flavour = process.env.KETIDA_FLAVOUR
 
-const whichConfig = () => {
+const whichConfig = async () => {
   let config = configVanilla
 
   if (featureBookStructureEnabled && flavour !== 'BOOKSPRINTS') {
@@ -28,7 +28,9 @@ const whichConfig = () => {
   }
 
   if (featurePODEnabled && flavour !== 'BOOKSPRINTS') {
-    config = configKetidaV2
+    // require the config asynchonously
+    // eslint-disable-next-line global-require
+    config = await require('../../config/modules/applicationParametersKetida2')
   }
 
   if (flavour === 'BOOKSPRINTS') {
@@ -51,7 +53,7 @@ const seedApplicationParameters = async () => {
       )
     }
 
-    const selectedConfig = whichConfig()
+    const selectedConfig = await whichConfig()
 
     const areas = Object.keys(selectedConfig)
     await truncate()
