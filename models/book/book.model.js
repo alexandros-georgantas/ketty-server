@@ -365,6 +365,36 @@ class Book extends Base {
     }
   }
 
+  static async getUserBookDetails(userId, bookId, options) {
+    try {
+      const { trx } = options
+
+      const queryBuilder = Book.query(trx)
+        .leftJoin('book_translation', 'book_translation.book_id', 'book.id')
+        .leftJoin('teams', 'teams.object_id', 'book.id')
+        .leftJoin('team_members', 'team_members.team_id', 'teams.id')
+        .leftJoin('users', 'users.id', 'team_members.user_id')
+        .leftJoin('identities', 'identities.user_id', 'users.id')
+
+      return queryBuilder
+        .select([
+          'book.id',
+          'book_translation.title as title',
+          'users.given_names as name',
+          'identities.email',
+        ])
+        .where({
+          'book.deleted': false,
+          'users.id': userId,
+          'book.id': bookId,
+        })
+        .skipUndefined()
+        .first()
+    } catch (e) {
+      throw new Error(e.message)
+    }
+  }
+
   static get schema() {
     return {
       type: 'object',
