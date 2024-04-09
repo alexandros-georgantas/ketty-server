@@ -1641,6 +1641,16 @@ const uploadBookThumbnail = async (bookId, file, options = {}) => {
   }
 }
 
+const getUserBookDetails = async (userId, bookId, options = {}) => {
+  try {
+    return Book.getUserBookDetails(userId, bookId, {
+      trx: options.trx,
+    })
+  } catch (error) {
+    throw new Error('Something went wrong while getting user book details.')
+  }
+}
+
 module.exports = {
   getBook,
   getBooks,
@@ -1664,4 +1674,5 @@ module.exports = {
   updateBookStatus,
   getBookSubtitle,
   uploadBookThumbnail,
+  getUserBookDetails,
 }

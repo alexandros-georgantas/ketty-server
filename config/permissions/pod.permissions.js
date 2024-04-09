@@ -770,6 +770,7 @@ const permissions = {
     getSpecificTemplates: isAuthenticatedRule,
     team: teamRule,
     teams: isAuthenticatedRule,
+    getInvitations: isAuthenticatedRule,
   },
   Mutation: {
     '*': deny,
@@ -808,6 +809,10 @@ const permissions = {
     uploadFiles: uploadFilesRules,
     uploadToLulu: uploadToLuluRule,
     verifyEmail: allow,
+    sendInvitations: isAuthenticatedRule,
+    handleInvitation: allow,
+    deleteInvitation: isAuthenticatedRule,
+    updateInvitation: isAuthenticatedRule,
   },
 }
 
