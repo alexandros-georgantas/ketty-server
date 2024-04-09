@@ -15,6 +15,7 @@ module.exports = [
   './models/bookComponentState',
   './models/bookComponentTranslation',
   './models/bookSettings',
+  './models/invitations',
   './models/bookTranslation',
   './models/customTag',
   './models/division',

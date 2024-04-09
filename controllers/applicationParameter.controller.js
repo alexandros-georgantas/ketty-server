@@ -19,7 +19,7 @@ const getApplicationParameters = async (context, area, options = {}) => {
             .skipUndefined()
             .where({ context, area })
 
-          return ap[0]
+          return ap
         }
 
         logger.info(

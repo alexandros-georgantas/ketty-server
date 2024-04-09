@@ -707,6 +707,29 @@ const uploadBookThumbnailRule = rule()(
   },
 )
 
+const updateApplicationParametersRule = rule(async (_, __, ctx) => {
+  try {
+    const { user: userId } = ctx
+    if (!userId) return false
+
+    const isAuthenticatedUser = await isAuthenticated(userId)
+
+    if (!isAuthenticatedUser) {
+      return false
+    }
+
+    const isAdminUser = await isAdmin(userId)
+
+    if (isAdminUser) {
+      return true
+    }
+
+    return false
+  } catch (e) {
+    throw new Error(e.message)
+  }
+})
+
 const uploadToLuluRule = rule()(async (_, { id: exportProfileId }, ctx) => {
   try {
     const { user: userId } = ctx
@@ -760,7 +783,7 @@ const permissions = {
     chatGPT: isAuthenticatedRule,
     openAi: isAuthenticatedRule,
     currentUser: isAuthenticatedRule,
-    getApplicationParameters: isAuthenticatedRule,
+    getApplicationParameters: allow,
     getBook: getBookRule,
     getBookComponent: getBookComponentRule,
     getBooks: isAuthenticatedRule,
@@ -770,6 +793,7 @@ const permissions = {
     getSpecificTemplates: isAuthenticatedRule,
     team: teamRule,
     teams: isAuthenticatedRule,
+    getInvitations: isAuthenticatedRule,
   },
   Mutation: {
     '*': deny,
@@ -802,12 +826,17 @@ const permissions = {
     updateExportProfile: interactWithExportProfileRule,
     updatePODMetadata: updateMetadataRule,
     updateSubtitle: updateSubtitleRule,
+    updateApplicationParameters: updateApplicationParametersRule,
     updateTeamMemberStatus: updateTeamMemberStatusRule,
     updateTrackChanges: updateTrackChangesRule,
     uploadBookThumbnail: uploadBookThumbnailRule,
     uploadFiles: uploadFilesRules,
     uploadToLulu: uploadToLuluRule,
     verifyEmail: allow,
+    sendInvitations: isAuthenticatedRule,
+    handleInvitation: allow,
+    deleteInvitation: isAuthenticatedRule,
+    updateInvitation: isAuthenticatedRule,
   },
 }
 

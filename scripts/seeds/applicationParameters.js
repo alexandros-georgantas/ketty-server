@@ -8,7 +8,7 @@ const ApplicationParameter = require('../../models/applicationParameter/applicat
 const configBooksprints = require('../../config/modules/bookBuilderBooksprints')
 const configVanilla = require('../../config/modules/bookBuilderVanilla')
 const configOEN = require('../../config/modules/bookBuilderOEN')
-const configKetidaV2 = require('../../config/modules/applicationParametersKetida2')
+// let configKetidaV2 = await require('../../config/modules/applicationParametersKetida2')
 
 const featureBookStructureEnabled =
   (process.env.FEATURE_BOOK_STRUCTURE &&
@@ -20,7 +20,7 @@ const featurePODEnabled =
 
 const flavour = process.env.KETIDA_FLAVOUR
 
-const whichConfig = () => {
+const whichConfig = async () => {
   let config = configVanilla
 
   if (featureBookStructureEnabled && flavour !== 'BOOKSPRINTS') {
@@ -28,7 +28,9 @@ const whichConfig = () => {
   }
 
   if (featurePODEnabled && flavour !== 'BOOKSPRINTS') {
-    config = configKetidaV2
+    // require the config asynchonously
+    // eslint-disable-next-line global-require
+    config = await require('../../config/modules/applicationParametersKetida2')
   }
 
   if (flavour === 'BOOKSPRINTS') {
@@ -51,9 +53,100 @@ const seedApplicationParameters = async () => {
       )
     }
 
-    const selectedConfig = whichConfig()
+    const selectedConfig = await whichConfig()
 
     const areas = Object.keys(selectedConfig)
+
+    if (selectedConfig.instance === 'KETIDA_V2') {
+      // preserve params that can be configured via admin dashboard
+      return useTransaction(async trx =>
+        Promise.all(
+          areas.map(async area => {
+            const appParam = await ApplicationParameter.find({
+              context: 'bookBuilder',
+              area,
+            })
+
+            const [existingParam] = appParam.result
+            const integration = {}
+
+            switch (area) {
+              // create termsAndConditions and aiEnabled if they don't exist
+              case 'termsAndConditions':
+              case 'aiEnabled':
+              case 'chatGptApiKey':
+                if (!existingParam) {
+                  logger.info(
+                    `Creating new Application Parameter: ${JSON.stringify(
+                      selectedConfig[area],
+                    )}`,
+                  )
+                  return ApplicationParameter.insert(
+                    {
+                      context: 'bookBuilder',
+                      area,
+                      config: JSON.stringify(selectedConfig[area]),
+                    },
+                    { trx },
+                  )
+                }
+
+                return appParam
+
+              // update integrations but preserve the `disabled` property value
+              case 'integrations':
+                if (existingParam) {
+                  Object.keys(selectedConfig[area]).forEach(key => {
+                    integration[key] = {
+                      ...selectedConfig[area][key],
+                      disabled: existingParam.config[key]?.disabled,
+                    }
+                  })
+
+                  return existingParam.update(
+                    {
+                      config: JSON.stringify(integration),
+                    },
+                    { trx },
+                  )
+                }
+
+                // if integrations don't exist create them
+                return ApplicationParameter.insert(
+                  {
+                    context: 'bookBuilder',
+                    area,
+                    config: JSON.stringify(selectedConfig[area]),
+                  },
+                  { trx },
+                )
+
+              // for other params, update them if they exist, create them if they don't
+              default:
+                if (existingParam) {
+                  return existingParam.update(
+                    {
+                      config: JSON.stringify(selectedConfig[area]),
+                    },
+                    { trx },
+                  )
+                }
+
+                // if param doesn't exist, create it
+                return ApplicationParameter.insert(
+                  {
+                    context: 'bookBuilder',
+                    area,
+                    config: JSON.stringify(selectedConfig[area]),
+                  },
+                  { trx },
+                )
+            }
+          }),
+        ),
+      )
+    }
+
     await truncate()
     return useTransaction(async trx =>
       Promise.all(

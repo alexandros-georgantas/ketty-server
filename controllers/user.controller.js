@@ -299,10 +299,34 @@ const searchForUsers = async (
   }
 }
 
+const getIdentityByToken = async (token, options = {}) => {
+  try {
+    const { trx } = options
+    return useTransaction(
+      async tr => {
+        const identity = await Identity.findOne(
+          {
+            verificationToken: token,
+          },
+          { trx: tr },
+        )
+
+        if (!identity) throw new Error(`getIdentityByToken: identity not found`)
+
+        return identity
+      },
+      { trx, passedTrxOnly: true },
+    )
+  } catch (e) {
+    throw new Error(e)
+  }
+}
+
 module.exports = {
   searchForUsers,
   isAdmin,
   ketidaLogin,
   ketidaResendVerificationEmail,
   isGlobal,
+  getIdentityByToken,
 }

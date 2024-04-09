@@ -18,6 +18,7 @@ const user = require('./user')
 const lock = require('./lock')
 const serviceCallbackToken = require('./serviceCallbackToken')
 const { models } = require('./dataloader')
+const invitations = require('./invitations')
 
 const loader = models.reduce((r, c) => Object.assign(r, c), {})
 
@@ -42,6 +43,7 @@ module.exports = {
   loader,
   template,
   serviceCallbackToken,
+  invitations,
   models: {
     ApplicationParameter: applicationParameter.model,
     Book: book.model,
@@ -63,5 +65,6 @@ module.exports = {
     loader,
     ServiceCallbackToken: serviceCallbackToken.model,
     ExportProfile: exportProfile.model,
+    Invitations: invitations.model,
   },
 }
