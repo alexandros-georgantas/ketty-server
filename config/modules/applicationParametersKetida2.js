@@ -7,6 +7,8 @@ const { logger } = require('@coko/server')
 const featureAIEnabled =
   (process.env.AI_ENABLED && JSON.parse(process.env.AI_ENABLED)) || false
 
+const chatGPT = config.has('chatGPT') && config.get('chatGPT')
+
 const integrations = config.has('integrations') && config.get('integrations')
 
 module.exports = (async () => {
@@ -150,6 +152,7 @@ module.exports = (async () => {
     ],
     lockTrackChangesWhenReviewing: false,
     aiEnabled: featureAIEnabled,
+    chatGptApiKey: chatGPT?.key,
     heartbeatInterval: process.env.WS_HEARTBEAT_INTERVAL || 5000,
     integrations,
     termsAndConditions: termsAndConditions && marked.parse(termsAndConditions),
