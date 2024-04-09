@@ -1,20 +1,18 @@
 const axios = require('axios')
-const config = require('config')
+const { ApplicationParameter } = require('../models').models
 
 // const logger = require('@coko/server')
 
 const openAi = async (input, history = []) => {
   try {
     const CHAT_GPT_URL = 'https://api.openai.com/v1/chat/completions'
-    // const CHAT_GPT_URL = config.has('chatGPT.url') && config.get('chatGPT.url')
 
-    const CHAT_GPT_KEY = config.has('chatGPT.key') && config.get('chatGPT.key')
+    const CHAT_GPT_KEY = await ApplicationParameter.findOne({
+      context: 'bookBuilder',
+      area: 'chatGptApiKey',
+    })
 
-    // if (!CHAT_GPT_URL) {
-    //   throw new Error('Missing API URL')
-    // }
-
-    if (!CHAT_GPT_KEY) {
+    if (!CHAT_GPT_KEY?.config) {
       throw new Error('Missing access key')
     }
 
@@ -30,13 +28,15 @@ const openAi = async (input, history = []) => {
             content: input,
           },
         ],
-        response_format: { type: 'json_object' },
+        // history is being used in the AI studio calls only, so let's use it as a discriminator for now
+        // TODO: a more specific way to set response_format
+        ...(history.length ? { response_format: { type: 'json_object' } } : {}),
         temperature: 0,
       },
       {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${CHAT_GPT_KEY}`,
+          Authorization: `Bearer ${CHAT_GPT_KEY.config}`,
         },
       },
     )
