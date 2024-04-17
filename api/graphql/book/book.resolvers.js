@@ -569,16 +569,19 @@ module.exports = {
 
       return productionEditors
     },
-    async thumbnailURL(book, _, ctx) {
+    async thumbnailURL(book) {
       if (book.thumbnailId) {
-        const thumbnailFile = await File.findById(book.thumbnailId)
+        try {
+          const thumbnailFile = await File.findById(book.thumbnailId)
 
-        if (thumbnailFile) {
-          const thumbnailURL = getURL(
-            thumbnailFile.getStoredObjectBasedOnType('small').key,
-          )
+          if (thumbnailFile) {
+            return getURL(thumbnailFile.getStoredObjectBasedOnType('small').key)
+          }
 
-          return thumbnailURL
+          return null
+        } catch (error) {
+          logger.error(`Error fetching thumbnail for book ${book.id},`, error)
+          return null
         }
       }
 
