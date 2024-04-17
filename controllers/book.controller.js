@@ -146,10 +146,9 @@ const getBooks = async ({ collectionId, userId, options }) => {
 
     const { trx, page, pageSize, orderBy, showArchived } = options
 
-    const isEligibleForAll = await hasMembershipInGlobalTeams(
-      userId,
-      allowToGetAllBooksGlobalTeams,
-    )
+    const isEligibleForAll =
+      allowToGetAllBooksGlobalTeams &&
+      (await hasMembershipInGlobalTeams(userId, allowToGetAllBooksGlobalTeams))
 
     logger.info(
       `${BOOK_CONTROLLER} getBooks: fetching books for user with id ${userId}`,
