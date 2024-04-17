@@ -105,12 +105,6 @@ const canInteractWithBookAndRelevantAssets = async (userId, bookId) => {
       return false
     }
 
-    const belongsToAdminTeam = await isAdmin(userId)
-
-    if (belongsToAdminTeam) {
-      return true
-    }
-
     return isOwnerOrBelongsToObjectTeam(userId, bookId)
   } catch (e) {
     throw new Error(e.message)
