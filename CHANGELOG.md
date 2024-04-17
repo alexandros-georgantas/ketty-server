@@ -1,3 +1,10 @@
+## [1.26.1](https://gitlab.coko.foundation/ketida/server/compare/v1.26.0...v1.26.1) (2024-04-17)
+
+
+### Bug Fixes
+
+* **controllers:** remove admin permission to see all books ([7c2f1ca](https://gitlab.coko.foundation/ketida/server/commit/7c2f1caa8f2e614c90939bf7b630ef06446e2129))
+
 # [1.25.0](https://gitlab.coko.foundation/ketida/server/compare/v1.24.0...v1.25.0) (2024-03-13)
 
 
