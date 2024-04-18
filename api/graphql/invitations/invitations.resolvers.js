@@ -1,6 +1,6 @@
 const {
   deleteInvitation,
-  getInvitation,
+  getEmailInvitations,
   sendInvitations,
   getInvitations,
   updateInvitation,
@@ -21,18 +21,22 @@ const invitationHandler = async (_, { token }, ctx) => {
   try {
     const identity = await getIdentityByToken(token)
 
-    const invitation = await getInvitation(identity.email)
+    const invitations = await getEmailInvitations(identity.email)
 
-    if (invitation) {
-      // Add member to team
-      await addTeamMembers(
-        invitation.teamId,
-        [identity.userId],
-        invitation.status,
+    if (invitations.length) {
+      Promise.all(
+        invitations.map(async invitation => {
+          // Add member to team
+          await addTeamMembers(
+            invitation.teamId,
+            [identity.userId],
+            invitation.status,
+          )
+
+          // Clean up invitation
+          await deleteInvitation(invitation.bookId, invitation.email)
+        }),
       )
-
-      // Clean up invitation
-      await deleteInvitation(invitation.bookId, invitation.email)
     }
   } catch (e) {
     throw new Error(e)

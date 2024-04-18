@@ -1,8 +1,16 @@
 const { logger, useTransaction } = require('@coko/server')
 const omitBy = require('lodash/omitBy')
 const isUndefined = require('lodash/isUndefined')
+const { Identity } = require('@coko/server/src/models')
+
+const {
+  notify,
+  notificationTypes: { EMAIL },
+} = require('@coko/server/src//services')
 
 const TeamMember = require('@coko/server/src/models/teamMember/teamMember.model')
+const Book = require('../models/book/book.model')
+const { bookInvite } = require('./helpers/emailTemplates')
 
 const { Team } = require('../models').models
 
@@ -159,7 +167,14 @@ const deleteTeam = async (teamId, options = {}) => {
   }
 }
 
-const addTeamMembers = async (teamId, members, status, options = {}) => {
+const addTeamMembers = async (
+  teamId,
+  members,
+  status,
+  bookId,
+  currentUserId,
+  options = {},
+) => {
   try {
     const { trx } = options
 
@@ -167,6 +182,32 @@ const addTeamMembers = async (teamId, members, status, options = {}) => {
       await Promise.all(
         members.map(userId => Team.addMember(teamId, userId, { status })),
       )
+    }).then(async () => {
+      if (bookId) {
+        const book = await Book.getUserBookDetails(currentUserId, bookId, {
+          trx,
+        })
+
+        // Send email invitations
+        Promise.all(
+          members.map(async userId => {
+            const identity = await Identity.findOne({
+              userId,
+            })
+
+            const email = bookInvite({
+              email: identity?.email,
+              bookTitle: book.title,
+              sharerEmail: book.email,
+              sharerName: book.name,
+              bookId: book.id,
+              status,
+            })
+
+            notify(EMAIL, email)
+          }),
+        )
+      }
 
       return Team.findById(teamId, { trx })
     })
