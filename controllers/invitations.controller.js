@@ -124,12 +124,12 @@ const updateInvitation = async (bookId, email, status, options = {}) => {
   }
 }
 
-const getInvitation = async (email, options = {}) => {
+const getEmailInvitations = async (email, options = {}) => {
   try {
     const { trx } = options
-    logger.info(`getInvitation: for email ${email}`)
+    logger.info(`getEmailInvitations: for email ${email}`)
 
-    return useTransaction(async tr => Invitations.findOne({ email }), {
+    return useTransaction(async tr => Invitations.query(tr).where({ email }), {
       trx,
     })
   } catch (e) {
@@ -141,6 +141,6 @@ module.exports = {
   sendInvitations,
   deleteInvitation,
   getInvitations,
-  getInvitation,
+  getEmailInvitations,
   updateInvitation,
 }

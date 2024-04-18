@@ -96,11 +96,22 @@ const updateTeamMemberStatusHandler = async (
   }
 }
 
-const addTeamMembersHandler = async (_, { teamId, members, status }, ctx) => {
+const addTeamMembersHandler = async (
+  _,
+  { teamId, members, status, bookId },
+  ctx,
+) => {
   try {
     const pubsub = await pubsubManager.getPubsub()
     logger.info('team resolver: executing addTeamMembers use case')
-    const updatedTeam = await addTeamMembers(teamId, members, status)
+
+    const updatedTeam = await addTeamMembers(
+      teamId,
+      members,
+      status,
+      bookId,
+      ctx.user,
+    )
 
     if (updatedTeam.global === true) {
       pubsub.publish(TEAM_MEMBERS_UPDATED, {
