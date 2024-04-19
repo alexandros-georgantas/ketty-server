@@ -1,3 +1,10 @@
+# [1.27.0](https://gitlab.coko.foundation/ketida/server/compare/v1.26.1...v1.27.0) (2024-04-19)
+
+
+### Features
+
+* Share book by email, send email invite to existing users ([047f203](https://gitlab.coko.foundation/ketida/server/commit/047f20301f0be4ac6a512c11920b7dd59544f236))
+
 ## [1.26.1](https://gitlab.coko.foundation/ketida/server/compare/v1.26.0...v1.26.1) (2024-04-17)
 
 
