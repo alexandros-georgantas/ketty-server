@@ -246,6 +246,11 @@ type ExportResult {
   validationResult: String
 }
 
+type CreateBookResponse {
+  book: Book!
+  newUserTeam: Team
+}
+
 extend type Query {
   getBook(id: ID!): Book!
   getPagedPreviewerLink(
@@ -257,7 +262,7 @@ extend type Query {
 
 extend type Mutation {
   archiveBook(id: ID!, archive: Boolean!): Book!
-  createBook(input: CreateBookInput!): Book!
+  createBook(input: CreateBookInput!): CreateBookResponse!
   renameBook(id: ID!, title: String!): Book!
   updateSubtitle(id: ID!, subtitle: String): Book!
   deleteBook(id: ID!): Book!
