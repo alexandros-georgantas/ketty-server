@@ -136,6 +136,7 @@ const createBookHandler = async (_, { input }, ctx) => {
     const pubsub = await pubsubManager.getPubsub()
 
     let newBook
+    let newUserTeam
 
     if (addUserToBookTeams && !isEmpty(addUserToBookTeams)) {
       newBook = await createBook({
@@ -150,6 +151,8 @@ const createBookHandler = async (_, { input }, ctx) => {
       const updatedUser = await getUser(ctx.user)
 
       pubsub.publish(USER_UPDATED, { userUpdated: updatedUser })
+
+      newUserTeam = await getObjectTeam('owner', newBook.id, false)
     } else {
       newBook = await createBook({ collectionId, title })
     }
@@ -158,7 +161,7 @@ const createBookHandler = async (_, { input }, ctx) => {
 
     pubsub.publish(BOOK_CREATED, { bookCreated: newBook.id })
 
-    return newBook
+    return { book: newBook, newUserTeam }
   } catch (e) {
     throw new Error(e)
   }
@@ -589,22 +592,6 @@ module.exports = {
     },
   },
   Subscription: {
-    bookCreated: {
-      subscribe: async (...args) => {
-        const pubsub = await pubsubManager.getPubsub()
-
-        return withFilter(
-          () => {
-            return pubsub.asyncIterator(BOOK_CREATED)
-          },
-          (_, __, ctx) => {
-            const { user } = ctx
-
-            return isAdmin(user)
-          },
-        )(...args)
-      },
-    },
     bookUpdated: {
       subscribe: async (...args) => {
         const pubsub = await pubsubManager.getPubsub()
