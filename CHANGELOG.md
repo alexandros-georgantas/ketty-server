@@ -1,3 +1,10 @@
+# [1.28.0](https://gitlab.coko.foundation/ketida/server/compare/v1.27.0...v1.28.0) (2024-04-25)
+
+
+### Features
+
+* **api/graphql:** include new user team in graphql response for createBook mutation ([44dc01f](https://gitlab.coko.foundation/ketida/server/commit/44dc01fe1303f6e1147765e9c46407d5c9b71e1d))
+
 # [1.27.0](https://gitlab.coko.foundation/ketida/server/compare/v1.26.1...v1.27.0) (2024-04-19)
 
 
