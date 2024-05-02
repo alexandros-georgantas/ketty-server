@@ -1,3 +1,10 @@
+# [1.29.0](https://gitlab.coko.foundation/ketida/server/compare/v1.28.0...v1.29.0) (2024-05-02)
+
+
+### Features
+
+* store book settings for customised AI writing prompts ([dd154f2](https://gitlab.coko.foundation/ketida/server/commit/dd154f2879e8d0f29ea8a16064aa07d96326112d))
+
 # [1.28.0](https://gitlab.coko.foundation/ketida/server/compare/v1.27.0...v1.28.0) (2024-04-25)
 
 
