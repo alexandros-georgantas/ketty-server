@@ -173,11 +173,17 @@ type BookSettings {
   id: ID
   aiOn: Boolean
   aiPdfDesignerOn: Boolean
+  freeTextPromptsOn: Boolean
+  customPrompts: [String]
+  customPromptsOn: Boolean
 }
 
 input BookSettingsInput {
   aiOn: Boolean
   aiPdfDesignerOn: Boolean
+  freeTextPromptsOn: Boolean
+  customPrompts: [String]
+  customPromptsOn: Boolean
 }
 
 type BookStructure {
