@@ -6,7 +6,8 @@ const { Model } = require('objection')
 
 const Base = require('../ketidaBase')
 
-const { booleanDefaultFalse, id } = require('../helpers').schema
+const { booleanDefaultFalse, booleanDefaultTrue, id, string } =
+  require('../helpers').schema
 
 class BookSettings extends Base {
   constructor(properties) {
@@ -42,6 +43,13 @@ class BookSettings extends Base {
         aiOn: booleanDefaultFalse,
         aiPdfDesignerOn: booleanDefaultFalse,
         bookId: id,
+        freeTextPromptsOn: booleanDefaultTrue,
+        customPrompts: {
+          type: 'array',
+          items: string,
+          default: [],
+        },
+        customPromptsOn: booleanDefaultFalse,
       },
     }
   }

@@ -45,8 +45,6 @@ typings/
 *.env*
 config/local*
 */config/local*
-config/termsAndConditions*
-*/config/termsAndConditions*
 
 # Storybook build outputs
 .out

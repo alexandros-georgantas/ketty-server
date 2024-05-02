@@ -8,7 +8,7 @@ const ApplicationParameter = require('../../models/applicationParameter/applicat
 const configBooksprints = require('../../config/modules/bookBuilderBooksprints')
 const configVanilla = require('../../config/modules/bookBuilderVanilla')
 const configOEN = require('../../config/modules/bookBuilderOEN')
-// let configKetidaV2 = await require('../../config/modules/applicationParametersKetida2')
+const configKetidaV2 = require('../../config/modules/applicationParametersKetida2')
 
 const featureBookStructureEnabled =
   (process.env.FEATURE_BOOK_STRUCTURE &&
@@ -28,9 +28,7 @@ const whichConfig = async () => {
   }
 
   if (featurePODEnabled && flavour !== 'BOOKSPRINTS') {
-    // require the config asynchonously
-    // eslint-disable-next-line global-require
-    config = await require('../../config/modules/applicationParametersKetida2')
+    config = configKetidaV2
   }
 
   if (flavour === 'BOOKSPRINTS') {
