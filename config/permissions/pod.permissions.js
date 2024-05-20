@@ -231,10 +231,17 @@ const createExportProfileRule = rule()(
   },
 )
 
-const getBookRule = rule()(async (parent, { id: bookId }, ctx, info) => {
+const getBookRule = rule()(async (_, { id: bookId }, ctx) => {
   try {
     const { user: userId } = ctx
     if (!userId) return false
+    /* eslint-disable global-require */
+    const Book = require('../../models/book/book.model')
+    const book = await Book.findOne({ id: bookId, deleted: false })
+
+    if (!book) {
+      throw new Error(`book with id: ${bookId} does not exist`)
+    }
 
     return canInteractWithBookAndRelevantAssets(userId, bookId)
   } catch (e) {
