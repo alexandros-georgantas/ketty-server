@@ -1,3 +1,10 @@
+## [1.29.2](https://gitlab.coko.foundation/ketida/server/compare/v1.29.1...v1.29.2) (2024-05-27)
+
+
+### Bug Fixes
+
+* **api/graphql:** return different error when book is deleted ([07847d4](https://gitlab.coko.foundation/ketida/server/commit/07847d47626534137b63dfe5dc179accd227775e))
+
 # [1.29.0](https://gitlab.coko.foundation/ketida/server/compare/v1.28.0...v1.29.0) (2024-05-02)
 
 
