@@ -240,11 +240,11 @@ const getBookRule = rule()(async (_, { id: bookId }, ctx) => {
     const book = await Book.findOne({ id: bookId })
 
     if (!book) {
-      throw new Error(`book with id: ${bookId} does not exist`)
+      return new Error(`book with id: ${bookId} does not exist`)
     }
 
     if (book.deleted) {
-      throw new Error(`book with id: ${bookId} has been deleted`)
+      return new Error(`book with id: ${bookId} has been deleted`)
     }
 
     return canInteractWithBookAndRelevantAssets(userId, bookId)
