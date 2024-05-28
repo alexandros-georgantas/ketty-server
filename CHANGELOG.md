@@ -1,3 +1,10 @@
+## [1.29.3](https://gitlab.coko.foundation/ketida/server/compare/v1.29.2...v1.29.3) (2024-05-28)
+
+
+### Bug Fixes
+
+* **api/graphql:** return error instead of throwing it in permisson shield ([997bca2](https://gitlab.coko.foundation/ketida/server/commit/997bca2c3ba5e6c4fa2effa0962cadb6e854977a))
+
 ## [1.29.2](https://gitlab.coko.foundation/ketida/server/compare/v1.29.1...v1.29.2) (2024-05-27)
 
 
