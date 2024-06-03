@@ -255,7 +255,7 @@ const podAddBookComponentHandler = async (_, { input }, ctx, info) => {
       bookUpdated: bookId,
     })
 
-    return getBook(bookId)
+    return newBookComponent
   } catch (e) {
     logger.error(e.message)
     throw new Error(e)
