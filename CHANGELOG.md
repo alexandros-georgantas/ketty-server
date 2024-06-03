@@ -1,3 +1,10 @@
+# [1.30.0](https://gitlab.coko.foundation/ketida/server/compare/v1.29.3...v1.30.0) (2024-06-03)
+
+
+### Features
+
+* Autogenerate 1st chapter, return book component when creating one ([a2a8077](https://gitlab.coko.foundation/ketida/server/commit/a2a8077a1f9f17a2d5d2461597866d063f66e8cf))
+
 ## [1.29.3](https://gitlab.coko.foundation/ketida/server/compare/v1.29.2...v1.29.3) (2024-05-28)
 
 
