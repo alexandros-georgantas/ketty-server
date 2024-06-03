@@ -7,100 +7,86 @@
 
 ## [1.33.2](https://gitlab.coko.foundation/ketida/server/compare/v1.33.1...v1.33.2) (2024-06-14)
 
-
 ### Bug Fixes
 
-* update dockerfile ([662d671](https://gitlab.coko.foundation/ketida/server/commit/662d6711eafa7aa4f148f85ff5506c9403267106))
+- update dockerfile ([662d671](https://gitlab.coko.foundation/ketida/server/commit/662d6711eafa7aa4f148f85ff5506c9403267106))
 
 ## [1.33.1](https://gitlab.coko.foundation/ketida/server/compare/v1.33.0...v1.33.1) (2024-06-14)
 
-
 ### Bug Fixes
 
-* put pgvector installation inside main Dockerfile ([229eef3](https://gitlab.coko.foundation/ketida/server/commit/229eef3603d30a1d88f950e0986e6cddcfddb4e7))
+- put pgvector installation inside main Dockerfile ([229eef3](https://gitlab.coko.foundation/ketida/server/commit/229eef3603d30a1d88f950e0986e6cddcfddb4e7))
 
 # [1.33.0](https://gitlab.coko.foundation/ketida/server/compare/v1.32.0...v1.33.0) (2024-06-14)
 
-
 ### Features
 
-* create knowledge base and introduce embeddings for RAG ([27aa554](https://gitlab.coko.foundation/ketida/server/commit/27aa55413f52cc8100f6710016d68739f1103451))
+- create knowledge base and introduce embeddings for RAG ([27aa554](https://gitlab.coko.foundation/ketida/server/commit/27aa55413f52cc8100f6710016d68739f1103451))
 
 # [1.32.0](https://gitlab.coko.foundation/ketida/server/compare/v1.31.0...v1.32.0) (2024-06-10)
 
-
 ### Features
 
-* Enable and disable KB flow ([5df8835](https://gitlab.coko.foundation/ketida/server/commit/5df8835753ba572a4e40f709f33bd06a8655f69a))
+- Enable and disable KB flow ([5df8835](https://gitlab.coko.foundation/ketida/server/commit/5df8835753ba572a4e40f709f33bd06a8655f69a))
 
 # [1.30.0](https://gitlab.coko.foundation/ketida/server/compare/v1.29.3...v1.30.0) (2024-06-03)
 
-
 ### Features
 
-* Autogenerate 1st chapter, return book component when creating one ([a2a8077](https://gitlab.coko.foundation/ketida/server/commit/a2a8077a1f9f17a2d5d2461597866d063f66e8cf))
+- Autogenerate 1st chapter, return book component when creating one ([a2a8077](https://gitlab.coko.foundation/ketida/server/commit/a2a8077a1f9f17a2d5d2461597866d063f66e8cf))
 
 ## [1.29.3](https://gitlab.coko.foundation/ketida/server/compare/v1.29.2...v1.29.3) (2024-05-28)
 
-
 ### Bug Fixes
 
-* **api/graphql:** return error instead of throwing it in permisson shield ([997bca2](https://gitlab.coko.foundation/ketida/server/commit/997bca2c3ba5e6c4fa2effa0962cadb6e854977a))
+- **api/graphql:** return error instead of throwing it in permisson shield ([997bca2](https://gitlab.coko.foundation/ketida/server/commit/997bca2c3ba5e6c4fa2effa0962cadb6e854977a))
 
 ## [1.29.2](https://gitlab.coko.foundation/ketida/server/compare/v1.29.1...v1.29.2) (2024-05-27)
 
-
 ### Bug Fixes
 
-* **api/graphql:** return different error when book is deleted ([07847d4](https://gitlab.coko.foundation/ketida/server/commit/07847d47626534137b63dfe5dc179accd227775e))
+- **api/graphql:** return different error when book is deleted ([07847d4](https://gitlab.coko.foundation/ketida/server/commit/07847d47626534137b63dfe5dc179accd227775e))
 
 # [1.29.0](https://gitlab.coko.foundation/ketida/server/compare/v1.28.0...v1.29.0) (2024-05-02)
 
-
 ### Features
 
-* store book settings for customised AI writing prompts ([dd154f2](https://gitlab.coko.foundation/ketida/server/commit/dd154f2879e8d0f29ea8a16064aa07d96326112d))
+- store book settings for customised AI writing prompts ([dd154f2](https://gitlab.coko.foundation/ketida/server/commit/dd154f2879e8d0f29ea8a16064aa07d96326112d))
 
 # [1.28.0](https://gitlab.coko.foundation/ketida/server/compare/v1.27.0...v1.28.0) (2024-04-25)
 
-
 ### Features
 
-* **api/graphql:** include new user team in graphql response for createBook mutation ([44dc01f](https://gitlab.coko.foundation/ketida/server/commit/44dc01fe1303f6e1147765e9c46407d5c9b71e1d))
+- **api/graphql:** include new user team in graphql response for createBook mutation ([44dc01f](https://gitlab.coko.foundation/ketida/server/commit/44dc01fe1303f6e1147765e9c46407d5c9b71e1d))
 
 # [1.27.0](https://gitlab.coko.foundation/ketida/server/compare/v1.26.1...v1.27.0) (2024-04-19)
 
-
 ### Features
 
-* Share book by email, send email invite to existing users ([047f203](https://gitlab.coko.foundation/ketida/server/commit/047f20301f0be4ac6a512c11920b7dd59544f236))
+- Share book by email, send email invite to existing users ([047f203](https://gitlab.coko.foundation/ketida/server/commit/047f20301f0be4ac6a512c11920b7dd59544f236))
 
 ## [1.26.1](https://gitlab.coko.foundation/ketida/server/compare/v1.26.0...v1.26.1) (2024-04-17)
 
-
 ### Bug Fixes
 
-* **controllers:** remove admin permission to see all books ([7c2f1ca](https://gitlab.coko.foundation/ketida/server/commit/7c2f1caa8f2e614c90939bf7b630ef06446e2129))
+- **controllers:** remove admin permission to see all books ([7c2f1ca](https://gitlab.coko.foundation/ketida/server/commit/7c2f1caa8f2e614c90939bf7b630ef06446e2129))
 
 # [1.25.0](https://gitlab.coko.foundation/ketida/server/compare/v1.24.0...v1.25.0) (2024-03-13)
 
-
 ### Features
 
-* remove authsome dependency, replace with custom authorization ([c698cd5](https://gitlab.coko.foundation/ketida/server/commit/c698cd5287b31f09fe3fe9631139e2934451a937))
+- remove authsome dependency, replace with custom authorization ([c698cd5](https://gitlab.coko.foundation/ketida/server/commit/c698cd5287b31f09fe3fe9631139e2934451a937))
 
 # [1.24.0](https://gitlab.coko.foundation/ketida/server/compare/v1.23.1...v1.24.0) (2024-03-09)
 
-
 ### Features
 
-* ai designer setting and api ([c6f5744](https://gitlab.coko.foundation/ketida/server/commit/c6f5744f342df742d10e439c2fa5ee9eb65174a6))
-* new openAi endpoint ([05367d5](https://gitlab.coko.foundation/ketida/server/commit/05367d5771f636418b8593d5dac02fa9cb5fb52b))
-
+- ai designer setting and api ([c6f5744](https://gitlab.coko.foundation/ketida/server/commit/c6f5744f342df742d10e439c2fa5ee9eb65174a6))
+- new openAi endpoint ([05367d5](https://gitlab.coko.foundation/ketida/server/commit/05367d5771f636418b8593d5dac02fa9cb5fb52b))
 
 ### Performance Improvements
 
-* **controllers:** use model gpt-4 for open ai calls ([b6448bc](https://gitlab.coko.foundation/ketida/server/commit/b6448bc062356772c966f6ad6ffd9d70ce10de4c))
+- **controllers:** use model gpt-4 for open ai calls ([b6448bc](https://gitlab.coko.foundation/ketida/server/commit/b6448bc062356772c966f6ad6ffd9d70ce10de4c))
 
 # [1.23.0](https://gitlab.coko.foundation/ketida/server/compare/v1.22.0...v1.23.0) (2024-02-27)
 
@@ -108,46 +94,40 @@
 
 # [1.21.0](https://gitlab.coko.foundation/ketida/server/compare/v1.20.3...v1.21.0) (2024-01-24)
 
-
 ### Features
 
-* init locks improvements ([ebf86b6](https://gitlab.coko.foundation/ketida/server/commit/ebf86b6d05a1fa62853e125b9b05fd40137762bb))
+- init locks improvements ([ebf86b6](https://gitlab.coko.foundation/ketida/server/commit/ebf86b6d05a1fa62853e125b9b05fd40137762bb))
 
 ## [1.20.3](https://gitlab.coko.foundation/ketida/server/compare/v1.20.2...v1.20.3) (2024-01-19)
 
-
 ### Bug Fixes
 
-* **services:** fix export to epub for ketida v1 ([00aca19](https://gitlab.coko.foundation/ketida/server/commit/00aca19cc4585ef6c0dae63671b948cbf4209f53))
+- **services:** fix export to epub for ketida v1 ([00aca19](https://gitlab.coko.foundation/ketida/server/commit/00aca19cc4585ef6c0dae63671b948cbf4209f53))
 
 ## [1.20.2](https://gitlab.coko.foundation/ketida/server/compare/v1.20.1...v1.20.2) (2024-01-15)
 
-
 ### Bug Fixes
 
-* make template checks case insensitive and migrate everything to lower case ([b2325ba](https://gitlab.coko.foundation/ketida/server/commit/b2325ba1a470944f9674b2b13c560986c54ef08b))
+- make template checks case insensitive and migrate everything to lower case ([b2325ba](https://gitlab.coko.foundation/ketida/server/commit/b2325ba1a470944f9674b2b13c560986c54ef08b))
 
 ## [1.20.1](https://gitlab.coko.foundation/ketida/server/compare/v1.20.0...v1.20.1) (2024-01-12)
 
-
 ### Bug Fixes
 
-* fix export to epub for ketida v1 ([d3d5d32](https://gitlab.coko.foundation/ketida/server/commit/d3d5d32fd46ddabfb14e2263219510c731e8fdd2))
+- fix export to epub for ketida v1 ([d3d5d32](https://gitlab.coko.foundation/ketida/server/commit/d3d5d32fd46ddabfb14e2263219510c731e8fdd2))
 
 # [1.20.0](https://gitlab.coko.foundation/ketida/server/compare/v1.19.1...v1.20.0) (2024-01-12)
 
-
 ### Bug Fixes
 
-* remove unused title from addBookComponent ([7d602bf](https://gitlab.coko.foundation/ketida/server/commit/7d602bfb624c70922d9c5fb7cf6a190ef1d31d74))
-* **services:** added new env variable for fixing ws function ([024a86f](https://gitlab.coko.foundation/ketida/server/commit/024a86ff03d958d716b5273de24f555a889e04ec))
+- remove unused title from addBookComponent ([7d602bf](https://gitlab.coko.foundation/ketida/server/commit/7d602bfb624c70922d9c5fb7cf6a190ef1d31d74))
+- **services:** added new env variable for fixing ws function ([024a86f](https://gitlab.coko.foundation/ketida/server/commit/024a86ff03d958d716b5273de24f555a889e04ec))
 
 ## [1.19.1](https://gitlab.coko.foundation/ketida/server/compare/v1.19.0...v1.19.1) (2024-01-10)
 
-
 ### Bug Fixes
 
-* try to recreate template files ([5702010](https://gitlab.coko.foundation/ketida/server/commit/5702010ecf7d331871084a9d7a1cf5be333ddc41))
+- try to recreate template files ([5702010](https://gitlab.coko.foundation/ketida/server/commit/5702010ecf7d331871084a9d7a1cf5be333ddc41))
 
 # [1.19.0](https://gitlab.coko.foundation/ketida/server/compare/v1.18.0...v1.19.0) (2023-12-22)
 
@@ -155,63 +135,58 @@
 
 # [1.17.0](https://gitlab.coko.foundation/ketida/server/compare/v1.16.1...v1.17.0) (2023-12-18)
 
-
 ### Bug Fixes
 
-* copyright page isbn list ([7fc56a6](https://gitlab.coko.foundation/ketida/server/commit/7fc56a62da55adefdbae56803522f651b3d829aa))
-* export empty book ([f8be87c](https://gitlab.coko.foundation/ketida/server/commit/f8be87c481eafd3e6950241944ffd4b5f4d00935))
-* isbn html list structure ([288145d](https://gitlab.coko.foundation/ketida/server/commit/288145d64fdb9872abdeb414b748fae216a16c94))
-* isbn html structure ([5716a00](https://gitlab.coko.foundation/ketida/server/commit/5716a00325411119d124595f98d5c2e111e858d1))
+- copyright page isbn list ([7fc56a6](https://gitlab.coko.foundation/ketida/server/commit/7fc56a62da55adefdbae56803522f651b3d829aa))
+- export empty book ([f8be87c](https://gitlab.coko.foundation/ketida/server/commit/f8be87c481eafd3e6950241944ffd4b5f4d00935))
+- isbn html list structure ([288145d](https://gitlab.coko.foundation/ketida/server/commit/288145d64fdb9872abdeb414b748fae216a16c94))
+- isbn html structure ([5716a00](https://gitlab.coko.foundation/ketida/server/commit/5716a00325411119d124595f98d5c2e111e858d1))
 
 ## [1.16.1](https://gitlab.coko.foundation/ketida/server/compare/v1.16.0...v1.16.1) (2023-12-13)
 
-
 ### Bug Fixes
 
-* missing custom env variable ([651b47e](https://gitlab.coko.foundation/ketida/server/commit/651b47ea4c76922c8de11c0ac276ec75acc37a6b))
+- missing custom env variable ([651b47e](https://gitlab.coko.foundation/ketida/server/commit/651b47ea4c76922c8de11c0ac276ec75acc37a6b))
 
 # [1.16.0](https://gitlab.coko.foundation/ketida/server/compare/v1.15.1...v1.16.0) (2023-12-13)
 
 ## [1.15.1](https://gitlab.coko.foundation/ketida/server/compare/v1.15.0...v1.15.1) (2023-12-12)
 
-
 ### Bug Fixes
 
-* better handling of isbns for epubs and orphan isbn clean-ups ([d6a481d](https://gitlab.coko.foundation/ketida/server/commit/d6a481d850c8454248d5d74f367b26c17546e019))
-* improvment on orhpan isbn clean-up ([eb99e29](https://gitlab.coko.foundation/ketida/server/commit/eb99e296a21a715dcbdd030b0688de1d27e81c5a))
+- better handling of isbns for epubs and orphan isbn clean-ups ([d6a481d](https://gitlab.coko.foundation/ketida/server/commit/d6a481d850c8454248d5d74f367b26c17546e019))
+- improvment on orhpan isbn clean-up ([eb99e29](https://gitlab.coko.foundation/ketida/server/commit/eb99e296a21a715dcbdd030b0688de1d27e81c5a))
 
 # [1.15.0](https://gitlab.coko.foundation/ketida/server/compare/v1.14.1...v1.15.0) (2023-12-11)
 
-
 ### Bug Fixes
 
-* add space between isbns, clean args from function ([4cacbc6](https://gitlab.coko.foundation/ketida/server/commit/4cacbc640ba72315a28fdfcc7e40631ddc60ca31))
-* export page isbn ([a23c20e](https://gitlab.coko.foundation/ketida/server/commit/a23c20e51a8a2bb6b8e3ab00691b37c33815cae2))
-* export profile ([08f16a8](https://gitlab.coko.foundation/ketida/server/commit/08f16a8aeab3bdb6d758a48e48e46494835af603))
-* export profile isbn ([0159a88](https://gitlab.coko.foundation/ketida/server/commit/0159a887c65ed55813297b0b259836d85f4aefba))
-* export profile page ([80de985](https://gitlab.coko.foundation/ketida/server/commit/80de98525500bc6527be1690046731d7b19e8075))
-* **server:** export multiple isbn fields ([e01b1d5](https://gitlab.coko.foundation/ketida/server/commit/e01b1d5699aca1b87683a8461c10dea13e9a4eda))
-* **server:** export multiple isbn fields ([f2036c5](https://gitlab.coko.foundation/ketida/server/commit/f2036c57aa0448318f83d78639826a51b618cea2))
-* **server:** multiple isbn fields ([dd67022](https://gitlab.coko.foundation/ketida/server/commit/dd6702209a7c1adb6504c8fb213694b405b06621))
-* **server:** multiple isbn fields ([7fa33b6](https://gitlab.coko.foundation/ketida/server/commit/7fa33b6c626c450c72796064d558851c6c181658))
-* set default value of job queue flag to true ([2a9d1f0](https://gitlab.coko.foundation/ketida/server/commit/2a9d1f0023efc66f2529ff32298b4008175f28c4))
-* take into account isbn flag for the case of epub ([b164a1f](https://gitlab.coko.foundation/ketida/server/commit/b164a1f678d938e9750df031a98a41644dc8d7cf))
-
+- add space between isbns, clean args from function ([4cacbc6](https://gitlab.coko.foundation/ketida/server/commit/4cacbc640ba72315a28fdfcc7e40631ddc60ca31))
+- export page isbn ([a23c20e](https://gitlab.coko.foundation/ketida/server/commit/a23c20e51a8a2bb6b8e3ab00691b37c33815cae2))
+- export profile ([08f16a8](https://gitlab.coko.foundation/ketida/server/commit/08f16a8aeab3bdb6d758a48e48e46494835af603))
+- export profile isbn ([0159a88](https://gitlab.coko.foundation/ketida/server/commit/0159a887c65ed55813297b0b259836d85f4aefba))
+- export profile page ([80de985](https://gitlab.coko.foundation/ketida/server/commit/80de98525500bc6527be1690046731d7b19e8075))
+- **server:** export multiple isbn fields ([e01b1d5](https://gitlab.coko.foundation/ketida/server/commit/e01b1d5699aca1b87683a8461c10dea13e9a4eda))
+- **server:** export multiple isbn fields ([f2036c5](https://gitlab.coko.foundation/ketida/server/commit/f2036c57aa0448318f83d78639826a51b618cea2))
+- **server:** multiple isbn fields ([dd67022](https://gitlab.coko.foundation/ketida/server/commit/dd6702209a7c1adb6504c8fb213694b405b06621))
+- **server:** multiple isbn fields ([7fa33b6](https://gitlab.coko.foundation/ketida/server/commit/7fa33b6c626c450c72796064d558851c6c181658))
+- set default value of job queue flag to true ([2a9d1f0](https://gitlab.coko.foundation/ketida/server/commit/2a9d1f0023efc66f2529ff32298b4008175f28c4))
+- take into account isbn flag for the case of epub ([b164a1f](https://gitlab.coko.foundation/ketida/server/commit/b164a1f678d938e9750df031a98a41644dc8d7cf))
 
 ### Features
 
-* export profile isbn ([cd84a22](https://gitlab.coko.foundation/ketida/server/commit/cd84a22be4391e613f41a62bb52f8292030d6081))
-* export profile isbn ([3609471](https://gitlab.coko.foundation/ketida/server/commit/3609471196e3342900c82e9270a32e07d2ecdc4a))
-* multiple isbns ([d8b50f1](https://gitlab.coko.foundation/ketida/server/commit/d8b50f1f6ea1208f0c5e51ef9de0945de9d7e3ba))
-* **server:** export multiple isbn fields ([937912d](https://gitlab.coko.foundation/ketida/server/commit/937912dbec6b65ce8206b960185d2c4e1744b83e))
-* **server:** export multiple isbn fields ([5ac980e](https://gitlab.coko.foundation/ketida/server/commit/5ac980e7c7a9540ac6080ae1af3038e0c62cce89))
-* **server:** multiple isbn fields ([a13cf29](https://gitlab.coko.foundation/ketida/server/commit/a13cf29b36779a4b42f0c94b4277042762c88810))
-* **server:** multiple isbn fields ([6fa95c3](https://gitlab.coko.foundation/ketida/server/commit/6fa95c3b8a8fe73ba4fc5497637a6083e0f6a29b))
-* **server:** multiple isbn fields ([d30c865](https://gitlab.coko.foundation/ketida/server/commit/d30c86532b16facbb2f207f7cc7756feb64405e0))
-* **server:** multiple isbn fields ([aa6aa69](https://gitlab.coko.foundation/ketida/server/commit/aa6aa69720c09c12333ff445476f0f64ec3ce006))
-* **server:** multiple isbn fields ([cf98b3e](https://gitlab.coko.foundation/ketida/server/commit/cf98b3e87271fe447e603bc962badb021be6f8c0))
-* **server:** multiple isbn fields ([d215ed5](https://gitlab.coko.foundation/ketida/server/commit/d215ed57084a44de3a8bd691916f7e460e06d9c4))
-* **server:** multiple isbn fields ([0da8907](https://gitlab.coko.foundation/ketida/server/commit/0da8907b5e4dedc73ecf8f84c1654d46fd65c02e))
+- export profile isbn ([cd84a22](https://gitlab.coko.foundation/ketida/server/commit/cd84a22be4391e613f41a62bb52f8292030d6081))
+- export profile isbn ([3609471](https://gitlab.coko.foundation/ketida/server/commit/3609471196e3342900c82e9270a32e07d2ecdc4a))
+- multiple isbns ([d8b50f1](https://gitlab.coko.foundation/ketida/server/commit/d8b50f1f6ea1208f0c5e51ef9de0945de9d7e3ba))
+- **server:** export multiple isbn fields ([937912d](https://gitlab.coko.foundation/ketida/server/commit/937912dbec6b65ce8206b960185d2c4e1744b83e))
+- **server:** export multiple isbn fields ([5ac980e](https://gitlab.coko.foundation/ketida/server/commit/5ac980e7c7a9540ac6080ae1af3038e0c62cce89))
+- **server:** multiple isbn fields ([a13cf29](https://gitlab.coko.foundation/ketida/server/commit/a13cf29b36779a4b42f0c94b4277042762c88810))
+- **server:** multiple isbn fields ([6fa95c3](https://gitlab.coko.foundation/ketida/server/commit/6fa95c3b8a8fe73ba4fc5497637a6083e0f6a29b))
+- **server:** multiple isbn fields ([d30c865](https://gitlab.coko.foundation/ketida/server/commit/d30c86532b16facbb2f207f7cc7756feb64405e0))
+- **server:** multiple isbn fields ([aa6aa69](https://gitlab.coko.foundation/ketida/server/commit/aa6aa69720c09c12333ff445476f0f64ec3ce006))
+- **server:** multiple isbn fields ([cf98b3e](https://gitlab.coko.foundation/ketida/server/commit/cf98b3e87271fe447e603bc962badb021be6f8c0))
+- **server:** multiple isbn fields ([d215ed5](https://gitlab.coko.foundation/ketida/server/commit/d215ed57084a44de3a8bd691916f7e460e06d9c4))
+- **server:** multiple isbn fields ([0da8907](https://gitlab.coko.foundation/ketida/server/commit/0da8907b5e4dedc73ecf8f84c1654d46fd65c02e))
 
 # [1.14.0](https://gitlab.coko.foundation/ketida/server/compare/v1.14.0...v1.14.1) (2023-12-06)
 
