@@ -16,6 +16,7 @@ const {
 
 const { getUser } = require('@coko/server/src/models/user/user.controller')
 const { createFile, deleteFiles } = require('./file.controller')
+const { addBookComponent } = require('./bookComponent.controller')
 
 const {
   hasMembershipInGlobalTeams,
@@ -306,6 +307,7 @@ const createBook = async (data = {}) => {
           },
         )
 
+        let createdDivisions
         let createdDivisionIds
         let divisionData
 
@@ -320,9 +322,10 @@ const createBook = async (data = {}) => {
             trx: tr,
           })
 
+          createdDivisions = [bodyDivision]
           createdDivisionIds = [bodyDivision.id]
         } else {
-          const createdDivisions = await Promise.all(
+          createdDivisions = await Promise.all(
             divisions.map(async division => {
               divisionData = {
                 bookId,
@@ -345,8 +348,19 @@ const createBook = async (data = {}) => {
         logger.info(
           `${BOOK_CONTROLLER} createBook: book with id ${bookId} patched with the new divisions`,
         )
-
         // END OF BOOK DIVISIONS CREATION SECTION
+
+        // SECTION FOR CREATING 1st CHAPTER AUTOMATICALLY
+        if (featurePODEnabled) {
+          const bodyDivision = createdDivisions.find(
+            div => div.label === 'Body',
+          )
+
+          await addBookComponent(bodyDivision.id, bookId, 'chapter', {
+            trx: tr,
+          })
+        }
+        // END OF CREATING 1st CHAPTER AUTOMATICALLY SECTION
 
         // SECTION FOR BOOK TEAMS CREATION
         if (!config.has('teams.nonGlobal')) {
@@ -708,7 +722,7 @@ const createBook = async (data = {}) => {
         // }
         // END OF BOOK DEFAULT TEMPLATE CREATION SECTION
 
-        return newBook
+        return Book.findOne({ id: bookId }, { trx: tr })
       },
       { trx },
     )
