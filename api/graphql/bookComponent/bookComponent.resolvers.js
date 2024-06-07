@@ -62,6 +62,7 @@ const {
   deleteBookComponent,
   renameBookComponent,
   setStatus,
+  updateBookComponentParentId,
 } = require('../../../controllers/bookComponent.controller')
 
 const { getContentFiles } = require('../../../controllers/file.controller')
@@ -625,6 +626,27 @@ const updateComponentTypeHandler = async (_, { input }, ctx) => {
   }
 }
 
+const updateBookComponentParentIdHandler = async (_, { input }, ctx) => {
+  try {
+    const { id, parentComponentId } = input
+    const pubsub = await pubsubManager.getPubsub()
+
+    const updatedBookComponent = await updateBookComponentParentId(
+      id,
+      parentComponentId,
+    )
+
+    pubsub.publish(BOOK_COMPONENT_UPDATED, {
+      bookComponentUpdated: updatedBookComponent.id,
+    })
+
+    return updatedBookComponent
+  } catch (e) {
+    logger.error(e.message)
+    throw new Error(e)
+  }
+}
+
 const toggleIncludeInTOCHandler = async (_, { input }, ctx) => {
   try {
     const { id } = input
@@ -691,6 +713,7 @@ module.exports = {
     updateUploading: updateUploadingHandler,
     updateTrackChanges: updateTrackChangesHandler,
     updateComponentType: updateComponentTypeHandler,
+    updateBookComponentParentId: updateBookComponentParentIdHandler,
     toggleIncludeInTOC: toggleIncludeInTOCHandler,
     setBookComponentStatus: setBookComponentStatusHandler,
   },

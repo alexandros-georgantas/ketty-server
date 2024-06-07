@@ -85,6 +85,7 @@ type BookComponent {
   runningHeadersRight: String
   runningHeadersLeft: String
   status: Int
+  parentComponentId: ID
 }
 
 input BookComponentInput {
@@ -114,6 +115,7 @@ input UpdateBookComponentInput {
   componentType: String
   trackChangesEnabled: Boolean
   content: String
+  parentComponentId: ID
 }
 
 input IngestWordFiles {
@@ -145,6 +147,7 @@ extend type Mutation {
   updateTrackChanges(input: UpdateBookComponentInput): BookComponent!
   updateContent(input: UpdateBookComponentInput): BookComponent!
   updateComponentType(input: UpdateBookComponentInput): BookComponent!
+  updateBookComponentParentId(input: UpdateBookComponentInput): BookComponent!
   updateUploading(input: UpdateBookComponentInput): BookComponent!
   toggleIncludeInTOC(input: UpdateBookComponentInput): BookComponent!
   setBookComponentStatus(id: ID!, status: Int!): BookComponent!

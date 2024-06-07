@@ -333,6 +333,7 @@ const getTemplates = async () => {
       ? config.get('templates').map(t => ({
           label: t.label.toLowerCase(),
           url: t.url,
+          branch: t.branch,
           assetsRoot: t.assetsRoot.replace(/^\/+/, '').replace(/\/+$/, ''),
         }))
       : []
@@ -341,8 +342,12 @@ const getTemplates = async () => {
 
     return Promise.all(
       normalizedTemplates.map(async templateDetails => {
-        const { url, label } = templateDetails
-        return execute(`git clone ${url} ./templates/${label}`)
+        const { url, label, branch } = templateDetails
+        return execute(
+          `git clone ${url} ${
+            branch ? `--branch ${branch}` : ''
+          } ./templates/${label} `,
+        )
       }),
     )
   } catch (e) {

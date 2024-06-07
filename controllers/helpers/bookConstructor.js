@@ -85,6 +85,7 @@ module.exports = async (bookId, options = {}) => {
           runningHeadersRight: bookComponentState.runningHeadersRight,
           runningHeadersLeft: bookComponentState.runningHeadersLeft,
           pagination: bookComponent.pagination,
+          parentComponentId: bookComponent.parentComponentId,
         }
       }),
     )

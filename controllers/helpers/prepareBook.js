@@ -127,9 +127,15 @@ const prepareBook = async (bookId, template, options) => {
   const shouldMathML = fileExtension === 'epub'
   book.divisions.forEach(division => {
     let counter = 0
+    let chapterCounter = 1
     division.bookComponents.forEach(bookComponent => {
       const { componentType } = bookComponent
       const isTheFirstInBody = division.type === 'body' && counter === 0
+      const isChapter = division.type === 'body' && componentType === 'chapter'
+
+      if (isChapter) {
+        chapterCounter += 1
+      }
 
       if (componentType === 'toc') return
 
@@ -173,7 +179,12 @@ const prepareBook = async (bookId, template, options) => {
           )
         }
       } else {
-        container = generateContainer(bookComponent, isTheFirstInBody)
+        const levelIndex = bookComponent.parentComponentId ? 2 : 1
+        container = generateContainer(
+          bookComponent,
+          isTheFirstInBody,
+          levelIndex,
+        )
         cleanedContent = cleanHTML(
           container,
           bookComponent,
@@ -181,6 +192,8 @@ const prepareBook = async (bookId, template, options) => {
           tocComponent,
           bookComponentsWithMath,
           endnotesComponent,
+          levelIndex,
+          chapterCounter,
         )
       }
 

@@ -426,6 +426,20 @@ const updateComponentType = async (bookComponentId, componentType) => {
   }
 }
 
+const updateBookComponentParentId = async (
+  bookComponentId,
+  parentComponentId,
+) => {
+  try {
+    return BookComponent.patchAndFetchById(bookComponentId, {
+      parentComponentId,
+    })
+  } catch (e) {
+    logger.error(e.message)
+    throw new Error(e)
+  }
+}
+
 const updateUploading = async (bookComponentId, uploading) => {
   try {
     const currentState = await BookComponentState.findOne({
@@ -886,4 +900,5 @@ module.exports = {
   updateWorkflowState,
   deleteBookComponent,
   renameBookComponent,
+  updateBookComponentParentId,
 }
