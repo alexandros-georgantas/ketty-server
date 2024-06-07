@@ -11,9 +11,17 @@ module.exports = (
   bookComponentsWithMath,
   endnotesComponent = undefined,
   level = undefined,
+  chapterCounter = undefined,
 ) => {
-  const { title, componentType, content, includeInTOC, division, id } =
-    bookComponent
+  const {
+    title,
+    componentType,
+    content,
+    includeInTOC,
+    division,
+    id,
+    parentComponentId,
+  } = bookComponent
 
   const levelClass = level ? `toc-level-${level}` : undefined
   const toc = tocComponent ? cheerio.load(tocComponent.content) : undefined
@@ -107,7 +115,10 @@ module.exports = (
   $('h1').each((i, elem) => {
     const $elem = $(elem)
 
-    const h1 = $('<h1/>').attr('class', 'component-title').html($elem.html())
+    const h1 = $('<h1/>')
+      .attr('class', 'component-title')
+      .attr('id', id)
+      .html($elem.html())
 
     $elem.replaceWith(h1)
 
@@ -446,13 +457,34 @@ module.exports = (
       }
     }
 
-    const li = `<li class="toc-${division} ${
-      levelClass || ''
-    } toc-${componentType}"><a href="#comp-number-${id}"><span class="name">${
-      title || componentType
-    }</span></a>${subitems || ''}</li>`
+    if (componentType === 'part') {
+      const li = `<li class="toc-${division} ${
+        levelClass || ''
+      } toc-${componentType}"><a href="#comp-number-${id}"><span class="name">${
+        title || componentType
+      }</span></a>${subitems || ''}${
+        componentType === 'part'
+          ? `<ol id="children-of-${id}" start="${chapterCounter}"></ol>`
+          : ''
+      }</li>`
 
-    toc('#toc-ol').append(li)
+      toc('#toc-ol').append(li)
+      /* eslint-disable no-param-reassign */
+      // tocComponent.content = toc('body').html()
+    } else {
+      const li = `<li class="toc-${division} ${
+        levelClass || ''
+      } toc-${componentType}"><a href="#comp-number-${id}"><span class="name">${
+        title || componentType
+      }</span></a>${subitems || ''}</li>`
+
+      if (parentComponentId) {
+        toc(`#children-of-${parentComponentId}`).append(li)
+      } else {
+        toc('#toc-ol').append(li)
+      }
+    }
+
     /* eslint-disable no-param-reassign */
     tocComponent.content = toc('body').html()
     /* eslint-enable no-param-reassign */

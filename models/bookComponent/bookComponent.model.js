@@ -72,6 +72,7 @@ class BookComponent extends Base {
           OR read from config (doable?)
         */
         componentType: string,
+        parentComponentId: id,
         divisionId: id,
         pagination: {
           type: 'object',
