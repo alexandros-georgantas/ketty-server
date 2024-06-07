@@ -61,7 +61,7 @@ const generateContainer = (
 
   if (componentType === 'toc') {
     output = cheerio.load(
-      `<section id="comp-number-${id}"  class="component-${division} ${componentType} ${
+      `<section id="comp-number-${id}" class="component-${division} ${componentType} ${
         !featureBookStructureEnabled ? paginationExtractor(pagination) : ''
       }">${runningHeadersGenerator(
         runningHeadersLeft,
@@ -71,7 +71,7 @@ const generateContainer = (
     )
   } else if (componentType === 'endnotes') {
     output = cheerio.load(
-      `<section id="comp-number-${id}"  class="$component-${division} ${componentType} ${
+      `<section id="comp-number-${id}" class="$component-${division} ${componentType} ${
         !featureBookStructureEnabled ? paginationExtractor(pagination) : ''
       }">${runningHeadersGenerator(runningHeadersLeft, runningHeadersRight)}
       <header><h1 class="component-title">${title}</h1></header></section>`,
@@ -84,7 +84,7 @@ const generateContainer = (
     }
 
     output = cheerio.load(
-      `<section id="comp-number-${id}"  class="component-${division} ${
+      `<section id="comp-number-${id}" class="component-${division} ${
         levelClass || ''
       } ${componentType} ${
         !featureBookStructureEnabled ? paginationExtractor(pagination) : ''
@@ -133,7 +133,7 @@ const generateTitlePage = (
     )}<header>
         ${
           bookTitle
-            ? `<h1 class="component-title">${bookTitle}</h1>`
+            ? `<h1 id="${id}" class="component-title">${bookTitle}</h1>`
             : 'Untitled'
         }
         </header>
