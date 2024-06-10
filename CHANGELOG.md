@@ -1,3 +1,10 @@
+# [1.32.0](https://gitlab.coko.foundation/ketida/server/compare/v1.31.0...v1.32.0) (2024-06-10)
+
+
+### Features
+
+* Enable and disable KB flow ([5df8835](https://gitlab.coko.foundation/ketida/server/commit/5df8835753ba572a4e40f709f33bd06a8655f69a))
+
 # [1.30.0](https://gitlab.coko.foundation/ketida/server/compare/v1.29.3...v1.30.0) (2024-06-03)
 
 
