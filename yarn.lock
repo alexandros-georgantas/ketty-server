@@ -463,10 +463,10 @@
     stylelint-order "^5.0.0"
     stylelint-processor-styled-components "^1.10.0"
 
-"@coko/server@3.10.1":
-  version "3.10.1"
-  resolved "https://registry.yarnpkg.com/@coko/server/-/server-3.10.1.tgz#0810161266ce21b0f902e8aa741b7cedeabb2212"
-  integrity sha512-QdKDhmqaW+4Ou2Uafx15KHrkrZb1UXIXYSGG42foYCvrNOBmtNQd0Txvs71zQl01BEZao9llGrnsMMy/mPEhmQ==
+"@coko/server@3.13.1":
+  version "3.13.1"
+  resolved "https://registry.yarnpkg.com/@coko/server/-/server-3.13.1.tgz#ff0ec79cf15badaa3773bf5fe2b5d66eb5f03715"
+  integrity sha512-N48YrJbr6RyDtqPZwUvMaDDsf6mnTdpUP+9PmYkbF3O76abGNXc3bdeYyw2RavRwvIdKBTTsYywK5nqXd0bJXQ==
   dependencies:
     "@hapi/joi" "^14.3.0"
     "@pubsweet/models" "^0.3.21"
