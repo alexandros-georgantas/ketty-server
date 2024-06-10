@@ -176,6 +176,7 @@ type BookSettings {
   freeTextPromptsOn: Boolean
   customPrompts: [String]
   customPromptsOn: Boolean
+  knowledgeBaseOn: Boolean
 }
 
 input BookSettingsInput {
@@ -184,6 +185,7 @@ input BookSettingsInput {
   freeTextPromptsOn: Boolean
   customPrompts: [String]
   customPromptsOn: Boolean
+  knowledgeBaseOn: Boolean
 }
 
 type BookStructure {

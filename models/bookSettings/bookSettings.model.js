@@ -42,6 +42,7 @@ class BookSettings extends Base {
       properties: {
         aiOn: booleanDefaultFalse,
         aiPdfDesignerOn: booleanDefaultFalse,
+        knowledgeBaseOn: booleanDefaultFalse,
         bookId: id,
         freeTextPromptsOn: booleanDefaultTrue,
         customPrompts: {
