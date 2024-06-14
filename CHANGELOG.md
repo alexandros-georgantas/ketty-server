@@ -1,3 +1,10 @@
+## [1.33.1](https://gitlab.coko.foundation/ketida/server/compare/v1.33.0...v1.33.1) (2024-06-14)
+
+
+### Bug Fixes
+
+* put pgvector installation inside main Dockerfile ([229eef3](https://gitlab.coko.foundation/ketida/server/commit/229eef3603d30a1d88f950e0986e6cddcfddb4e7))
+
 # [1.33.0](https://gitlab.coko.foundation/ketida/server/compare/v1.32.0...v1.33.0) (2024-06-14)
 
 
