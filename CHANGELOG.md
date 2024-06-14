@@ -1,3 +1,10 @@
+## [1.33.2](https://gitlab.coko.foundation/ketida/server/compare/v1.33.1...v1.33.2) (2024-06-14)
+
+
+### Bug Fixes
+
+* update dockerfile ([662d671](https://gitlab.coko.foundation/ketida/server/commit/662d6711eafa7aa4f148f85ff5506c9403267106))
+
 ## [1.33.1](https://gitlab.coko.foundation/ketida/server/compare/v1.33.0...v1.33.1) (2024-06-14)
 
 
