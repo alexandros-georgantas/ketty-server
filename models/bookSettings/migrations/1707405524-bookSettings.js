@@ -23,6 +23,7 @@ exports.up = async knex => {
 
       // own
       table.boolean('aiOn').defaultTo(false)
+      // table.boolean('askKb').defaultTo(false)
     })
   } catch (e) {
     logger.error(e)
