@@ -1,3 +1,10 @@
+# [1.33.0](https://gitlab.coko.foundation/ketida/server/compare/v1.32.0...v1.33.0) (2024-06-14)
+
+
+### Features
+
+* create knowledge base and introduce embeddings for RAG ([27aa554](https://gitlab.coko.foundation/ketida/server/commit/27aa55413f52cc8100f6710016d68739f1103451))
+
 # [1.32.0](https://gitlab.coko.foundation/ketida/server/compare/v1.31.0...v1.32.0) (2024-06-10)
 
 
