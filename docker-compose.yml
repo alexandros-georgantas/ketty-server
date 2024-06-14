@@ -201,7 +201,7 @@ services:
   db:
     build:
       context: .
-      dockerfile: Dockerfile-pgvector
+      dockerfile: Dockerfile
     ports:
       - 5432:5432
     environment:
