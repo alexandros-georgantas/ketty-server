@@ -28,6 +28,8 @@ module.exports = [
   './models/serviceCredential',
   './models/serviceCallbackToken',
   './models/exportProfile',
+  './models/embeddings',
+  './models/document',
   './api/graphql',
   './api/rest',
 ]

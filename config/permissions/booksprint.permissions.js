@@ -651,6 +651,8 @@ const permissions = {
     getTemplate: isAuthenticatedRule,
     chatGPT: isAuthenticatedRule,
     openAi: isAuthenticatedRule,
+    ragSearch: isAuthenticatedRule,
+    getDocuments: isAuthenticatedRule,
   },
   Mutation: {
     '*': false,

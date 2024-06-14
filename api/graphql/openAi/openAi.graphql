@@ -3,6 +3,43 @@ input OpenAiMessage {
   content: String!
 }
 
+input UserMessage {
+  text: [String]
+  image_url: [String]
+}
+
+input EmbeddingOptions {
+  limit: Int
+  metric: String
+  threshold: Float
+}
+
+input SystemResponse {
+  type: String
+  shape: String
+}
+
+input SystemMessage {
+  text: String
+  role: String
+  task: String
+  context: String
+  response: SystemResponse
+  notes: [String]
+}
+
 extend type Query {
-  openAi(input: String!, history: [OpenAiMessage!]): String!
+  openAi(
+    input: UserMessage!
+    history: [OpenAiMessage]
+    format: String
+    system: SystemMessage
+  ): String!
+
+  ragSearch(
+    input: UserMessage!
+    history: [OpenAiMessage]
+    embeddingOptions: EmbeddingOptions
+    system: SystemMessage
+  ): String!
 }

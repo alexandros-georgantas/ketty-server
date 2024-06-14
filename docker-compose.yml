@@ -199,7 +199,9 @@ services:
     command: ['node', 'server/startServer.js']
 
   db:
-    image: postgres:14.4-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile-pgvector
     ports:
       - 5432:5432
     environment:
