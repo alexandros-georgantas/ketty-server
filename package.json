@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@coko/server": "3.13.1",
+    "@dqbd/tiktoken": "^1.0.14",
     "@pubsweet/models": "^0.3.26",
     "archiver": "^3.1.1",
     "axios": "^1.6.2",
@@ -53,13 +54,16 @@
     "libtidy-updated": "0.4.1",
     "list-contents": "^4.0.2",
     "lodash": "4.17.21",
+    "mammoth": "^1.7.1",
     "marked": "^12.0.1",
     "mathjax-node": "^2.1.1",
     "mime-types": "^2.1.24",
     "moment": "^2.29.4",
     "objection": "^2.2.15",
+    "pdf2html": "^3.1.0",
     "pubsweet": "^5.1.31",
     "ws": "8.12.0",
+    "xlsx": "^0.18.5",
     "xmlbuilder": "^13.0.2"
   },
   "devDependencies": {

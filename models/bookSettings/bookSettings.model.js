@@ -41,6 +41,7 @@ class BookSettings extends Base {
       required: ['bookId'],
       properties: {
         aiOn: booleanDefaultFalse,
+        // askKb: booleanDefaultFalse,
         aiPdfDesignerOn: booleanDefaultFalse,
         knowledgeBaseOn: booleanDefaultFalse,
         bookId: id,

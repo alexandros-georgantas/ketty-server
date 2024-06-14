@@ -787,6 +787,8 @@ const permissions = {
     '*': deny,
     chatGPT: isAuthenticatedRule,
     openAi: isAuthenticatedRule,
+    ragSearch: isAuthenticatedRule,
+    getDocuments: isAuthenticatedRule,
     currentUser: isAuthenticatedRule,
     getApplicationParameters: allow,
     getBook: getBookRule,
