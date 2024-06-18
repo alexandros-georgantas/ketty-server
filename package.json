@@ -1,6 +1,6 @@
 {
   "name": "server",
-  "version": "1.29.2",
+  "version": "1.33.2",
   "private": true,
   "description": "Ketida's Platform common server",
   "repository": {
