@@ -12,7 +12,13 @@ RUN apt-get update && apt-get install -y \
 
 FROM node:18.18.2-alpine3.18
 
-RUN apk add --no-cache git python3 make g++ imagemagick potrace
+RUN apt-get update && \
+    apt-get install -y openjdk-11-jdk && \
+    apt-get install -y ca-certificates-java && \
+    apt-get clean && \
+    update-ca-certificates -f;RUN apk add --no-cache git python3 make g++ imagemagick potrace
+
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
 
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
 
