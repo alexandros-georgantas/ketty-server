@@ -1,3 +1,10 @@
+## [1.33.4](https://gitlab.coko.foundation/ketida/server/compare/v1.33.3...v1.33.4) (2024-06-18)
+
+
+### Bug Fixes
+
+* **docker:** change node image to be able to run apt-get ([35f63da](https://gitlab.coko.foundation/ketida/server/commit/35f63da65406f17dbbc8b2c511c7f35dc943c614))
+
 ## [1.33.2](https://gitlab.coko.foundation/ketida/server/compare/v1.33.1...v1.33.2) (2024-06-14)
 
 
