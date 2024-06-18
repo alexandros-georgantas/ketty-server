@@ -1,3 +1,45 @@
+## [1.33.2](https://gitlab.coko.foundation/ketida/server/compare/v1.33.1...v1.33.2) (2024-06-14)
+
+
+### Bug Fixes
+
+* update dockerfile ([662d671](https://gitlab.coko.foundation/ketida/server/commit/662d6711eafa7aa4f148f85ff5506c9403267106))
+
+## [1.33.1](https://gitlab.coko.foundation/ketida/server/compare/v1.33.0...v1.33.1) (2024-06-14)
+
+
+### Bug Fixes
+
+* put pgvector installation inside main Dockerfile ([229eef3](https://gitlab.coko.foundation/ketida/server/commit/229eef3603d30a1d88f950e0986e6cddcfddb4e7))
+
+# [1.33.0](https://gitlab.coko.foundation/ketida/server/compare/v1.32.0...v1.33.0) (2024-06-14)
+
+
+### Features
+
+* create knowledge base and introduce embeddings for RAG ([27aa554](https://gitlab.coko.foundation/ketida/server/commit/27aa55413f52cc8100f6710016d68739f1103451))
+
+# [1.32.0](https://gitlab.coko.foundation/ketida/server/compare/v1.31.0...v1.32.0) (2024-06-10)
+
+
+### Features
+
+* Enable and disable KB flow ([5df8835](https://gitlab.coko.foundation/ketida/server/commit/5df8835753ba572a4e40f709f33bd06a8655f69a))
+
+# [1.30.0](https://gitlab.coko.foundation/ketida/server/compare/v1.29.3...v1.30.0) (2024-06-03)
+
+
+### Features
+
+* Autogenerate 1st chapter, return book component when creating one ([a2a8077](https://gitlab.coko.foundation/ketida/server/commit/a2a8077a1f9f17a2d5d2461597866d063f66e8cf))
+
+## [1.29.3](https://gitlab.coko.foundation/ketida/server/compare/v1.29.2...v1.29.3) (2024-05-28)
+
+
+### Bug Fixes
+
+* **api/graphql:** return error instead of throwing it in permisson shield ([997bca2](https://gitlab.coko.foundation/ketida/server/commit/997bca2c3ba5e6c4fa2effa0962cadb6e854977a))
+
 ## [1.29.2](https://gitlab.coko.foundation/ketida/server/compare/v1.29.1...v1.29.2) (2024-05-27)
 
 
