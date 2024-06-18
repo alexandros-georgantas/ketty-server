@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     postgresql-14-pgvector \
     && rm -rf /var/lib/apt/lists/*
 
-FROM node:18.18.2-alpine3.18
+FROM node:18.18.2-bullseye
 
 RUN apt-get update && \
     apt-get install -y openjdk-11-jdk && \
