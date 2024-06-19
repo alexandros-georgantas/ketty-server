@@ -1,24 +1,8 @@
-FROM postgres:14
+FROM node:18.18.2-alpine3.18
 
-RUN apt-get update && \
-    apt-get install -y openjdk-11-jdk && \
-    apt-get install -y ca-certificates-java && \
-    apt-get clean && \
+RUN apk update && \
+    apk add --no-cache openjdk11 ca-certificates git python3 make g++ imagemagick potrace && \
     update-ca-certificates -f;
-
-RUN apt-get update && apt-get install -y \
-    postgresql-14-pgvector \
-    && rm -rf /var/lib/apt/lists/*
-
-FROM node:18.18.2-bullseye
-
-RUN apt-get update && \
-    apt-get install -y openjdk-11-jdk && \
-    apt-get install -y ca-certificates-java && \
-    apt-get clean && \
-    update-ca-certificates -f;RUN apk add --no-cache git python3 make g++ imagemagick potrace
-
-ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
 
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
 
