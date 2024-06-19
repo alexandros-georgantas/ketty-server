@@ -12,11 +12,9 @@ RUN apt-get update && apt-get install -y \
 
 FROM node:18.18.2-bullseye
 
-RUN apt-get update && \
-    apt-get install -y openjdk-11-jdk && \
-    apt-get install -y ca-certificates-java && \
-    apt-get clean && \
-    update-ca-certificates -f;RUN apk add --no-cache git python3 make g++ imagemagick potrace
+RUN apk update && \
+    apk add --no-cache openjdk11 ca-certificates git python3 make g++ imagemagick potrace && \
+    update-ca-certificates -f;
 
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
 
