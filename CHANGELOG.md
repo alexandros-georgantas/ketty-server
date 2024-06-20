@@ -1,3 +1,10 @@
+## [1.33.5](https://gitlab.coko.foundation/ketida/server/compare/v1.33.4...v1.33.5) (2024-06-19)
+
+
+### Bug Fixes
+
+* use alpine node in Dockerfile to install java dependency ([b5db452](https://gitlab.coko.foundation/ketida/server/commit/b5db452c3391bea36cc05d41cb218dbd00e08a78))
+
 ## [1.33.4](https://gitlab.coko.foundation/ketida/server/compare/v1.33.3...v1.33.4) (2024-06-18)
 
 ### Bug Fixes
