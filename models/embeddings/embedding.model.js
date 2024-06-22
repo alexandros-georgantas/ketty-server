@@ -1,4 +1,5 @@
 const { BaseModel, logger } = require('@coko/server')
+const { Model } = require('objection')
 const { callOn } = require('../../utilities/utils')
 
 class Embedding extends BaseModel {
@@ -21,6 +22,22 @@ class Embedding extends BaseModel {
         embedding: { type: 'array', items: { type: 'number' } },
         storedObjectKey: { type: 'string' },
         section: { type: 'string' }, // contains the section name and the index separated by "|": "<sectionname>|<index>"
+        bookId: { type: 'string', format: 'uuid' },
+      },
+    }
+  }
+
+  static get relationMappings() {
+    // eslint-disable-next-line global-require
+    const Book = require('../book/book.model')
+    return {
+      book: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Book,
+        join: {
+          from: 'documents.bookId',
+          to: 'books.id',
+        },
       },
     }
   }
@@ -30,6 +47,7 @@ class Embedding extends BaseModel {
   }
 
   static async indexedSimilaritySearch({
+    bookId,
     embedding,
     limit = 10,
     metric = 'cosine',
@@ -50,12 +68,14 @@ class Embedding extends BaseModel {
     return this.query()
       .select('*')
       .from(this.tableName)
+      .where('bookId', bookId)
       .whereRaw(`embedding ${operator} ? < ?`, [qEmbedding, threshold])
       .orderByRaw(`embedding ${operator} ? ASC`, [qEmbedding])
       .limit(limit)
   }
 
   static async insertNewEmbedding({
+    bookId,
     embedding,
     storedObjectKey,
     section,
@@ -64,6 +84,7 @@ class Embedding extends BaseModel {
   }) {
     try {
       const result = await this.query(trx).insert({
+        bookId,
         embedding,
         storedObjectKey,
         section: `${section}|${index}`,
@@ -106,6 +127,23 @@ class Embedding extends BaseModel {
         `Error deleting embeddings with storedObjectKey: ${storedObjectKey}`,
         error,
       )
+      throw error
+    }
+  }
+
+  static async deleteByStoredBookId(bookId) {
+    try {
+      const result = await this.query().delete().where('bookId', bookId)
+
+      if (result) {
+        logger.info(`Successfully deleted embeddings with bookId: ${bookId}`)
+        return true
+      }
+
+      logger.warn(`No embeddings found with bookId: ${bookId}`)
+      return false
+    } catch (error) {
+      logger.error(`Error deleting embeddings with bookId: ${bookId}`, error)
       throw error
     }
   }
