@@ -12,7 +12,6 @@ exports.up = knex => {
       .timestamp('updated', { useTz: true })
       .notNullable()
       .defaultTo(knex.fn.now())
-    table.uuid('bookId').notNullable()
   })
 }
 
