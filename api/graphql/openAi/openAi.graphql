@@ -41,5 +41,6 @@ extend type Query {
     history: [OpenAiMessage]
     embeddingOptions: EmbeddingOptions
     system: SystemMessage
+    bookId: String!
   ): String!
 }

@@ -8,13 +8,14 @@ const openAiResolver = async (_, { input, history, format, system }) => {
 
 const ragSearchResolver = async (
   _,
-  { input, history, embeddingOptions = {}, system: passedSystem },
+  { input, history, embeddingOptions = {}, system: passedSystem, bookId },
 ) => {
   const resultedEmbeddingData = await embeddings(input.text.join('\n'))
   const { data } = JSON.parse(resultedEmbeddingData)
   const { embedding } = data[0]
 
   const embeddingsFound = await Embedding.indexedSimilaritySearch({
+    bookId,
     embedding,
     ...embeddingOptions,
   })

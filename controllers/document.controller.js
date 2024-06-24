@@ -53,6 +53,7 @@ const createDocument = async ({ file, maxLng, bookId }, options = {}) => {
             sections.map(({ fragment, heading, fragmentIndex }, i) =>
               embeddings(fragment).then(data =>
                 Embedding.insertNewEmbedding({
+                  bookId,
                   embedding: JSON.parse(data).data[0].embedding,
                   storedObjectKey: uploadedChunks[i][0].key,
                   filename: dirName,
