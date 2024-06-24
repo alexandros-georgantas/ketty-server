@@ -10,7 +10,7 @@ exports.up = async knex => {
       const existingEmbeddings = await knex('embeddings')
       const documents = await knex('documents')
 
-      return await Promise.all(
+      return Promise.all(
         existingEmbeddings.map(async embedding => {
           const document = documents.find(d => {
             return d.sectionsKeys.indexOf(embedding.storedObjectKey) > -1
