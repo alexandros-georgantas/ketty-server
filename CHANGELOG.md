@@ -1,3 +1,12 @@
+# [1.34.0](https://gitlab.coko.foundation/ketida/server/compare/v1.33.5...v1.34.0) (2024-06-25)
+
+
+### Bug Fixes
+
+* **docker:** add pgvector in Dockerfile for local developmnet ([90b5996](https://gitlab.coko.foundation/ketida/server/commit/90b5996d624e1ae369e6ea8036405bcc0cec8ac6))
+* put pgvector installation inside main Dockerfile ([a017a61](https://gitlab.coko.foundation/ketida/server/commit/a017a61d1a05d29143360b5e0c5109d0db391cce))
+* update dockerfile ([685537f](https://gitlab.coko.foundation/ketida/server/commit/685537f3f09f2f226c3a1facf9fe9dd713b8a44e))
+
 ## [1.33.5](https://gitlab.coko.foundation/ketida/server/compare/v1.33.4...v1.33.5) (2024-06-19)
 
 
