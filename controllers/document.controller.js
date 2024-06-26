@@ -38,6 +38,7 @@ const createDocument = async ({ file, maxLng, bookId }, options = {}) => {
           if (docNames.find(n => n === dirName)) {
             let prefix = 1
             const newKey = () => `${dirName}(${prefix})`
+
             while (docNames.find(n => n === newKey())) {
               prefix += 1
             }
