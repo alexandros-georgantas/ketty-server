@@ -30,7 +30,21 @@ const createDocument = async ({ file, maxLng, bookId }, options = {}) => {
 
           const existingKeys = allObjects.Contents.map(so => so.Key)
 
-          const dirName = await safeKey(originalDirName, existingKeys)
+          let dirName = await safeKey(originalDirName, existingKeys)
+
+          const currentDocuments = await Document.find({ bookId })
+          const docNames = currentDocuments.result.map(doc => doc.name)
+
+          if (docNames.find(n => n === dirName)) {
+            let prefix = 1
+            const newKey = () => `${dirName}(${prefix})`
+
+            while (docNames.find(n => n === newKey())) {
+              prefix += 1
+            }
+
+            dirName = newKey()
+          }
 
           const sections = await splitFileContent(file, extension, maxLng)
 
