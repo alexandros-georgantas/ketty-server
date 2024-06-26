@@ -1,3 +1,10 @@
+## [1.34.1](https://gitlab.coko.foundation/ketida/server/compare/v1.34.0...v1.34.1) (2024-06-26)
+
+
+### Bug Fixes
+
+* **controllers:** add index to filename if duplicated in book's KB ([12798a4](https://gitlab.coko.foundation/ketida/server/commit/12798a47edca4626e3199441969f26c4fecd655a))
+
 # [1.34.0](https://gitlab.coko.foundation/ketida/server/compare/v1.33.5...v1.34.0) (2024-06-25)
 
 
